@@ -1,0 +1,44 @@
+name: Core CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    env:
+      GODOT_VERSION: "4.2.2"
+      GODOT_BIN: "./Godot_v4.2.2-stable_linux.x86_64"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Python tools (GDScript lint/format check)
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install "gdtoolkit==4.*"
+
+      - name: Lint GDScript (core module)
+        run: |
+          gdlint godot/addons/core_systems/scripts
+
+      - name: Download Godot (headless Linux binary)
+        run: |
+          wget -q https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip
+          unzip -q Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip
+          chmod +x ${GODOT_BIN}
+
+      - name: Import project assets (headless)
+        run: |
+          ${GODOT_BIN} --headless --path godot --quit
+
+      - name: Run tests (GUT if present)
+        run: |
+          if [ -f "godot/addons/gut/gut_cmdln.gd" ]; then
+            ${GODOT_BIN} --headless --path godot -s res://addons/gut/gut_cmdln.gd -gdir=res://addons/core_systems/tests -gexit
+          else
+            echo "GUT not found yet; skipping test run."
+          fi
