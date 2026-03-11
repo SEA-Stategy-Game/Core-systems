@@ -27,3 +27,4 @@ func take_damage(amount: int):
 func die():
 	print("Entity ", entity_id, " destroyed.")
 	queue_free()
+

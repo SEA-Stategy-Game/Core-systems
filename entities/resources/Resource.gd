@@ -1,5 +1,7 @@
 extends Entity
 
+class_name Resource
+
 var amount: int
 var maxAmount: int
 
