@@ -1,2 +1,7 @@
+res://Entities/Units/unit.tscn
+res://Entities/Units/Unit.gd
+res://Entities/Interfaces/spawn_unit.tscn
+res://Entities/Interfaces/spawn_unit.gd
+res://Logic/Game.gd
+res://world.gd
 res://world.tscn
-res://UI/camera_2d.gd

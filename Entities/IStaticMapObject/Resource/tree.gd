@@ -1,5 +1,4 @@
-extends StaticBody2D
-extends Resource
+extends MapResource
 
 var totalTime = 5
 var currentTime

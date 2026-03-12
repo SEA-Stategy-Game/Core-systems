@@ -1,3 +1,3 @@
 extends Entity
 
-class_name Resource
+class_name MapResource

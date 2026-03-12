@@ -6,8 +6,10 @@ func _ready():
 	units = get_tree().get_nodes_in_group("units")
 	if has_node("Camera2D"):
 		$Camera2D.area_selected.connect(_on_area_selected)
+	Game.spawnUnit()
 
 func _on_area_selected(camera):
+	units = get_tree().get_nodes_in_group("units")
 	var start = camera.start
 	var end = camera.end
 	var area = []

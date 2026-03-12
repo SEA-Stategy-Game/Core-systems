@@ -2,10 +2,11 @@
 
 [ext_resource type="Script" uid="uid://boa5scnw8xkf7" path="res://UI/camera_2d.gd" id="1_f3sb7"]
 [ext_resource type="Script" uid="uid://d0nhl0c06ortq" path="res://world.gd" id="1_tlwt5"]
-[ext_resource type="PackedScene" uid="uid://d30ebo7uakvax" path="res://Units/character_body_2d.tscn" id="2_fj7yv"]
+[ext_resource type="PackedScene" uid="uid://d30ebo7uakvax" path="res://Entities/Units/character_body_2d.tscn" id="2_fj7yv"]
 [ext_resource type="PackedScene" uid="uid://djf7keuxeyyoh" path="res://UI/ui.tscn" id="3_036b0"]
-[ext_resource type="PackedScene" uid="uid://cbyljlajjsfti" path="res://World Objects/Tree.tscn" id="4_aqk2v"]
+[ext_resource type="PackedScene" uid="uid://cbyljlajjsfti" path="res://Entities/IStaticMapObject/Resource/tree.tscn" id="4_aqk2v"]
 [ext_resource type="Texture2D" uid="uid://smm6t2i77fdv" path="res://Assets/MiniWorldSprites/Ground/TexturedGrass.png" id="6_dwbse"]
+[ext_resource type="PackedScene" uid="uid://c5ee63xefwvh6" path="res://Barracks.tscn" id="7_pkg7o"]
 
 [node name="World" type="Node2D" unique_id=777208976]
 position = Vector2(-1, -25)
@@ -42,3 +43,7 @@ position = Vector2(-160.99998, -64.99999)
 
 [node name="Tree" parent="Objects" unique_id=707792734 instance=ExtResource("4_aqk2v")]
 position = Vector2(193.99998, 132)
+
+[node name="Houses" type="Node2D" parent="." unique_id=350287105]
+
+[node name="House" parent="Houses" unique_id=334523237 instance=ExtResource("7_pkg7o")]

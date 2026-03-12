@@ -10,26 +10,21 @@ var Speed = 50
 
 
 func _ready():
-	add_to_group("units")
+	add_to_group("units", true)
 	set_selected(selected)
-
 func set_selected(value):
 	selected = value
 	box.visible = value
 
 func _input(event):
 	if event.is_action_pressed("RightClick"):
-		follow_cursor = true
-	if event.is_action_released("RightClick"):
-		follow_cursor = false
-		
-		
-func _physics_process(delta):
-	if follow_cursor == true:
 		if selected:
 			target = get_global_mouse_position()
 			anim.play("Walk Down")
-	velocity = position.direction_to(target) *Speed
+		
+		
+func _physics_process(delta):
+	velocity = position.direction_to(target) * Speed
 	if position.distance_to(target) > 10:
 		move_and_slide()
 	else:

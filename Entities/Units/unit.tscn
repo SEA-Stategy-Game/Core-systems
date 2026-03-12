@@ -1,7 +1,6 @@
-[gd_scene format=3 uid="uid://d30ebo7uakvax"]
+[gd_scene format=3 uid="uid://b1wdh83xgdlb3"]
 
-[ext_resource type="Script" uid="uid://dweqb87bqh6d3" path="res://Entities/Units/Unit.gd" id="1_ij6vw"]
-[ext_resource type="Texture2D" uid="uid://b68isfnk756nx" path="res://Assets/MiniWorldSprites/Characters/Champions/Arthax.png" id="2_uhwgi"]
+[ext_resource type="Texture2D" uid="uid://b68isfnk756nx" path="res://Assets/MiniWorldSprites/Characters/Champions/Arthax.png" id="2_uo5aa"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ij6vw"]
 size = Vector2(10, 13)
@@ -53,29 +52,28 @@ _data = {
 &"Walk Down": SubResource("Animation_r18d6")
 }
 
-[node name="Unit" type="CharacterBody2D" unique_id=1684801707 groups=["Unit"]]
-script = ExtResource("1_ij6vw")
+[node name="Unit" type="CharacterBody2D" unique_id=1684801707]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=186835737 groups=["Unit"]]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=186835737]
 position = Vector2(0, -6.5)
 shape = SubResource("RectangleShape2D_ij6vw")
 debug_color = Color(0, 0.6, 0.69803923, 0)
 
-[node name="Arthax" type="Sprite2D" parent="." unique_id=1685461738 groups=["Unit"]]
+[node name="Arthax" type="Sprite2D" parent="." unique_id=1685461738]
 position = Vector2(0, -7)
-texture = ExtResource("2_uhwgi")
+texture = ExtResource("2_uo5aa")
 hframes = 5
 vframes = 8
 frame = 1
 
-[node name="HitBox" type="Panel" parent="." unique_id=1922341203 groups=["Unit"]]
+[node name="HitBox" type="Panel" parent="." unique_id=1922341203]
 offset_left = -7.0
 offset_top = -14.0
 offset_right = 7.0
 offset_bottom = 1.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_ij6vw")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1829869132 groups=["Unit"]]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1829869132]
 libraries/ = SubResource("AnimationLibrary_r2g42")
 
 [connection signal="input_event" from="." to="." method="_on_input_event"]

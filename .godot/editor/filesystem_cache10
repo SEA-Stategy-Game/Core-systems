@@ -1,9 +1,11 @@
 63f7b34db8d8cdea90c76aacccf841ec
-::res://::1773304472
+::res://::1773315783
+barracks.gd::GDScript::1626241360418143663::1773315749::0::1::::<>StaticBody2D<><>0<>0<><>::
+Barracks.tscn::PackedScene::6887063921499148577::1773315749::0::1::::<><><>0<>0<><>::uid://bmx026ol75xsu::::res://Assets/MiniWorldSprites/Buildings/Wood/Barracks.png<>uid://xf07s84ylbox::::res://barracks.gd
 icon.svg::CompressedTexture2D::1790880795757653::1772636104::1772636114::1::::<><><>0<>0<>1d558fff71561543e2cf7e0d300c3350<>res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex::
 README.md::TextFile::-1::1773304189::0::1::::<><><>0<>0<><>::
 world.gd::GDScript::8941266032866453978::1773239570::0::1::::<>Node2D<><>0<>0<><>::
-world.tscn::PackedScene::5476033528914687067::1773303964::0::1::::<><><>0<>0<><>::uid://boa5scnw8xkf7::::res://UI/camera_2d.gd<>uid://d0nhl0c06ortq::::res://world.gd<>uid://d30ebo7uakvax::::res://Units/character_body_2d.tscn<>uid://djf7keuxeyyoh::::res://UI/ui.tscn<>uid://cbyljlajjsfti::::res://World Objects/Tree.tscn
+world.tscn::PackedScene::5476033528914687067::1773315753::0::1::::<><><>0<>0<><>::uid://boa5scnw8xkf7::::res://UI/camera_2d.gd<>uid://d0nhl0c06ortq::::res://world.gd<>uid://d30ebo7uakvax::::res://Entities/Units/character_body_2d.tscn<>uid://djf7keuxeyyoh::::res://UI/ui.tscn<>res://Entities/IStaticMapObject/Resource/tree.tscn<>uid://smm6t2i77fdv::::res://Assets/MiniWorldSprites/Ground/TexturedGrass.png<>uid://c5ee63xefwvh6::::res://Barracks.tscn
 ::res://Assets/::1773071503
 EasyChar_2026-03-06T08_59_55.250Z.png::CompressedTexture2D::7558882039936969672::1772787633::1772790720::1::::<><><>0<>0<>fe0e73d9c17fe1057a1d9fc8fa90ac27<>res://.godot/imported/EasyChar_2026-03-06T08_59_55.250Z.png-f27052f864d0002560fcb2282e98d196.ctex::
 EasyChar_2026-03-06T09_08_29.159Z.png::CompressedTexture2D::2785929680394920733::1772788121::1772790716::1::::<><><>0<>0<>32103b01edfee142dd2a73fb1030f47a<>res://.godot/imported/EasyChar_2026-03-06T09_08_29.159Z.png-beea278eb273e16613fb9eaccb809c80.ctex::
@@ -258,19 +260,29 @@ BoxSelector.png::CompressedTexture2D::5188419624733837354::1773071503::177307150
 Highlighted-Boxes.png::CompressedTexture2D::1158870192366592029::1773071503::1773071505::1::::<><><>0<>0<>2596996f6d3d50220370bdb6514d8530<>res://.godot/imported/Highlighted-Boxes.png-bd591129940b72837066d98482ca25c2.ctex::
 Icons-Essentials.png::CompressedTexture2D::6689366184331133069::1773071503::1773071505::1::::<><><>0<>0<>44422573b16ccc0998fe7348c3083f54<>res://.godot/imported/Icons-Essentials.png-43e2571b5d60d2f59933f80bf1ac9996.ctex::
 UiIcons.png::CompressedTexture2D::270706617679497325::1773071503::1773071505::1::::<><><>0<>0<>d5632bee474b60d2481b8c1fc0c00261<>res://.godot/imported/UiIcons.png-741b4c0c07001ce84310f9509279701f.ctex::
-::res://Global/::1773300761
-Game.gd::GDScript::4704545461028654194::1773300761::0::1::::<>Node<><>0<>0<><>::
-::res://Logic/::1772700279
-Entity.gd::GDScript::8324469067109758160::1772700268::0::1::::Entity<>Node2D<><>0<>0<><>::
+::res://Entities/::1773306834
+entity.gd::GDScript::8324469067109758160::1773306834::0::1::::Entity<>Node2D<><>0<>0<><>::
+::res://Entities/Equipment/::1773306850
+equipment.gd::GDScript::2635495316753652538::1773306834::0::1::::Equipment<>Entity<><>0<>0<><>::
+::res://Entities/IStaticMapObject/::1773306834
+::res://Entities/IStaticMapObject/Building/::1773306850
+barrack.gd::GDScript::1180651098878265321::1773306834::0::1::::<>Building<><>0<>0<><>::
+building.gd::GDScript::5209404042937619523::1773306834::0::1::::Building<>Entity<><>0<>0<><>::
+smith.gd::GDScript::5342906169985191555::1773306834::0::1::::<>Building<><>0<>0<><>::
+tent.gd::GDScript::2553474568575175037::1773306834::0::1::::<>Building<><>0<>0<><>::
+::res://Entities/IStaticMapObject/Resource/::1773307384
+resource.gd::GDScript::2898821202514166040::1773307059::0::1::::MapResource<>Entity<><>0<>0<><>::
+stone.gd::GDScript::8370536993685581843::1773307064::0::1::::<>MapResource<><>0<>0<><>::
+tree.gd::GDScript::298133172662535116::1773307100::0::1::::<>MapResource<><>0<>0<><>::
+tree.tscn::PackedScene::4893259814365755618::1773307618::0::1::::<><><>0<>0<><>::res://Entities/IStaticMapObject/Resource/tree.gd<>uid://bddjglotcr720::::res://Assets/MiniWorldSprites/Nature/PineTrees.png
+::res://Entities/Units/::1773307342
+character_body_2d.tscn::PackedScene::9176404556230444219::1773307089::0::1::::<><><>0<>0<><>::uid://dweqb87bqh6d3::::res://Entities/Units/Unit.gd<>uid://b68isfnk756nx::::res://Assets/MiniWorldSprites/Characters/Champions/Arthax.png
+Unit.gd::GDScript::8712649162581846998::1773307777::0::1::::<>CharacterBody2D<><>0<>0<><>::
+unit.tscn::PackedScene::4256943357985133634::1773307342::0::1::::<><><>0<>0<><>::res://Units/Unit.gd<>uid://b68isfnk756nx::::res://Assets/MiniWorldSprites/Characters/Champions/Arthax.png
+::res://Logic/::1773306834
+Game.gd::GDScript::4704545461028654194::1773306834::0::1::::<>Node<><>0<>0<><>::
 TickManager.gd::GDScript::4492795999435739198::1772700207::0::1::::<>Node<><>0<>0<><>::
-Unit.gd::GDScript::401578603222276729::1772700207::0::1::::Unit<>Entity<><>0<>0<><>::
 ::res://UI/::1773302241
-camera_2d.gd::GDScript::3370918274872588346::1773302182::0::1::::<>Camera2D<><>0<>0<><>::
+camera_2d.gd::GDScript::3370918274872588346::1773306268::0::1::::<>Camera2D<><>0<>0<><>::
 UI.gd::GDScript::7073586154520536402::1773300761::0::1::::<>CanvasLayer<><>0<>0<><>::
 ui.tscn::PackedScene::7803244576340289827::1773302241::0::1::::<><><>0<>0<><>::uid://c71q6vwodg7uk::::res://UI/UI.gd
-::res://Units/::1773302182
-character_body_2d.tscn::PackedScene::9176404556230444219::1773302182::0::1::::<><><>0<>0<><>::uid://dweqb87bqh6d3::::res://Units/Unit.gd<>uid://b68isfnk756nx::::res://Assets/MiniWorldSprites/Characters/Champions/Arthax.png
-Unit.gd::GDScript::8712649162581846998::1773300933::0::1::::<>CharacterBody2D<><>0<>0<><>::
-::res://World Objects/::1773300800
-tree.gd::GDScript::298133172662535116::1773300800::0::1::::<>StaticBody2D<><>0<>0<><>::
-Tree.tscn::PackedScene::4893259814365755618::1773241951::0::1::::<><><>0<>0<><>::uid://eioher247qp5::::res://World Objects/tree.gd<>uid://bddjglotcr720::::res://Assets/MiniWorldSprites/Nature/PineTrees.png

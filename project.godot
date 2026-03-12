@@ -17,7 +17,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-Game="*uid://b8a6f86ijfa47"
+Game="*res://Logic/Game.gd"
 
 [input]
 
