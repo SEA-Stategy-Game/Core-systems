@@ -40,8 +40,8 @@ func _process(delta):
 	zoom.x = lerp(zoom.x, zoom.x * ZoomFactor, ZoomSpeed * delta)
 	zoom.y = lerp(zoom.y, zoom.y * ZoomFactor, ZoomSpeed * delta)
 	
-	zoom.x = clamp(zoom.x, zoom.x * ZoomFactor, ZoomSpeed * delta)
-	zoom.y = clamp(zoom.y, zoom.y * ZoomFactor, ZoomSpeed * delta)
+	zoom.x = clamp(zoom.x, ZoomMin, ZoomMax)
+	zoom.y = clamp(zoom.y, ZoomMin, ZoomMax)
 	
 	if not Zooming:
 		ZoomFactor = 1.0

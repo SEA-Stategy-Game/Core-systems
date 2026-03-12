@@ -5,20 +5,31 @@
 [ext_resource type="PackedScene" uid="uid://d30ebo7uakvax" path="res://Units/character_body_2d.tscn" id="2_fj7yv"]
 [ext_resource type="PackedScene" uid="uid://djf7keuxeyyoh" path="res://UI/ui.tscn" id="3_036b0"]
 [ext_resource type="PackedScene" uid="uid://cbyljlajjsfti" path="res://World Objects/Tree.tscn" id="4_aqk2v"]
+[ext_resource type="Texture2D" uid="uid://smm6t2i77fdv" path="res://Assets/MiniWorldSprites/Ground/TexturedGrass.png" id="6_dwbse"]
 
 [node name="World" type="Node2D" unique_id=777208976]
+position = Vector2(-1, -25)
 script = ExtResource("1_tlwt5")
 
+[node name="TextureRect" type="TextureRect" parent="." unique_id=904408715]
+offset_left = -2941.0
+offset_top = -1882.0
+offset_right = 3010.0
+offset_bottom = 1978.0
+texture = ExtResource("6_dwbse")
+stretch_mode = 1
+
 [node name="Camera2D" type="Camera2D" parent="." unique_id=118205968]
+position = Vector2(12, -41)
 script = ExtResource("1_f3sb7")
 
 [node name="UI" parent="." unique_id=1080200729 instance=ExtResource("3_036b0")]
 
 [node name="Units" type="Node2D" parent="." unique_id=1851347236 groups=["units"]]
-scale = Vector2(5, 5)
+position = Vector2(163.99998, 27.999998)
 
 [node name="Unit" parent="Units" unique_id=1684801707 groups=["units"] instance=ExtResource("2_fj7yv")]
-position = Vector2(-1, 2)
+position = Vector2(35.8, -13.199999)
 
 [node name="Unit2" parent="Units" unique_id=1978056199 instance=ExtResource("2_fj7yv")]
 position = Vector2(51, 13)
@@ -27,11 +38,7 @@ position = Vector2(51, 13)
 position = Vector2(-5, 23)
 
 [node name="Objects" type="Node2D" parent="." unique_id=64952163]
-scale = Vector2(5, 5)
+position = Vector2(-160.99998, -64.99999)
 
 [node name="Tree" parent="Objects" unique_id=707792734 instance=ExtResource("4_aqk2v")]
-position = Vector2(-30, 60)
-
-[node name="TextureRect" type="TextureRect" parent="." unique_id=904408715]
-offset_right = 40.0
-offset_bottom = 40.0
+position = Vector2(193.99998, 132)
