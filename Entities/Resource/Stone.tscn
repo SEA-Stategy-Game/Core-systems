@@ -1,7 +1,7 @@
-[gd_scene format=3 uid="uid://cbyljlajjsfti"]
+[gd_scene format=3 uid="uid://cwxsdlngu3cq4"]
 
-[ext_resource type="Script" uid="uid://eioher247qp5" path="res://Entities/Resource/tree.gd" id="1_2l5pv"]
-[ext_resource type="Texture2D" uid="uid://3imwtiqwyig3" path="res://Assets/MiniWorldSprites/Nature/Rocks.png" id="2_e2tkl"]
+[ext_resource type="Script" uid="uid://eioher247qp5" path="res://Entities/Resource/tree.gd" id="1_37pa3"]
+[ext_resource type="Texture2D" uid="uid://bddjglotcr720" path="res://Assets/MiniWorldSprites/Nature/PineTrees.png" id="2_lbd18"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_qpyuj"]
 
@@ -15,7 +15,7 @@ bg_color = Color(0.20591703, 0.6977598, 0.5061626, 1)
 bg_color = Color(0.78011423, 0.5426332, 0.31062788, 1)
 
 [node name="Tree" type="StaticBody2D" unique_id=707792734 groups=["Tree"]]
-script = ExtResource("1_2l5pv")
+script = ExtResource("1_37pa3")
 resource_name = "Tree"
 
 [node name="Chop Tree" type="Area2D" parent="." unique_id=1272582681 groups=["Tree"]]
@@ -30,7 +30,7 @@ shape = SubResource("RectangleShape2D_1cusd")
 
 [node name="PineTrees" type="Sprite2D" parent="." unique_id=1846018161 groups=["Tree"]]
 position = Vector2(1, -9)
-texture = ExtResource("2_e2tkl")
+texture = ExtResource("2_lbd18")
 
 [node name="ProgressBar" type="ProgressBar" parent="." unique_id=1328027188 groups=["Tree"]]
 offset_left = -9.0

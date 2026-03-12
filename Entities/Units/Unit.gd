@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+class_name Unit
+
 @export var selected = false
 @onready var box = get_node("HitBox")
 @onready var anim = get_node("AnimationPlayer")
