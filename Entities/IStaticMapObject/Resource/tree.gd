@@ -1,4 +1,5 @@
 extends StaticBody2D
+extends Resource
 
 var totalTime = 5
 var currentTime
@@ -22,7 +23,7 @@ func _process(delta):
 
 
 func _on_chop_tree_body_entered(body: Node2D) -> void:
-	if "Unit" in body.name:
+	if "Unit" in body.name: # Change 'unit' to for example 'axe'
 		units += 1
 		startChopping()
 
