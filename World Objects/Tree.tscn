@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://cbyljlajjsfti"]
+
+[ext_resource type="Script" uid="uid://eioher247qp5" path="res://World Objects/tree.gd" id="1_6tg3m"]
+[ext_resource type="Texture2D" uid="uid://bddjglotcr720" path="res://Assets/MiniWorldSprites/Nature/PineTrees.png" id="2_mdseu"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1cusd"]
+size = Vector2(7, 8)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_qpyuj"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e2ymw"]
+bg_color = Color(0.20591703, 0.6977598, 0.5061626, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_aja8y"]
+bg_color = Color(0.78011423, 0.5426332, 0.31062788, 1)
+
+[node name="Tree" type="StaticBody2D" unique_id=707792734 groups=["Tree"]]
+script = ExtResource("1_6tg3m")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=580988398 groups=["Tree"]]
+position = Vector2(0.5, -6)
+shape = SubResource("RectangleShape2D_1cusd")
+
+[node name="Chop Tree" type="Area2D" parent="." unique_id=1272582681 groups=["Tree"]]
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Chop Tree" unique_id=1101035522 groups=["Tree"]]
+position = Vector2(1, -8)
+shape = SubResource("CircleShape2D_qpyuj")
+
+[node name="PineTrees" type="Sprite2D" parent="." unique_id=1846018161 groups=["Tree"]]
+position = Vector2(1, -9)
+texture = ExtResource("2_mdseu")
+
+[node name="ProgressBar" type="ProgressBar" parent="." unique_id=1328027188 groups=["Tree"]]
+offset_left = -9.0
+offset_top = -21.0
+offset_right = 11.0
+offset_bottom = -18.0
+theme_override_styles/background = SubResource("StyleBoxFlat_e2ymw")
+theme_override_styles/fill = SubResource("StyleBoxFlat_aja8y")
+value = 50.0
+show_percentage = false
+
+[node name="Timer" type="Timer" parent="ProgressBar" unique_id=537835437 groups=["Tree"]]
+
+[connection signal="body_entered" from="Chop Tree" to="." method="_on_chop_tree_body_entered"]
+[connection signal="body_exited" from="Chop Tree" to="." method="_on_chop_tree_body_exited"]
+[connection signal="timeout" from="ProgressBar/Timer" to="." method="_on_timer_timeout"]
