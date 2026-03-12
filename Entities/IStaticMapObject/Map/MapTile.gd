@@ -14,7 +14,7 @@ var terrain: TerrainType = TerrainType.DIRT
 var map_object: Variant = null
 var is_occupied: bool = false
 
-func _init(tile_x: int = 0, tile_y: int = 0, tile_terrain: TerrainType = TerrainType.GRASS, tile_object: Variant = null) -> void:
+func _init(tile_x: int = 0, tile_y: int = 0, tile_terrain: TerrainType = TerrainType.DIRT, tile_object: Variant = null) -> void:
 	x = tile_x
 	y = tile_y
 	terrain = tile_terrain
@@ -48,15 +48,12 @@ func is_walkable() -> bool:
 			return true
 
 func take_damage(dmg: int) -> void:
-	# Route damage to a static object on the tile, such as a tree, stone,
-	# or later a building, if that object supports take_damage().
 	if map_object == null:
 		return
 
 	if map_object.has_method("take_damage"):
 		map_object.take_damage(dmg)
 
-	# If the object was destroyed elsewhere, free the tile afterward.
 	if not is_instance_valid(map_object):
 		clear_map_object()
 
