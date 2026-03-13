@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cwxsdlngu3cq4"]
 
-[ext_resource type="Script" path="res://Entities/Resource/stone.gd" id="1_37pa3"]
+[ext_resource type="Script" uid="uid://dweo47eprfwam" path="res://Entities/Resource/stone.gd" id="1_37pa3"]
 [ext_resource type="Texture2D" uid="uid://3imwtiqwyig3" path="res://Assets/MiniWorldSprites/Nature/Rocks.png" id="2_lbd18"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_qpyuj"]
@@ -29,8 +29,10 @@ position = Vector2(0.5, -6)
 shape = SubResource("RectangleShape2D_1cusd")
 
 [node name="Rocks" type="Sprite2D" parent="." unique_id=1846018161 groups=["Stone"]]
-position = Vector2(1, -9)
+position = Vector2(0, -8)
 texture = ExtResource("2_lbd18")
+hframes = 3
+vframes = 4
 
 [node name="ProgressBar" type="ProgressBar" parent="." unique_id=1328027188 groups=["Stone"]]
 offset_left = -9.0
