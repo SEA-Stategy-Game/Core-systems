@@ -7,9 +7,9 @@
 
 # Godot editor / generated files
 .godot/
+.addons/
 *.import
 *.uid
-
 
 # -----------------------------
 # VS Code
