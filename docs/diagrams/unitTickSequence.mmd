@@ -1,0 +1,61 @@
+sequenceDiagram
+    autonumber
+    participant EC as EntityContainer
+    participant U as Unit
+    participant PL as Planner
+    participant PF as PathfindingSystem
+    participant COL as CollisionSystem
+    participant MAP as GameMap
+    participant TILE as MapTile
+    participant RS as ResourceSystem
+    participant R as Resource
+    participant CS as CombatSystem
+    participant E as Entity
+    participant CONS as ConstructionSystem
+    participant B as Building
+
+    EC->>PL: checkPlan(unit)
+    PL-->>EC: action
+
+    alt action == MOVE(x,y)
+        EC->>PF: findPath(U.getPosition(), target)
+        PF-->>EC: nextStep
+        EC->>MAP: getTile(nextStep.x, nextStep.y)
+        MAP-->>EC: TILE
+        EC->>TILE: isWalkable()
+        TILE-->>EC: bool
+        EC->>COL: validateMove(U, nextStep)
+        COL-->>EC: ok/blocked
+        alt ok
+            EC->>U: move(x,y)
+            U-->>EC: moved
+        else blocked
+            EC->>U: tick()
+        end
+
+    else action == GATHER(resourceId)
+        EC->>RS: validateGather(U, resourceId)
+        RS-->>EC: ok
+        EC->>R: harvest()
+        R-->>EC: amount
+        EC->>U: carry()
+        EC->>R: deplete()
+
+    else action == ATTACK(targetId)
+        EC->>CS: validateAttack(U, targetId)
+        CS-->>EC: ok
+        EC->>U: attack()
+        EC->>E: takeDamage(dmg)
+        E-->>EC: hp updated
+        EC->>E: isAlive()
+        E-->>EC: true/false
+        alt dead
+            EC->>E: destroy()
+        end
+
+    else action == BUILD(buildingId)
+        EC->>CONS: validateBuild(U, buildingId)
+        CONS-->>EC: ok
+        EC->>U: build()
+        EC->>B: tick()
+    end
