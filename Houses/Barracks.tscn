@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://c5ee63xefwvh6"]
 
 [ext_resource type="Texture2D" uid="uid://bmx026ol75xsu" path="res://Assets/MiniWorldSprites/Buildings/Wood/Barracks.png" id="1_126bj"]
-[ext_resource type="Script" uid="uid://xf07s84ylbox" path="res://barracks.gd" id="1_uneb2"]
+[ext_resource type="Script" uid="uid://xf07s84ylbox" path="res://Houses/barracks.gd" id="1_uneb2"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_uneb2"]
 size = Vector2(14, 16)
@@ -16,6 +16,7 @@ border_color = Color(0.5072414, 0.8546502, 0.9927836, 1)
 border_blend = true
 
 [node name="House" type="StaticBody2D" unique_id=334523237]
+input_pickable = true
 script = ExtResource("1_uneb2")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1027505998]
@@ -31,4 +32,8 @@ offset_left = -8.0
 offset_top = -8.0
 offset_right = 8.0
 offset_bottom = 8.0
+mouse_filter = 1
 theme_override_styles/panel = SubResource("StyleBoxFlat_ij6vw")
+
+[connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]

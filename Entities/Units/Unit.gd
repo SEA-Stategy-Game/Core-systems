@@ -6,7 +6,7 @@ class_name Unit
 @onready var box = get_node("HitBox")
 @onready var anim = get_node("AnimationPlayer")
 
-@onready var target = position
+@onready var target = global_position
 var follow_cursor = false
 var Speed = 50
 
@@ -16,18 +16,21 @@ func _ready():
 	set_selected(selected)
 func set_selected(value):
 	selected = value
-	box.visible = value
+	if box:
+		box.visible = value
 
 func _input(event):
 	if event.is_action_pressed("RightClick"):
 		if selected:
 			target = get_global_mouse_position()
-			anim.play("Walk Down")
+			if anim:
+				anim.play("Walk Down")
 		
 		
 func _physics_process(delta):
-	velocity = position.direction_to(target) * Speed
-	if position.distance_to(target) > 10:
+	velocity = global_position.direction_to(target) * Speed
+	if global_position.distance_to(target) > 10:
 		move_and_slide()
 	else:
-		anim.stop()
+		if anim:
+			anim.stop()

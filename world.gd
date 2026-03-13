@@ -3,10 +3,14 @@ extends Node2D
 var units = []
 
 func _ready():
-	units = get_tree().get_nodes_in_group("units")
+	get_units()
+	Game.spawnUnit(position)
 	if has_node("Camera2D"):
 		$Camera2D.area_selected.connect(_on_area_selected)
-	Game.spawnUnit()
+
+func get_units():
+	units = null
+	units = get_tree().get_nodes_in_group("units")
 
 func _on_area_selected(camera):
 	units = get_tree().get_nodes_in_group("units")
