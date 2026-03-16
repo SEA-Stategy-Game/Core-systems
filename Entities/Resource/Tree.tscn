@@ -30,6 +30,8 @@ shape = SubResource("CircleShape2D_qpyuj")
 [node name="PineTrees" type="Sprite2D" parent="." unique_id=1846018161 groups=["Tree"]]
 position = Vector2(1, -9)
 texture = ExtResource("2_v6iir")
+hframes = 3
+frame = 1
 
 [node name="ProgressBar" type="ProgressBar" parent="." unique_id=1328027188 groups=["Tree"]]
 offset_left = -9.0

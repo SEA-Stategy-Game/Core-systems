@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://8mnf5bvrt6td"]
+
+[ext_resource type="Script" uid="uid://ty5lte13pjoc" path="res://UI/pop.gd" id="1_r7dmh"]
+[ext_resource type="Texture2D" uid="uid://bddjglotcr720" path="res://Assets/MiniWorldSprites/Nature/PineTrees.png" id="2_b2ib3"]
+
+[node name="POP" type="Label" unique_id=1337718129]
+offset_left = -20.0
+offset_top = -23.0
+offset_right = 20.0
+horizontal_alignment = 1
+vertical_alignment = 1
+script = ExtResource("1_r7dmh")
+
+[node name="PineTrees" type="Sprite2D" parent="." unique_id=469783330]
+position = Vector2(20, 16)
+texture = ExtResource("2_b2ib3")
+hframes = 3
