@@ -29,6 +29,7 @@ GameRoomManager="*res://Logic/multiplayer/game_room_manager.gd"
 [dotnet]
 
 project/assembly_name="Core"
+PlanReceiver="*res://Logic/PlanReceiver.gd"
 
 [input]
 
