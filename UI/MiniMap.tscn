@@ -1,0 +1,61 @@
+[gd_scene format=3 uid="uid://bb2fxj44efs13"]
+
+[ext_resource type="Script" uid="uid://bb702s0nghts4" path="res://UI/Minimap.gd" id="1_0xjql"]
+[ext_resource type="Texture2D" uid="uid://smm6t2i77fdv" path="res://Assets/MiniWorldSprites/Ground/TexturedGrass.png" id="1_h7lw0"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0xjql"]
+bg_color = Color(0.03529412, 0.36078432, 0.654902, 0.63529414)
+border_width_left = 7
+border_width_top = 7
+border_width_right = 7
+border_width_bottom = 7
+border_blend = true
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[node name="Control" type="Control" unique_id=642239375]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1152.0
+offset_bottom = -648.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="Panel" parent="." unique_id=1430409526]
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 0
+offset_left = 7.0
+offset_top = 7.0
+offset_right = 157.0
+offset_bottom = 157.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_0xjql")
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="." unique_id=1207497410]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 292.0
+offset_bottom = 292.0
+scale = Vector2(0.5, 0.5)
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer" unique_id=680910463]
+handle_input_locally = false
+size = Vector2i(280, 280)
+render_target_update_mode = 4
+script = ExtResource("1_0xjql")
+
+[node name="TextureRect" type="TextureRect" parent="SubViewportContainer/SubViewport" unique_id=904408715]
+offset_right = 141.0
+offset_bottom = 142.0
+scale = Vector2(2, 2)
+texture = ExtResource("1_h7lw0")
+stretch_mode = 1
+
+[node name="Camera2D" type="Camera2D" parent="SubViewportContainer/SubViewport" unique_id=118205968]
+position = Vector2(12, -41)
+
+[node name="Units" type="Node2D" parent="SubViewportContainer/SubViewport" unique_id=1851347236 groups=["units"]]

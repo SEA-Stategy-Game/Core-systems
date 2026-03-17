@@ -18,6 +18,8 @@ config/icon="res://icon.svg"
 [autoload]
 
 Game="*res://Logic/Game.gd"
+ActionGateway="*res://Logic/ActionGateway.gd"
+TickManager="*res://Logic/TickManager.gd"
 
 [input]
 

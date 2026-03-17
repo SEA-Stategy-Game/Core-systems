@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://djf7keuxeyyoh"]
 
 [ext_resource type="Script" uid="uid://c71q6vwodg7uk" path="res://UI/UI.gd" id="1_2fwl4"]
+[ext_resource type="PackedScene" uid="uid://bb2fxj44efs13" path="res://UI/MiniMap.tscn" id="2_dajm1"]
 
 [node name="UI" type="CanvasLayer" unique_id=1080200729]
 script = ExtResource("1_2fwl4")
@@ -8,5 +9,9 @@ script = ExtResource("1_2fwl4")
 [node name="Panel" type="Panel" parent="." unique_id=1888789476]
 
 [node name="Label" type="Label" parent="." unique_id=1846223536]
-offset_right = 40.0
-offset_bottom = 23.0
+offset_left = 948.0
+offset_top = 10.0
+offset_right = 1141.0
+offset_bottom = 33.0
+
+[node name="Control" parent="." unique_id=642239375 instance=ExtResource("2_dajm1")]
