@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 Game="*res://Logic/Game.gd"
 ActionGateway="*res://Logic/ActionGateway.gd"
 TickManager="*res://Logic/TickManager.gd"
+PlanReceiver="*res://Logic/PlanReceiver.gd"
 
 [input]
 
