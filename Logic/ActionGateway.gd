@@ -220,24 +220,25 @@ func _find_resource(resource_id: int) -> Node2D:
 	return null
 
 func _get_or_create_queue(unit: CharacterBody2D) -> CommandQueue:
+	var cq: CommandQueue
 	if "command_queue" in unit and unit.command_queue != null:
-		return unit.command_queue
+		cq = unit.command_queue
+	else:
+		cq = CommandQueue.new()
+		var uid = unit.entity_id if "entity_id" in unit else unit.get_instance_id()
+		cq.setup(unit, uid)
+		if "command_queue" in unit:
+			unit.command_queue = cq
+		else:
+			unit.set_meta("command_queue", cq)
 
-	var cq = CommandQueue.new()
-	var uid = unit.entity_id if "entity_id" in unit else unit.get_instance_id()
-	cq.setup(unit, uid)
-
-	# Wire signals
-	cq.action_completed.connect(_on_action_completed)
-	cq.action_failed.connect(_on_action_failed)
+	# Wire signals — guards forhindrer dubletter ved gentagne kald
+	if not cq.action_completed.is_connected(_on_action_completed):
+		cq.action_completed.connect(_on_action_completed)
+	if not cq.action_failed.is_connected(_on_action_failed):
+		cq.action_failed.connect(_on_action_failed)
 	if not cq.queue_empty.is_connected(_on_queue_empty):
 		cq.queue_empty.connect(_on_queue_empty)
-
-	# Store on the unit
-	if "command_queue" in unit:
-		unit.command_queue = cq
-	else:
-		unit.set_meta("command_queue", cq)
 
 	return cq
 
