@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://d0nhl0c06ortq" path="res://world.gd" id="1_tlwt5"]
 [ext_resource type="PackedScene" uid="uid://biykd6njvejpn" path="res://Entities/Units/character_body_2d.tscn" id="2_fj7yv"]
 [ext_resource type="PackedScene" uid="uid://djf7keuxeyyoh" path="res://UI/ui.tscn" id="3_036b0"]
-[ext_resource type="PackedScene" uid="uid://biio3e1hn22ty" path="res://Entities/Resource/tree.tscn" id="4_aqk2v"]
+[ext_resource type="PackedScene" uid="uid://biio3e1hn22ty" path="res://Entities/Resource/Tree.tscn" id="4_aqk2v"]
 [ext_resource type="Texture2D" uid="uid://smm6t2i77fdv" path="res://Assets/MiniWorldSprites/Ground/TexturedGrass.png" id="6_dwbse"]
 [ext_resource type="PackedScene" uid="uid://c5ee63xefwvh6" path="res://Houses/Barracks.tscn" id="7_pkg7o"]
 [ext_resource type="PackedScene" uid="uid://cwxsdlngu3cq4" path="res://Entities/Resource/Stone.tscn" id="8_gbfbk"]

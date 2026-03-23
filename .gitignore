@@ -7,7 +7,7 @@
 
 # Godot editor / generated files
 .godot/
-.addons/
+.addons/gut
 *.import
 *.uid
 
