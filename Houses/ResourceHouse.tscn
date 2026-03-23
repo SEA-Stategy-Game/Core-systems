@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://c5vfgqutjvnae"]
+
+[ext_resource type="Texture2D" uid="uid://cdjnf3236r6ml" path="res://Assets/MiniWorldSprites/Buildings/Wood/Resources.png" id="1_md6p5"]
+[ext_resource type="Script" uid="uid://bpganhfccio4f" path="res://Houses/resource_house.gd" id="1_ya2dm"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_p6ibp"]
+size = Vector2(17, 15)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e2ymw"]
+bg_color = Color(0.20591703, 0.6977598, 0.5061626, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_aja8y"]
+bg_color = Color(0.78011423, 0.5426332, 0.31062788, 1)
+
+[node name="ResourceHouse" type="StaticBody2D" unique_id=1624802311]
+script = ExtResource("1_ya2dm")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2065298965]
+y_sort_enabled = true
+position = Vector2(0.5, 0.5)
+shape = SubResource("RectangleShape2D_p6ibp")
+
+[node name="Timer" type="Timer" parent="." unique_id=966449620]
+wait_time = 0.1
+
+[node name="ProgressBar" type="ProgressBar" parent="." unique_id=1328027188 groups=["Tree"]]
+offset_left = -11.0
+offset_top = -13.0
+offset_right = 11.0
+offset_bottom = -8.0
+theme_override_styles/background = SubResource("StyleBoxFlat_e2ymw")
+theme_override_styles/fill = SubResource("StyleBoxFlat_aja8y")
+value = 50.0
+show_percentage = false
+
+[node name="Timer" type="Timer" parent="ProgressBar" unique_id=537835437 groups=["Tree"]]
+
+[node name="Resources" type="Sprite2D" parent="." unique_id=1107776248]
+texture = ExtResource("1_md6p5")
+hframes = 3
+vframes = 5
+frame = 11
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

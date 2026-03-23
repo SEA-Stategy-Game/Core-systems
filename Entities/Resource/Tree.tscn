@@ -1,7 +1,7 @@
-[gd_scene format=3 uid="uid://cbyljlajjsfti"]
+[gd_scene format=3 uid="uid://biio3e1hn22ty"]
 
-[ext_resource type="Script" path="res://Entities/IStaticMapObject/Resource/tree.gd" id="1_2l5pv"]
-[ext_resource type="Texture2D" uid="uid://bddjglotcr720" path="res://Assets/MiniWorldSprites/Nature/PineTrees.png" id="2_4mvmc"]
+[ext_resource type="Script" uid="uid://brdufmt7pabf2" path="res://Entities/Resource/tree.gd" id="1_2cgd5"]
+[ext_resource type="Texture2D" uid="uid://bddjglotcr720" path="res://Assets/MiniWorldSprites/Nature/PineTrees.png" id="2_v6iir"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1cusd"]
 size = Vector2(7, 8)
@@ -15,7 +15,7 @@ bg_color = Color(0.20591703, 0.6977598, 0.5061626, 1)
 bg_color = Color(0.78011423, 0.5426332, 0.31062788, 1)
 
 [node name="Tree" type="StaticBody2D" unique_id=707792734 groups=["Tree"]]
-script = ExtResource("1_2l5pv")
+script = ExtResource("1_2cgd5")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=580988398 groups=["Tree"]]
 position = Vector2(0.5, -6)
@@ -29,7 +29,9 @@ shape = SubResource("CircleShape2D_qpyuj")
 
 [node name="PineTrees" type="Sprite2D" parent="." unique_id=1846018161 groups=["Tree"]]
 position = Vector2(1, -9)
-texture = ExtResource("2_4mvmc")
+texture = ExtResource("2_v6iir")
+hframes = 3
+frame = 1
 
 [node name="ProgressBar" type="ProgressBar" parent="." unique_id=1328027188 groups=["Tree"]]
 offset_left = -9.0
@@ -43,6 +45,6 @@ show_percentage = false
 
 [node name="Timer" type="Timer" parent="ProgressBar" unique_id=537835437 groups=["Tree"]]
 
-[connection signal="body_entered" from="Chop Tree" to="." method="_on_chop_tree_body_entered"]
-[connection signal="body_exited" from="Chop Tree" to="." method="_on_chop_tree_body_exited"]
+[connection signal="body_entered" from="Chop Tree" to="." method="_on_harvest_area_body_entered"]
+[connection signal="body_exited" from="Chop Tree" to="." method="_on_harvest_area_body_exited"]
 [connection signal="timeout" from="ProgressBar/Timer" to="." method="_on_timer_timeout"]

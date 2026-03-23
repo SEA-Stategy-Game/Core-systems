@@ -12,6 +12,7 @@ func getPosition() -> Vector2:
 
 func takeDamage(dmg: int) -> void:
 	# Not implemented
+	pass
 
 static func is_implemented_by(obj: Variant) -> bool:
 	if obj == null:

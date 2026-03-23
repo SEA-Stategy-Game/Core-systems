@@ -1,0 +1,51 @@
+[gd_scene format=3 uid="uid://cwxsdlngu3cq4"]
+
+[ext_resource type="Script" uid="uid://dweo47eprfwam" path="res://Entities/Resource/stone.gd" id="1_37pa3"]
+[ext_resource type="Texture2D" uid="uid://3imwtiqwyig3" path="res://Assets/MiniWorldSprites/Nature/Rocks.png" id="2_lbd18"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_qpyuj"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1cusd"]
+size = Vector2(7, 8)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e2ymw"]
+bg_color = Color(0.20591703, 0.6977598, 0.5061626, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_aja8y"]
+bg_color = Color(0.78011423, 0.5426332, 0.31062788, 1)
+
+[node name="Stone" type="StaticBody2D" unique_id=707792734 groups=["Stone"]]
+script = ExtResource("1_37pa3")
+resource_name = "Stone"
+
+[node name="Mine Stone" type="Area2D" parent="." unique_id=1272582681 groups=["Stone"]]
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Mine Stone" unique_id=1101035522 groups=["Stone"]]
+position = Vector2(1, -8)
+shape = SubResource("CircleShape2D_qpyuj")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=580988398 groups=["Stone"]]
+position = Vector2(0.5, -6)
+shape = SubResource("RectangleShape2D_1cusd")
+
+[node name="Rocks" type="Sprite2D" parent="." unique_id=1846018161 groups=["Stone"]]
+position = Vector2(0, -8)
+texture = ExtResource("2_lbd18")
+hframes = 3
+vframes = 4
+
+[node name="ProgressBar" type="ProgressBar" parent="." unique_id=1328027188 groups=["Stone"]]
+offset_left = -9.0
+offset_top = -21.0
+offset_right = 11.0
+offset_bottom = -18.0
+theme_override_styles/background = SubResource("StyleBoxFlat_e2ymw")
+theme_override_styles/fill = SubResource("StyleBoxFlat_aja8y")
+value = 50.0
+show_percentage = false
+
+[node name="Timer" type="Timer" parent="ProgressBar" unique_id=537835437 groups=["Stone"]]
+
+[connection signal="body_entered" from="Mine Stone" to="." method="_on_harvest_area_body_entered"]
+[connection signal="body_exited" from="Mine Stone" to="." method="_on_harvest_area_body_exited"]
+[connection signal="timeout" from="ProgressBar/Timer" to="." method="_on_timer_timeout"]

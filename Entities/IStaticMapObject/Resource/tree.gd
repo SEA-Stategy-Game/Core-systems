@@ -1,8 +1,10 @@
-extends MapResource
+extends Node2D
 
 var totalTime = 5
 var currentTime
 var units = 0
+
+var POP = preload("res://UI/pop.gd")
 
 @onready var bar = $ProgressBar
 @onready var timer = $ProgressBar/Timer
@@ -44,6 +46,9 @@ func _on_timer_timeout() -> void:
 	
 func treeChopped():
 	Game.Wood += 1
+	var pop = POP.instantiate()
+	add_child(pop)
+	pop.show_value(str(10), false)
 	queue_free()
 
 func startChopping():

@@ -1,7 +1,10 @@
-extends CanvasLayer
+extends StaticBody2D
 
+var totalTime = 50
+var currTime
 
-@onready var label = $Label
+@onready var bar = $ProgressBar
+@onready var timer = $Timer
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass # Replace with function body.
@@ -9,4 +12,8 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	label.text = "Wood " + str(Game.Wood) + "  Stone " + str(Game.Stone) 
+	pass
+
+
+func _on_timer_timeout() -> void:
+	pass # Replace with function body.

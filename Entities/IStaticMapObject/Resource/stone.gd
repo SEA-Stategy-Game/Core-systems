@@ -1,1 +1,1 @@
-extends MapResource
+extends Node2D

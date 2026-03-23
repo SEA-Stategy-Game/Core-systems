@@ -1,0 +1,55 @@
+\documentclass[12pt]{article}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{hyperref}
+
+\title{SenseAPI Validation Report}
+\author{Senior Godot Engine Architect & AI Integration Specialist}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+This report outlines the implementation of a persistent Idle State and the \texttt{SenseAPI} for the Godot Core architecture. This allows the AI Planning Team to transition the engine from a ``Command-Only'' flow to a robust ``Sense-Think-Act'' cycle without needing to hold direct references to physical scene nodes.
+
+\section{Unit Idle State \& Busy-Check Logic}
+The \texttt{Unit.gd} script natively updates an \texttt{is\_idle} boolean. When the underlying \texttt{CommandQueue} runs dry, the \texttt{Unit} emits a \texttt{unit\_idled(unit\_id)} signal. The \texttt{ActionGateway} relays this signal to the broader AI context.
+\begin{itemize}
+    \item \textbf{Transition to BUSY:} The unit marks \texttt{is\_idle = false} the moment \texttt{ActionGateway} feeds its \texttt{CommandQueue} and triggers active execution.
+    \item \textbf{Transition to IDLE:} After completing the final step in a plan and emptying the queue, \texttt{is\_idle = true} is applied.
+\end{itemize}
+
+\subsection{State Flow Visual Reference}
+\begin{verbatim}
+ActionState Enum Integration
+[PENDING] -> [RUNNING] -> [COMPLETED / FAILED] -> [IDLE (Queue Empty)]
+\end{verbatim}
+
+\section{Sense API Reference}
+Responses are exclusively serialized as \texttt{Dictionary} or \texttt{Array} objects to satisfy security requirements and prevent malicious Node manipulations.
+
+\begin{table}[h]
+\centering
+\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{\textwidth}{@{}lXl@{}}
+\toprule
+\textbf{Method} & \textbf{Description} & \textbf{Return Value} \\
+\midrule
+\texttt{get\_all\_units()} & Returns all units in play. & \texttt{Array[Dictionary]} \\
+\texttt{get\_unit\_status(uid)} & Snapshot including ActionState context. & \texttt{Dictionary} \\
+\texttt{get\_world\_resources()} & All available trees/stones remaining. & \texttt{Array[Dictionary]} \\
+\texttt{get\_tick\_data()} & The active runtime tick state. & \texttt{int} \\
+\bottomrule
+\end{tabularx}
+\caption{Sense API Methods}
+\label{tab:sense_api}
+\end{table}
+
+\section{Sandbox Verification}
+The provided test script independently asserts this logic by dispatching a \texttt{MOVE} scenario. It correctly confirms \texttt{is\_idle = false} during transit and relies purely on the \texttt{unit\_idled} signal callback to establish when it flips back to \texttt{is\_idle = true}. Console output is explicitly formatted as \texttt{[SENSE\_QUERY]}, \texttt{[UNIT\_IDLE]}, and \texttt{[DATA\_SNAPSHOT]}.
+
+\end{document}
