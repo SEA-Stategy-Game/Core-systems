@@ -54,6 +54,7 @@ _data = {
 }
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_owuc0"]
+radius = 60.0
 
 [node name="Unit" type="CharacterBody2D" unique_id=1684801707 groups=["Unit"]]
 script = ExtResource("1_ij6vw")
@@ -83,7 +84,9 @@ libraries/ = SubResource("AnimationLibrary_r2g42")
 [node name="Range" type="Area2D" parent="." unique_id=1213542416]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Range" unique_id=539367772]
+y_sort_enabled = true
 position = Vector2(0, -6)
+scale = Vector2(0.3, 0.3)
 shape = SubResource("CircleShape2D_owuc0")
 
 [connection signal="input_event" from="." to="." method="_on_input_event"]

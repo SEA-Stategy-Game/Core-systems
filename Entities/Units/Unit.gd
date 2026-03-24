@@ -117,6 +117,16 @@ func get_closest_hostile() -> Node2D:
 func take_damage(amount: int) -> void:
 	current_health -= amount
 	print("[COMBAT_LOG] Unit ", entity_id, " (player ", player_id, ") took ", amount, " damage. HP: ", current_health, "/", max_health)
+	
+	# Visual feedback: flash red!
+	var sprite = get_node_or_null("Arthax") # The Sprite2D name in unit.tscn
+	if not sprite:
+		sprite = get_node_or_null("Sprite2D")
+	if sprite:
+		var tween = get_tree().create_tween()
+		sprite.modulate = Color(1, 0, 0) # Red
+		tween.tween_property(sprite, "modulate", Color(1, 1, 1), 0.2) # Back to normal
+
 	if current_health <= 0:
 		die()
 
