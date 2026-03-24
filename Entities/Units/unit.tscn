@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://b1wdh83xgdlb3"]
 
-[ext_resource type="Texture2D" uid="uid://b68isfnk756nx" path="res://Assets/MiniWorldSprites/Characters/Champions/Arthax.png" id="2_uo5aa"]
+[ext_resource type="Script" uid="uid://dweqb87bqh6d3" path="res://Entities/Units/Unit.gd" id="1_ij6vw"]
+[ext_resource type="Texture2D" uid="uid://b68isfnk756nx" path="res://Assets/MiniWorldSprites/Characters/Champions/Arthax.png" id="2_uhwgi"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ij6vw"]
 size = Vector2(10, 13)
@@ -52,28 +53,37 @@ _data = {
 &"Walk Down": SubResource("Animation_r18d6")
 }
 
-[node name="Unit" type="CharacterBody2D" unique_id=1684801707]
+[sub_resource type="CircleShape2D" id="CircleShape2D_owuc0"]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=186835737]
+[node name="Unit" type="CharacterBody2D" unique_id=1684801707 groups=["Unit"]]
+script = ExtResource("1_ij6vw")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=186835737 groups=["Unit"]]
 position = Vector2(0, -6.5)
 shape = SubResource("RectangleShape2D_ij6vw")
 debug_color = Color(0, 0.6, 0.69803923, 0)
 
-[node name="Arthax" type="Sprite2D" parent="." unique_id=1685461738]
+[node name="Arthax" type="Sprite2D" parent="." unique_id=1685461738 groups=["Unit"]]
 position = Vector2(0, -7)
-texture = ExtResource("2_uo5aa")
+texture = ExtResource("2_uhwgi")
 hframes = 5
 vframes = 8
 frame = 1
 
-[node name="HitBox" type="Panel" parent="." unique_id=1922341203]
+[node name="HitBox" type="Panel" parent="." unique_id=1922341203 groups=["Unit"]]
 offset_left = -7.0
 offset_top = -14.0
 offset_right = 7.0
 offset_bottom = 1.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_ij6vw")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1829869132]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1829869132 groups=["Unit"]]
 libraries/ = SubResource("AnimationLibrary_r2g42")
+
+[node name="Range" type="Area2D" parent="." unique_id=1213542416]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Range" unique_id=539367772]
+position = Vector2(0, -6)
+shape = SubResource("CircleShape2D_owuc0")
 
 [connection signal="input_event" from="." to="." method="_on_input_event"]

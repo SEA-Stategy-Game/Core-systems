@@ -2,9 +2,9 @@
 
 [ext_resource type="Script" uid="uid://boa5scnw8xkf7" path="res://UI/camera_2d.gd" id="1_f3sb7"]
 [ext_resource type="Script" uid="uid://d0nhl0c06ortq" path="res://world.gd" id="1_tlwt5"]
-[ext_resource type="PackedScene" uid="uid://biykd6njvejpn" path="res://Entities/Units/character_body_2d.tscn" id="2_fj7yv"]
 [ext_resource type="PackedScene" uid="uid://djf7keuxeyyoh" path="res://UI/ui.tscn" id="3_036b0"]
 [ext_resource type="PackedScene" uid="uid://biio3e1hn22ty" path="res://Entities/Resource/tree.tscn" id="4_aqk2v"]
+[ext_resource type="PackedScene" uid="uid://b1wdh83xgdlb3" path="res://Entities/Units/unit.tscn" id="5_gbfbk"]
 [ext_resource type="Texture2D" uid="uid://smm6t2i77fdv" path="res://Assets/MiniWorldSprites/Ground/TexturedGrass.png" id="6_dwbse"]
 [ext_resource type="PackedScene" uid="uid://c5ee63xefwvh6" path="res://Houses/Barracks.tscn" id="7_pkg7o"]
 [ext_resource type="PackedScene" uid="uid://cwxsdlngu3cq4" path="res://Entities/Resource/Stone.tscn" id="8_gbfbk"]
@@ -28,17 +28,20 @@ script = ExtResource("1_f3sb7")
 
 [node name="Units" type="Node2D" parent="." unique_id=1851347236 groups=["units"]]
 
-[node name="Unit" parent="Units" unique_id=1684801707 groups=["units"] instance=ExtResource("2_fj7yv")]
-position = Vector2(35.8, -13.199999)
+[node name="Unit" parent="Units" unique_id=1684801707 instance=ExtResource("5_gbfbk")]
+position = Vector2(-56, 55)
 
-[node name="Unit2" parent="Units" unique_id=1978056199 instance=ExtResource("2_fj7yv")]
-position = Vector2(51, 13)
+[node name="Unit2" parent="Units" unique_id=794963320 instance=ExtResource("5_gbfbk")]
+position = Vector2(-54, 75)
 
-[node name="Unit3" parent="Units" unique_id=1397362367 instance=ExtResource("2_fj7yv")]
-position = Vector2(-5, 23)
+[node name="Unit3" parent="Units" unique_id=1722076510 instance=ExtResource("5_gbfbk")]
+position = Vector2(-13, 55)
 
-[node name="Unit5" parent="Units" unique_id=544769095 instance=ExtResource("2_fj7yv")]
-position = Vector2(-48.999985, 62)
+[node name="Unit4" parent="Units" unique_id=756994126 instance=ExtResource("5_gbfbk")]
+position = Vector2(152, -17)
+entity_id = 0
+player_id = 1
+max_health = 10
 
 [node name="Objects" type="Node2D" parent="." unique_id=64952163]
 

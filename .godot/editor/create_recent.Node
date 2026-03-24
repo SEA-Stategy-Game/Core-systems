@@ -1,15 +1,14 @@
+CollisionShape2D
+Area2D
 SubViewport
 SubViewportContainer
 Panel
 Label
 ProgressBar
 Timer
-CollisionShape2D
 StaticBody2D
 MapResource
 Node2D
 Sprite2D
 Button
 TextureRect
-Area2D
-AnimationPlayer

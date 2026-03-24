@@ -1,6 +1,6 @@
 extends Node2D
 
-@onready var unit = preload("res://Entities/Units/character_body_2d.tscn")
+@onready var unit = preload("res://Entities/Units/unit.tscn")
 var housePos = Vector2(300,300)
 
 func _on_yes_pressed() -> void:

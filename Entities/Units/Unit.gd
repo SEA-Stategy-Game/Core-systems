@@ -6,10 +6,17 @@ class_name Unit
 ## Exported / inspector properties
 ## -----------------------------------------------------------------------
 @export var selected: bool = false
-@export var entity_id: int = -1   # Unique ID for AI lookups
+@export var entity_id: int = -1        ## Unique ID for AI lookups
+@export var player_id: int = 0         ## Owner player for multiplayer
+@export var max_health: int = 100
+@export var attack_damage: int = 10    ## Damage per combat tick
+@export var attack_cooldown: float = 1.0  ## Seconds between attacks
+
+var current_health: int
 
 @onready var box = get_node("HitBox")
 @onready var anim = get_node("AnimationPlayer")
+@onready var attack_range_area: Area2D = get_node_or_null("Range")
 
 ## -----------------------------------------------------------------------
 ## Movement (manual player control -- right-click)
@@ -24,6 +31,12 @@ var Speed: int = 50
 var command_queue: CommandQueue = null
 var is_idle: bool = true
 
+## -----------------------------------------------------------------------
+## Combat state -- tracked bodies inside the Range Area2D
+## -----------------------------------------------------------------------
+var _bodies_in_range: Array = []       ## All bodies currently inside Range
+var _attack_timer: float = 0.0
+
 signal ai_action_completed(unit_id: int, action_data: Dictionary)
 signal ai_action_failed(unit_id: int, action_data: Dictionary)
 signal unit_idled(unit_id: int)
@@ -33,6 +46,7 @@ signal unit_idled(unit_id: int)
 # -----------------------------------------------------------------
 
 func _ready() -> void:
+	current_health = max_health
 	add_to_group("units", true)
 	set_selected(selected)
 
@@ -44,10 +58,82 @@ func _ready() -> void:
 	command_queue.action_failed.connect(_on_cq_action_failed)
 	command_queue.queue_empty.connect(_on_cq_queue_empty)
 
+	# Wire up the Range Area2D signals for combat detection
+	if attack_range_area:
+		attack_range_area.body_entered.connect(_on_range_body_entered)
+		attack_range_area.body_exited.connect(_on_range_body_exited)
+
 func set_selected(value) -> void:
 	selected = value
 	if box:
 		box.visible = value
+
+# -----------------------------------------------------------------
+# Range Area2D signal handlers
+# -----------------------------------------------------------------
+
+func _on_range_body_entered(body: Node2D) -> void:
+	if body == self:
+		return  # Ignore self
+	if body.has_method("get_player_id"):
+		_bodies_in_range.append(body)
+
+func _on_range_body_exited(body: Node2D) -> void:
+	_bodies_in_range.erase(body)
+
+## Return all hostile bodies currently inside the Range Area2D.
+func get_hostiles_in_range() -> Array:
+	var hostiles: Array = []
+	for body in _bodies_in_range:
+		if not is_instance_valid(body):
+			continue
+		if not body.has_method("get_player_id"):
+			continue
+		if body.get_player_id() == player_id:
+			continue  # Friendly
+		if body.get_player_id() == -1:
+			continue  # Neutral (resources) -- skip unless explicitly attacked
+		if body.has_method("is_alive") and not body.is_alive():
+			continue
+		hostiles.append(body)
+	return hostiles
+
+## Return the closest hostile body in range, or null.
+func get_closest_hostile() -> Node2D:
+	var hostiles = get_hostiles_in_range()
+	var closest: Node2D = null
+	var closest_dist: float = INF
+	for h in hostiles:
+		var d = global_position.distance_to(h.global_position)
+		if d < closest_dist:
+			closest_dist = d
+			closest = h
+	return closest
+
+# -----------------------------------------------------------------
+# IDamageable contract
+# -----------------------------------------------------------------
+
+func take_damage(amount: int) -> void:
+	current_health -= amount
+	print("[COMBAT_LOG] Unit ", entity_id, " (player ", player_id, ") took ", amount, " damage. HP: ", current_health, "/", max_health)
+	if current_health <= 0:
+		die()
+
+func get_current_health() -> int:
+	return current_health
+
+func is_alive() -> bool:
+	return current_health > 0
+
+func get_player_id() -> int:
+	return player_id
+
+func die() -> void:
+	print("[COMBAT_LOG] Unit ", entity_id, " (player ", player_id, ") destroyed.")
+	if command_queue:
+		command_queue.clear()
+	queue_free()
 
 # -----------------------------------------------------------------
 # Player input  (manual right-click movement -- kept for human play)
@@ -68,6 +154,15 @@ func _input(event) -> void:
 # -----------------------------------------------------------------
 
 func _physics_process(delta) -> void:
+	# Clean up stale references from _bodies_in_range
+	_bodies_in_range = _bodies_in_range.filter(func(b): return is_instance_valid(b))
+
+	# AUTO-AGGRO: If the AI queue is totally idle and a hostile is in range, attack it automatically!
+	if command_queue and command_queue.is_idle():
+		var closest = get_closest_hostile()
+		if closest != null:
+			command_queue.enqueue(UnitActionAttack.create_focused(closest))
+
 	# 1. If the AI command queue has work, let it drive the unit.
 	if command_queue and not command_queue.is_idle():
 		if is_idle:
