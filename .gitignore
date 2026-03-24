@@ -6,7 +6,7 @@
 .export.cfg
 
 # Godot editor / generated files
-.godot/
+.godot/*
 .addons/gut
 *.import
 *.uid
