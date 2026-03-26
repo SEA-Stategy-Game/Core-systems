@@ -16,7 +16,9 @@ func after_each():
 	if entity and not entity.is_queued_for_deletion():
 		entity.queue_free()
 
+# --------------------
 # initialization tests
+# --------------------
 func test_entity_initializes_with_default_max_health():
 	var new_entity = Entity.new()
 	new_entity.max_health = 100
@@ -44,7 +46,9 @@ func test_entity_added_to_units_group_on_ready():
 func test_entity_is_not_selected_by_default():
 	assert_false(entity.is_selected)
 
+# ------------
 # health tests
+# ------------
 func test_take_damage_reduces_current_health():
 	entity._ready()
 	var initial_health = entity.current_health
@@ -78,7 +82,9 @@ func test_take_damage_triggers_die_when_health_goes_below_zero():
 	entity.take_damage(OVERKILL_DAMAGE)
 	assert_true(entity.is_queued_for_deletion())
 
+# ---------------
 # selection tests
+# ---------------
 func test_set_selected_true_marks_entity_as_selected():
 	entity.set_selected(true)
 	assert_true(entity.is_selected)
@@ -101,7 +107,9 @@ func test_set_selected_without_selection_box_does_not_crash():
 	entity.set_selected(false)
 	assert_false(entity.is_selected)
 
+# ----------
 # edge cases
+# ----------
 func test_entity_with_very_high_max_health():
 	entity.max_health = 999999
 	entity._ready()
@@ -130,7 +138,9 @@ func test_entity_id_is_preserved():
 	entity.set_selected(true)
 	assert_eq(entity.entity_id, 42)
 
+# -----------------------
 # state consistency tests
+# -----------------------
 func test_entity_maintains_state_after_selection_toggle():
 	entity._ready()
 	entity.take_damage(25)
@@ -139,7 +149,9 @@ func test_entity_maintains_state_after_selection_toggle():
 	entity.set_selected(false)
 	assert_eq(entity.current_health, health_before)
 
+# ---------------------------
 # integration scenarios tests
+# ---------------------------
 func test_combat_scenario():
 	entity._ready()
 	assert_eq(entity.current_health, INITIAL_HEALTH)

@@ -38,7 +38,9 @@ func before_each() -> void:
 func after_each() -> void:
 	resource = null
 
+# ----------
 # unit tests
+# ----------
 func test_resource_initializes_current_time_from_total_time() -> void:
 	assert_eq(resource.currentTime, resource.totalTime)
 
@@ -72,7 +74,9 @@ func test_resource_timer_timeout_finishes_when_time_reaches_zero() -> void:
 	assert_true(resource.finished_called)
 	assert_true(resource.is_queued_for_deletion())
 
+# -----------------
 # integration tests
+# -----------------
 func test_unit_entering_harvest_area_increments_counter_and_starts_timer() -> void:
 	var unit = UnitScript.new()
 	assert_true(resource.timer.is_stopped())
@@ -96,7 +100,9 @@ func test_non_unit_body_does_not_affect_harvesting_counter() -> void:
 	resource._on_harvest_area_body_exited(body)
 	assert_eq(resource.units_harvesting, 0)
 
+# ---------------
 # edge cases tets
+# ---------------
 func test_multiple_units_harvest_simultaneously() -> void:
 	var unit_a = UnitScript.new()
 	var unit_b = UnitScript.new()
