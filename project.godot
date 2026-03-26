@@ -31,6 +31,10 @@ GameRoomManager="*res://Logic/multiplayer/game_room_manager.gd"
 project/assembly_name="Core"
 PlanReceiver="*res://Logic/PlanReceiver.gd"
 
+[dotnet]
+
+project/assembly_name="New Game Project"
+
 [input]
 
 LeftClick={

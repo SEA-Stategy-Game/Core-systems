@@ -113,6 +113,7 @@ position = Vector2(-160, 24)
 
 [node name="Stone5" parent="NavigationRegion2D/Objects/StoneHenge" unique_id=1332675886 instance=ExtResource("8_gbfbk")]
 position = Vector2(-152, 40)
+entity_id = 3
 
 [node name="Stone6" parent="NavigationRegion2D/Objects/StoneHenge" unique_id=113364537 instance=ExtResource("8_gbfbk")]
 position = Vector2(-160, 56)
@@ -122,6 +123,7 @@ position = Vector2(-200, 40)
 
 [node name="Stone8" parent="NavigationRegion2D/Objects/StoneHenge" unique_id=1581381074 instance=ExtResource("8_gbfbk")]
 position = Vector2(-192, 56)
+entity_id = 4
 
 [node name="Stone9" parent="NavigationRegion2D/Objects/StoneHenge" unique_id=1610620610 instance=ExtResource("8_gbfbk")]
 position = Vector2(-176, 64)
