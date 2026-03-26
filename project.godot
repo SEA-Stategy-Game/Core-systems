@@ -22,6 +22,10 @@ ActionGateway="*res://Logic/ActionGateway.gd"
 TickManager="*res://Logic/TickManager.gd"
 PlanReceiver="*res://Logic/PlanReceiver.gd"
 
+[dotnet]
+
+project/assembly_name="New Game Project"
+
 [input]
 
 LeftClick={
