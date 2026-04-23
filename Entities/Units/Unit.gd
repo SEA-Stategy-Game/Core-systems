@@ -30,9 +30,13 @@ var current_health: int
 ## -----------------------------------------------------------------------
 ## Movement (manual player control -- right-click)
 ## -----------------------------------------------------------------------
-@onready var target: Vector2 = global_position
 var follow_cursor: bool = false
-var Speed: int = 50
+var speed: int = 2000
+
+## -----------------------------------------------------------------------
+## Pathfinding
+## -----------------------------------------------------------------------
+# @export var Goal: Node = null
 
 ## -----------------------------------------------------------------------
 ## AI Command Queue
@@ -164,7 +168,7 @@ func _input(event) -> void:
 			# Manual move clears any AI queue so the player takes over
 			if command_queue:
 				command_queue.clear()
-			target = get_global_mouse_position()
+			$NavigationAgent2D.target_position = get_global_mouse_position()
 			if anim:
 				anim.play("Walk Down")
 
@@ -190,12 +194,22 @@ func _physics_process(delta) -> void:
 		return  # AI commands take priority -- skip manual logic
 
 	# 2. Otherwise, fall back to manual right-click movement.
-	velocity = global_position.direction_to(target) * Speed
-	if global_position.distance_to(target) > 10:
-		move_and_slide()
-	else:
+	if $NavigationAgent2D.is_target_reached():
 		if anim:
 			anim.stop()
+		return
+
+	var nav_point_direction = to_local($NavigationAgent2D.get_next_path_position()).normalized()
+	velocity = nav_point_direction * speed * delta
+	move_and_slide()
+	
+	# velocity = global_position.direction_to(target) * speed
+	# if global_position.distance_to(target) > 10:
+	# 	move_and_slide()
+	# else:
+	# 	if anim:
+	# 		anim.stop()
+	
 
 # -----------------------------------------------------------------
 # Signal relays

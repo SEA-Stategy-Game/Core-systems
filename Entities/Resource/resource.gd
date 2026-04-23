@@ -15,6 +15,8 @@ class_name MapResource
 @onready var bar = $ProgressBar
 @onready var timer = $ProgressBar/Timer
 
+@onready var nav_region = $"/root/World/NavigationRegion2D"
+
 var amount: int = 1
 var maxAmount: int = 1 
 var currentTime: float
@@ -68,3 +70,4 @@ func _on_timer_timeout() -> void:
 func on_finished_harvesting():
 	print(resource_name, " depleted!")
 	queue_free()
+	nav_region.rebuild_nav()
