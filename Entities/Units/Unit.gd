@@ -39,6 +39,7 @@ var current_path_index: int = 0
 ## -----------------------------------------------------------------------
 ## Pathfinding
 ## -----------------------------------------------------------------------
+# @export var Goal: Node = null
 
 ## -----------------------------------------------------------------------
 ## AI Command Queue
@@ -181,6 +182,9 @@ func _input(event) -> void:
 			# Makes units use the Godot RVO avoidance mechanism
 			$NavigationAgent2D.avoidance_enabled = true
 			
+			if anim:
+				anim.play("Walk Down")
+
 # -----------------------------------------------------------------
 # Physics / tick processing
 # -----------------------------------------------------------------
@@ -207,6 +211,23 @@ func _physics_process(delta) -> void:
 	var desired_velocity = nav_point_direction * speed * delta
 	$NavigationAgent2D.set_velocity(desired_velocity)
 	
+	if $NavigationAgent2D.is_target_reached():
+		if anim:
+			anim.stop()
+		return
+
+	var nav_point_direction = to_local($NavigationAgent2D.get_next_path_position()).normalized()
+	velocity = nav_point_direction * speed * delta
+	move_and_slide()
+	
+	# velocity = global_position.direction_to(target) * speed
+	# if global_position.distance_to(target) > 10:
+	# 	move_and_slide()
+	# else:
+	# 	if anim:
+	# 		anim.stop()
+	
+
 # -----------------------------------------------------------------
 # Signal relays
 # -----------------------------------------------------------------
@@ -296,3 +317,13 @@ func _on_navigation_agent_2d_velocity_computed(safe_velocity: Vector2) -> void:
 		# Makes units able to walk into each other os that they can finish pathfinding and does not stall on each other
 		$NavigationAgent2D.avoidance_enabled = false
 		
+func _on_timer_timeout() -> void:
+	# if $NavigationAgent2D.target_position != Goal.global_position:
+	# 	$NavigationAgent2D.target_position = Goal.global_position'
+	print("Test")
+	$PathfindingUpdateTimer.start()
+
+
+func _on_navigation_agent_2d_velocity_computed(safe_velocity: Vector2) -> void:
+	# position += safe_velocity * get_physics_process_delta_time()
+	pass # Replace with function body.

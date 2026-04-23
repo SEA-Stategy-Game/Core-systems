@@ -82,9 +82,18 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
 offset_left = -7.0
 offset_top = -7.5
+offset_top = -7.5
 offset_right = 7.0
+offset_bottom = 7.5
+grow_horizontal = 2
+grow_vertical = 2
 offset_bottom = 7.5
 grow_horizontal = 2
 grow_vertical = 2
@@ -99,6 +108,15 @@ libraries/ = SubResource("AnimationLibrary_r2g42")
 y_sort_enabled = true
 scale = Vector2(0.3, 0.3)
 shape = SubResource("CircleShape2D_owuc0")
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1564493811]
+path_desired_distance = 10.0
+target_desired_distance = 3.0
+avoidance_enabled = true
+debug_enabled = true
+
+[node name="Timer" type="Timer" parent="." unique_id=2024305693]
+one_shot = true
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1564493811]
 path_desired_distance = 10.0

@@ -47,8 +47,7 @@ func _process_simulation() -> void:
 	if auto_save_interval > 0 and tick_count % auto_save_interval == 0:
 		if gateway and gateway.has_method("save_task_state"):
 			gateway.save_task_state()
-	
-	# 4. Broadcast the state in the server
+		# 4. Broadcast the state in the server
 	var tick = {"TICK": tick_count}
 	server.broadcast_state(tick)
 	
