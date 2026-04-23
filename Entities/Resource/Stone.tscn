@@ -5,8 +5,8 @@
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_qpyuj"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_1cusd"]
-size = Vector2(7, 8)
+[sub_resource type="CircleShape2D" id="CircleShape2D_37pa3"]
+radius = 5.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e2ymw"]
 bg_color = Color(0.20591703, 0.6977598, 0.5061626, 1)
@@ -21,12 +21,12 @@ resource_name = "Stone"
 [node name="Mine Stone" type="Area2D" parent="." unique_id=1272582681 groups=["Stone"]]
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="Mine Stone" unique_id=1101035522 groups=["Stone"]]
-position = Vector2(1, -8)
+position = Vector2(0, -8)
 shape = SubResource("CircleShape2D_qpyuj")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=580988398 groups=["Stone"]]
-position = Vector2(0.5, -6)
-shape = SubResource("RectangleShape2D_1cusd")
+position = Vector2(0, -8)
+shape = SubResource("CircleShape2D_37pa3")
 
 [node name="Rocks" type="Sprite2D" parent="." unique_id=1846018161 groups=["Stone"]]
 position = Vector2(0, -8)

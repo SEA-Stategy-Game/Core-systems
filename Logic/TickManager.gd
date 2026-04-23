@@ -44,4 +44,3 @@ func _process_simulation() -> void:
 	if auto_save_interval > 0 and tick_count % auto_save_interval == 0:
 		if gateway and gateway.has_method("save_task_state"):
 			gateway.save_task_state()
-

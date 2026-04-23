@@ -1,10 +1,9 @@
-[gd_scene format=3 uid="uid://b1wdh83xgdlb3"]
+[gd_scene format=3 uid="uid://dj8otlm2x128f"]
 
-[ext_resource type="Script" uid="uid://dweqb87bqh6d3" path="res://Entities/Units/Unit.gd" id="1_ij6vw"]
-[ext_resource type="Texture2D" uid="uid://b68isfnk756nx" path="res://Assets/MiniWorldSprites/Characters/Champions/Arthax.png" id="2_uhwgi"]
+[ext_resource type="Script" uid="uid://dweqb87bqh6d3" path="res://Entities/Units/Unit.gd" id="1_j7ad1"]
+[ext_resource type="Texture2D" uid="uid://b68isfnk756nx" path="res://Assets/MiniWorldSprites/Characters/Champions/Arthax.png" id="2_aq6li"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_ij6vw"]
-size = Vector2(10, 13)
+[sub_resource type="CircleShape2D" id="CircleShape2D_owuc0"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ij6vw"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
@@ -53,54 +52,38 @@ _data = {
 &"Walk Down": SubResource("Animation_r18d6")
 }
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_owuc0"]
-radius = 60.0
-
-[node name="Unit" type="CharacterBody2D" unique_id=1684801707 groups=["Unit"]]
-script = ExtResource("1_ij6vw")
+[node name="Unit2" type="CharacterBody2D" unique_id=1684801707 groups=["Unit"]]
+script = ExtResource("1_j7ad1")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=186835737 groups=["Unit"]]
-shape = SubResource("RectangleShape2D_ij6vw")
+position = Vector2(0, -6.5)
+shape = SubResource("CircleShape2D_owuc0")
 debug_color = Color(0, 0.6, 0.69803923, 0)
 
 [node name="Arthax" type="Sprite2D" parent="." unique_id=1685461738 groups=["Unit"]]
-texture = ExtResource("2_uhwgi")
+position = Vector2(0, -7)
+texture = ExtResource("2_aq6li")
 hframes = 5
 vframes = 8
 frame = 1
 
 [node name="HitBox" type="Panel" parent="." unique_id=1922341203 groups=["Unit"]]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
 offset_left = -7.0
-offset_top = -7.5
+offset_top = -14.0
 offset_right = 7.0
-offset_bottom = 7.5
-grow_horizontal = 2
-grow_vertical = 2
+offset_bottom = 1.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_ij6vw")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1829869132 groups=["Unit"]]
 libraries/ = SubResource("AnimationLibrary_r2g42")
 
-[node name="Range" type="Area2D" parent="." unique_id=1213542416]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Range" unique_id=539367772]
-y_sort_enabled = true
-scale = Vector2(0.3, 0.3)
-shape = SubResource("CircleShape2D_owuc0")
-
-[node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1564493811]
-path_desired_distance = 10.0
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=252959000]
+path_desired_distance = 3.0
 target_desired_distance = 3.0
-avoidance_enabled = true
 debug_enabled = true
 
-[node name="Timer" type="Timer" parent="." unique_id=2024305693]
+[node name="Timer" type="Timer" parent="." unique_id=304053686]
 one_shot = true
 
 [connection signal="input_event" from="." to="." method="_on_input_event"]
-[connection signal="velocity_computed" from="NavigationAgent2D" to="." method="_on_navigation_agent_2d_velocity_computed"]
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
