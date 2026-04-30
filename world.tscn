@@ -3,11 +3,12 @@
 [ext_resource type="Script" uid="uid://boa5scnw8xkf7" path="res://UI/camera_2d.gd" id="1_f3sb7"]
 [ext_resource type="Script" uid="uid://d0nhl0c06ortq" path="res://world.gd" id="1_tlwt5"]
 [ext_resource type="PackedScene" uid="uid://djf7keuxeyyoh" path="res://UI/ui.tscn" id="3_036b0"]
-[ext_resource type="PackedScene" uid="uid://biio3e1hn22ty" path="res://Entities/Resource/tree.tscn" id="4_aqk2v"]
+[ext_resource type="PackedScene" uid="uid://biio3e1hn22ty" path="res://Entities/Resource/Tree.tscn" id="4_aqk2v"]
 [ext_resource type="PackedScene" uid="uid://b1wdh83xgdlb3" path="res://Entities/Units/unit.tscn" id="5_gbfbk"]
 [ext_resource type="Texture2D" uid="uid://smm6t2i77fdv" path="res://Assets/MiniWorldSprites/Ground/TexturedGrass.png" id="6_dwbse"]
 [ext_resource type="PackedScene" uid="uid://c5ee63xefwvh6" path="res://Houses/Barracks.tscn" id="7_pkg7o"]
 [ext_resource type="PackedScene" uid="uid://cwxsdlngu3cq4" path="res://Entities/Resource/Stone.tscn" id="8_gbfbk"]
+[ext_resource type="Script" uid="uid://cu6mxdf8h703t" path="res://Logic/Server.gd" id="9_ioo17"]
 
 [node name="World" type="Node2D" unique_id=777208976]
 script = ExtResource("1_tlwt5")
@@ -44,6 +45,9 @@ player_id = 1
 
 [node name="Objects" type="Node2D" parent="." unique_id=64952163]
 
+[node name="Stone" parent="Objects" unique_id=1921004082 instance=ExtResource("8_gbfbk")]
+position = Vector2(-34, -60)
+
 [node name="Tree" parent="Objects" unique_id=707792734 instance=ExtResource("4_aqk2v")]
 position = Vector2(193.99998, 132)
 
@@ -51,5 +55,5 @@ position = Vector2(193.99998, 132)
 
 [node name="House" parent="Houses" unique_id=334523237 instance=ExtResource("7_pkg7o")]
 
-[node name="Stone" parent="." unique_id=1921004082 instance=ExtResource("8_gbfbk")]
-position = Vector2(-34, -60)
+[node name="ClientGateway" type="Node2D" parent="." unique_id=416014866]
+script = ExtResource("9_ioo17")
