@@ -6,6 +6,7 @@ extends Node
 ## the server-side "Source of Truth".
 ## -----------------------------------------------------------------------
 
+
 signal tick_processed(count: int)
 
 var tick_interval: float = 0.5   # 2 ticks per second
@@ -14,6 +15,8 @@ var tick_count: int = 0
 
 ## Auto-save interval (in ticks).  0 = disabled.
 var auto_save_interval: int = 60  # Every 30 seconds at 2 tps
+
+@onready var server = get_node("/root/World/ClientGateway")
 
 func _process(delta: float) -> void:
 	time_passed += delta
@@ -44,4 +47,8 @@ func _process_simulation() -> void:
 	if auto_save_interval > 0 and tick_count % auto_save_interval == 0:
 		if gateway and gateway.has_method("save_task_state"):
 			gateway.save_task_state()
-
+	
+	# 4. Broadcast the state in the server
+	var tick = {"TICK": tick_count}
+	server.broadcast_state(tick)
+	
