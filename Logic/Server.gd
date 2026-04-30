@@ -14,7 +14,9 @@ func _ready():
 	peer.create_server(12345, 32)
 	multiplayer.multiplayer_peer = peer
 	multiplayer.peer_connected.connect(_on_peer_connected)
-	print("Server started")
+	for ip in IP.get_local_addresses():
+		if ip.begins_with("192.") or ip.begins_with("10."):
+			print("Server started, hosting on: ", ip)
 	print("My node path: ", get_path())
 
 ## Called when a new client connects. Logs the peer ID.
