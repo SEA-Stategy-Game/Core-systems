@@ -1,3 +1,32 @@
+extends Node
+class_name MapManager
+
+@export var tile_size: int = 32
+@export var map_node_path: NodePath = NodePath("")
+
+var map_node: Node = null
+
+func _ready() -> void:
+    if map_node_path != NodePath(""):
+        if has_node(map_node_path):
+            map_node = get_node(map_node_path)
+        else:
+            map_node = null
+
+func world_to_grid(world_pos: Vector2) -> Vector2i:
+    return Vector2i(int(floor(world_pos.x / tile_size)), int(floor(world_pos.y / tile_size)))
+
+func get_tile_at_world_pos(world_pos: Vector2) -> Variant:
+    var gpos = world_to_grid(world_pos)
+    # Try common map accessors; adapt to your map implementation:
+    if map_node:
+        if map_node.has_method("getTile"):
+            return map_node.getTile(gpos.x, gpos.y)
+        if map_node.has_method("get_tile"):
+            return map_node.get_tile(gpos.x, gpos.y)
+    # No map configured or unsupported API
+    return null
+
 extends GutTest
 
 const DEFAULT_TILE_SIZE := 32
