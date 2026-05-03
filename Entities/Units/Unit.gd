@@ -39,7 +39,7 @@ var current_path_index: int = 0
 ## -----------------------------------------------------------------------
 ## Pathfinding
 ## -----------------------------------------------------------------------
-# @export var Goal: Node = null
+@export var goal : Vector2 = Vector2();
 
 ## -----------------------------------------------------------------------
 ## AI Command Queue
@@ -176,7 +176,10 @@ func _input(event) -> void:
 			# Manual move clears any AI queue so the player takes over
 			if command_queue:
 				command_queue.clear()
-			$NavigationAgent2D.target_position = get_global_mouse_position()
+			goal = get_global_mouse_position()
+			$NavigationAgent2D.target_position = goal
+			print($NavigationAgent2D.is_target_reachable())
+			print(goal)
 			current_path_index = 0;
 			set_anim(velocity.length_squared() > 100)
 			# Makes units use the Godot RVO avoidance mechanism
@@ -215,7 +218,7 @@ func _physics_process(delta) -> void:
 		if anim:
 			anim.stop()
 		return
-
+	
 	var nav_point_direction = to_local($NavigationAgent2D.get_next_path_position()).normalized()
 	velocity = nav_point_direction * speed * delta
 	move_and_slide()
@@ -318,12 +321,14 @@ func _on_navigation_agent_2d_velocity_computed(safe_velocity: Vector2) -> void:
 		$NavigationAgent2D.avoidance_enabled = false
 		
 func _on_timer_timeout() -> void:
-	# if $NavigationAgent2D.target_position != Goal.global_position:
-	# 	$NavigationAgent2D.target_position = Goal.global_position'
-	print("Test")
+	# if $NavigationAgent2D.target_position != goal.global_position:
+	# 	$NavigationAgent2D.target_position = goal.global_position'
 	$PathfindingUpdateTimer.start()
-
 
 func _on_navigation_agent_2d_velocity_computed(safe_velocity: Vector2) -> void:
 	# position += safe_velocity * get_physics_process_delta_time()
 	pass # Replace with function body.
+
+func recalculate_path():
+	await NavigationServer2D.map_changed
+	$NavigationAgent2D.target_position = $NavigationAgent2D.target_position
