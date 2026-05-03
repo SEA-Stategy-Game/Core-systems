@@ -36,7 +36,7 @@ var speed: int = 2000
 ## -----------------------------------------------------------------------
 ## Pathfinding
 ## -----------------------------------------------------------------------
-# @export var Goal: Node = null
+@export var goal : Vector2 = Vector2();
 
 ## -----------------------------------------------------------------------
 ## AI Command Queue
@@ -168,7 +168,10 @@ func _input(event) -> void:
 			# Manual move clears any AI queue so the player takes over
 			if command_queue:
 				command_queue.clear()
-			$NavigationAgent2D.target_position = get_global_mouse_position()
+			goal = get_global_mouse_position()
+			$NavigationAgent2D.target_position = goal
+			print($NavigationAgent2D.is_target_reachable())
+			print(goal)
 			if anim:
 				anim.play("Walk Down")
 
@@ -177,6 +180,7 @@ func _input(event) -> void:
 # -----------------------------------------------------------------
 
 func _physics_process(delta) -> void:
+	
 	# Clean up stale references from _bodies_in_range
 	_bodies_in_range = _bodies_in_range.filter(func(b): return is_instance_valid(b))
 
@@ -198,7 +202,7 @@ func _physics_process(delta) -> void:
 		if anim:
 			anim.stop()
 		return
-
+	
 	var nav_point_direction = to_local($NavigationAgent2D.get_next_path_position()).normalized()
 	velocity = nav_point_direction * speed * delta
 	move_and_slide()
