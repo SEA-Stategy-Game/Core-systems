@@ -17,10 +17,11 @@ class_name MapResource
 
 @onready var nav_region = $"/root/World/NavigationRegion2D"
 
+
 var amount: int = 1
 var maxAmount: int = 1 
 var currentTime: float
-var units_harvesting: int = 0
+var units_harvesting: Dictionary = {}
 
 func _ready() -> void:
 	player_id = -1  # Neutral / environment object
@@ -47,18 +48,18 @@ func deplete():
 func _on_harvest_area_body_entered(body: Node2D) -> void:
 	# Checks if the body is a 'Unit' class
 	if body is Unit: 
-		units_harvesting += 1
+		units_harvesting[body] = null; # Sets do not exist in gd script so a dummy value in a dict is used instead
 		if timer and timer.is_stopped():
 			timer.start()
 
 func _on_harvest_area_body_exited(body: Node2D) -> void:
 	if body is Unit:
-		units_harvesting -= 1
-		if units_harvesting <= 0 and timer:
+		units_harvesting.erase(body)
+		if units_harvesting.size() <= 0 and timer:
 			timer.stop()
 
 func _on_timer_timeout() -> void:
-	currentTime -= 1 * units_harvesting
+	currentTime -= 1 * units_harvesting.size()
 	
 	if bar:
 		var tween = get_tree().create_tween()
@@ -71,3 +72,5 @@ func on_finished_harvesting():
 	print(resource_name, " depleted!")
 	queue_free()
 	nav_region.rebuild_nav()
+	for unit in units_harvesting.keys():
+		unit.recalculate_path();
