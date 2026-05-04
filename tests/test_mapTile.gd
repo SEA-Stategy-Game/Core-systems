@@ -18,13 +18,9 @@ func world_to_grid(world_pos: Vector2) -> Vector2i:
 
 func get_tile_at_world_pos(world_pos: Vector2) -> Variant:
     var gpos = world_to_grid(world_pos)
-    # Try common map accessors; adapt to your map implementation:
     if map_node:
-        if map_node.has_method("getTile"):
-            return map_node.getTile(gpos.x, gpos.y)
         if map_node.has_method("get_tile"):
             return map_node.get_tile(gpos.x, gpos.y)
-    # No map configured or unsupported API
     return null
 
 extends GutTest

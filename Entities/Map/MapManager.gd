@@ -1,4 +1,3 @@
-# Entities/Map/MapManager.gd
 extends Node
 class_name MapManager
 
@@ -14,6 +13,4 @@ func get_tile_at_world_pos(world_pos: Vector2) -> Variant:
     var g = world_to_grid(world_pos)
     if map_node.has_method("get_tile"):
         return map_node.get_tile(g.x, g.y)
-    if map_node.has_method("getTile"):
-        return map_node.getTile(g.x, g.y)
     return null
