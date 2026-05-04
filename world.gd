@@ -1,12 +1,30 @@
 extends Node2D
 
+const TestMap = preload("res://Entities/Map/TestMap.gd")
+
 var units = []
+var game_map: GameMap
 
 func _ready():
 	get_units()
 	Game.spawnUnit(position)
 	if has_node("Camera2D"):
 		$Camera2D.area_selected.connect(_on_area_selected)
+
+	game_map = GameMap.new()
+	game_map.width = 150
+	game_map.height = 150
+	game_map.tile_size = 32
+	game_map.initialize_tiles()
+	add_child(game_map)
+
+	TestMap.build_test_map(game_map)
+
+	if Engine.has_singleton("MapManager"):
+		var mm = Engine.get_singleton("MapManager")
+		if mm:
+			mm.map_node = game_map
+			mm.tile_size = game_map.tile_size
 
 func get_units():
 	units = null
