@@ -2,8 +2,8 @@ extends RefCounted
 class_name MapGenerator
 
 @export var water_border: int = 5
-@export var forest_threshold: float = 0.70   # higher = fewer forests
-@export var hills_threshold: float = 0.90    # higher = fewer hills
+@export var forest_threshold: float = 0.70
+@export var hills_threshold: float = 0.90
 
 func generate(map: GameMap, seed: int = -1) -> void:
     var rng = RandomNumberGenerator.new()

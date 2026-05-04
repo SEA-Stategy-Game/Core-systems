@@ -1,10 +1,6 @@
 extends Node
 class_name GameMap
 
-@export var width: int = 64
-@export var height: int = 64
-@export var tile_size: int = 32
-
 var tiles: Array = []
 
 func _ready() -> void:
