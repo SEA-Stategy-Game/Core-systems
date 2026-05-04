@@ -62,7 +62,7 @@ func test_init_sets_default_values() -> void:
 	var default_tile := MapTile.new()
 	assert_eq(default_tile.x, 0)
 	assert_eq(default_tile.y, 0)
-	assert_eq(default_tile.terrain, MapTile.TerrainType.DIRT)
+	assert_eq(default_tile.terrain, MapTile.TerrainType.PLAINS)
 	assert_null(default_tile.map_object)
 	assert_false(default_tile.is_occupied)
 
@@ -114,7 +114,7 @@ func test_clear_map_object_resets_state() -> void:
 # walkability / place
 # -------------------
 func test_is_walkable_false_when_occupied() -> void:
-	tile.terrain = MapTile.TerrainType.DIRT
+	tile.terrain = MapTile.TerrainType.PLAINS
 	tile.set_map_object(DamageReceiver.new())
 	assert_false(tile.is_walkable())
 
@@ -128,13 +128,13 @@ func test_is_walkable_false_for_mountain() -> void:
 	tile.clear_map_object()
 	assert_false(tile.is_walkable())
 
-func test_is_walkable_true_for_unoccupied_dirt() -> void:
-	tile.terrain = MapTile.TerrainType.DIRT
+func test_is_walkable_true_for_unoccupied_plains() -> void:
+	tile.terrain = MapTile.TerrainType.PLAINS
 	tile.clear_map_object()
 	assert_true(tile.is_walkable())
 
 func test_can_place_object_true_when_unoccupied_and_walkable() -> void:
-	tile.terrain = MapTile.TerrainType.DIRT
+	tile.terrain = MapTile.TerrainType.PLAINS
 	tile.clear_map_object()
 	assert_true(tile.can_place_object())
 

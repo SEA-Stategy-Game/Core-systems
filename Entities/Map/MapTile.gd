@@ -11,11 +11,11 @@ enum TerrainType {
 
 var x: int
 var y: int
-var terrain: TerrainType = TerrainType.DIRT
+var terrain: TerrainType = TerrainType.PLAINS
 var map_object: Variant = null
 var is_occupied: bool = false
 
-func _init(tile_x: int = 0, tile_y: int = 0, tile_terrain: TerrainType = TerrainType.DIRT, tile_object: Variant = null) -> void:
+func _init(tile_x: int = 0, tile_y: int = 0, tile_terrain: TerrainType = TerrainType.PLAINS, tile_object: Variant = null) -> void:
     x = tile_x
     y = tile_y
     terrain = tile_terrain
@@ -41,12 +41,7 @@ func has_map_object() -> bool:
 func is_walkable() -> bool:
     if is_occupied:
         return false
-
-    match terrain:
-        TerrainType.WATER, TerrainType.MOUNTAIN:
-            return false
-        _:
-            return true
+    return terrain != TerrainType.WATER
 
 func get_movement_multiplier() -> float:
     match terrain:
@@ -59,7 +54,7 @@ func get_movement_multiplier() -> float:
         TerrainType.WATER:
             return 0.0
         _:
-            return 1.00
+            return 1.0
 
 func take_damage(dmg: int) -> void:
     if map_object == null:
