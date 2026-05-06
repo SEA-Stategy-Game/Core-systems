@@ -20,7 +20,7 @@ func _on_yes_pressed() -> void:
 
 
 func _on_no_pressed() -> void:
-	var housePath = get_tree().get_root().get_node("World/Houses")
+	var housePath = get_tree().get_root().get_node("World/NavigationRegion2D/Houses")
 	for i in housePath.get_child_count():
 		if housePath.get_child(i).Selected == true:
 			housePath.get_child(i).Selected = false
