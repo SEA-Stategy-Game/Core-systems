@@ -2,9 +2,14 @@
 
 [ext_resource type="Script" uid="uid://dweqb87bqh6d3" path="res://Entities/Units/Unit.gd" id="1_ij6vw"]
 [ext_resource type="Texture2D" uid="uid://b68isfnk756nx" path="res://Assets/MiniWorldSprites/Characters/Champions/Arthax.png" id="2_uhwgi"]
+[ext_resource type="Shader" uid="uid://c2phvlug0na42" path="res://Entities/Units/WhiteFlash.gdshader" id="2_uo5aa"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_ij6vw"]
-size = Vector2(10, 13)
+[sub_resource type="CircleShape2D" id="CircleShape2D_bl5ya"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5mvwf"]
+resource_local_to_scene = true
+shader = ExtResource("2_uo5aa")
+shader_parameter/active = false
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ij6vw"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
@@ -60,10 +65,12 @@ radius = 60.0
 script = ExtResource("1_ij6vw")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=186835737 groups=["Unit"]]
-shape = SubResource("RectangleShape2D_ij6vw")
+shape = SubResource("CircleShape2D_bl5ya")
+disabled = true
 debug_color = Color(0, 0.6, 0.69803923, 0)
 
 [node name="Arthax" type="Sprite2D" parent="." unique_id=1685461738 groups=["Unit"]]
+material = SubResource("ShaderMaterial_5mvwf")
 texture = ExtResource("2_uhwgi")
 hframes = 5
 vframes = 8
@@ -95,12 +102,12 @@ shape = SubResource("CircleShape2D_owuc0")
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1564493811]
 path_desired_distance = 10.0
-target_desired_distance = 3.0
 avoidance_enabled = true
+neighbor_distance = 50.0
+max_neighbors = 4
+time_horizon_agents = 0.5
+time_horizon_obstacles = 1.0
 debug_enabled = true
-
-[node name="Timer" type="Timer" parent="." unique_id=2024305693]
-one_shot = true
 
 [connection signal="input_event" from="." to="." method="_on_input_event"]
 [connection signal="velocity_computed" from="NavigationAgent2D" to="." method="_on_navigation_agent_2d_velocity_computed"]
