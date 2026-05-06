@@ -10,6 +10,14 @@
 resource_local_to_scene = true
 shader = ExtResource("2_uo5aa")
 shader_parameter/active = false
+[ext_resource type="Shader" uid="uid://c2phvlug0na42" path="res://Entities/Units/WhiteFlash.gdshader" id="2_uo5aa"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_bl5ya"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5mvwf"]
+resource_local_to_scene = true
+shader = ExtResource("2_uo5aa")
+shader_parameter/active = false
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ij6vw"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
@@ -111,8 +119,11 @@ shape = SubResource("CircleShape2D_owuc0")
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1564493811]
 path_desired_distance = 10.0
-target_desired_distance = 3.0
 avoidance_enabled = true
+neighbor_distance = 50.0
+max_neighbors = 4
+time_horizon_agents = 0.5
+time_horizon_obstacles = 1.0
 debug_enabled = true
 
 [node name="Timer" type="Timer" parent="." unique_id=2024305693]
