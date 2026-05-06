@@ -107,6 +107,10 @@ neighbor_distance = 50.0
 max_neighbors = 4
 time_horizon_agents = 0.5
 time_horizon_obstacles = 1.0
+<<<<<<< HEAD
+=======
+debug_enabled = true
+>>>>>>> 5f58898bc6a64dad6ccc0d85bcb8153e98ce9f1f
 
 [connection signal="input_event" from="." to="." method="_on_input_event"]
 [connection signal="velocity_computed" from="NavigationAgent2D" to="." method="_on_navigation_agent_2d_velocity_computed"]
