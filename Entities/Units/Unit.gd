@@ -35,11 +35,13 @@ var speed: int = 2000
 var is_animated: bool = false
 var current_path_index: int = 0
 @onready var sprite = $Arthax # For shader, could be removed
+var is_animated: bool = false
+var current_path_index: int = 0
+@onready var sprite = $Arthax # For shader, could be removed
 
 ## -----------------------------------------------------------------------
 ## Pathfinding
 ## -----------------------------------------------------------------------
-@export var goal : Vector2 = Vector2();
 
 ## -----------------------------------------------------------------------
 ## AI Command Queue
@@ -78,6 +80,9 @@ func _ready() -> void:
 	if attack_range_area:
 		attack_range_area.body_entered.connect(_on_range_body_entered)
 		attack_range_area.body_exited.connect(_on_range_body_exited)
+		
+	$NavigationAgent2D.waypoint_reached.connect(_on_waypoint_reached)
+	$NavigationAgent2D.navigation_finished.connect(func(): current_path_index = 0)
 		
 	$NavigationAgent2D.waypoint_reached.connect(_on_waypoint_reached)
 	$NavigationAgent2D.navigation_finished.connect(func(): current_path_index = 0)
@@ -144,6 +149,8 @@ func take_damage(amount: int) -> void:
 	if sprite:
 		if sprite.material:
 			sprite.material = sprite.material.duplicate(true)
+		if sprite.material:
+			sprite.material = sprite.material.duplicate(true)
 		var tween = get_tree().create_tween()
 		sprite.modulate = Color(1, 0, 0) # Red
 		tween.tween_property(sprite, "modulate", Color(1, 1, 1), 0.2) # Back to normal
@@ -176,6 +183,12 @@ func _input(event) -> void:
 			# Manual move clears any AI queue so the player takes over
 			if command_queue:
 				command_queue.clear()
+			$NavigationAgent2D.target_position = get_global_mouse_position()
+			current_path_index = 0;
+			set_anim(velocity.length_squared() > 100)
+			# Makes units use the Godot RVO avoidance mechanism
+			$NavigationAgent2D.avoidance_enabled = true
+			
 			goal = get_global_mouse_position()
 			$NavigationAgent2D.target_position = goal
 			print($NavigationAgent2D.is_target_reachable())
@@ -214,23 +227,10 @@ func _physics_process(delta) -> void:
 	var desired_velocity = nav_point_direction * speed * delta
 	$NavigationAgent2D.set_velocity(desired_velocity)
 	
-	if $NavigationAgent2D.is_target_reached():
-		if anim:
-			anim.stop()
-		return
-	
 	var nav_point_direction = to_local($NavigationAgent2D.get_next_path_position()).normalized()
-	velocity = nav_point_direction * speed * delta
-	move_and_slide()
+	var desired_velocity = nav_point_direction * speed * delta
+	$NavigationAgent2D.set_velocity(desired_velocity)
 	
-	# velocity = global_position.direction_to(target) * speed
-	# if global_position.distance_to(target) > 10:
-	# 	move_and_slide()
-	# else:
-	# 	if anim:
-	# 		anim.stop()
-	
-
 # -----------------------------------------------------------------
 # Signal relays
 # -----------------------------------------------------------------
@@ -319,16 +319,58 @@ func _on_navigation_agent_2d_velocity_computed(safe_velocity: Vector2) -> void:
 		move_and_slide()
 		# Makes units able to walk into each other os that they can finish pathfinding and does not stall on each other
 		$NavigationAgent2D.avoidance_enabled = false
-		
-func _on_timer_timeout() -> void:
-	# if $NavigationAgent2D.target_position != goal.global_position:
-	# 	$NavigationAgent2D.target_position = goal.global_position'
-	$PathfindingUpdateTimer.start()
+			
+# Small function to set animation. I don't know if starting animation is expensive.
+# Otherwise just remove and set directly
+func set_anim(flag) -> void:
+	if flag and not is_animated:	
+		anim.play("Walk Down")
+		is_animated = true
+	if not flag and is_animated:
+		anim.stop()
+		is_animated = false
 
-func _on_navigation_agent_2d_velocity_computed(safe_velocity: Vector2) -> void:
-	# position += safe_velocity * get_physics_process_delta_time()
-	pass # Replace with function body.
+func point_to_line_dist(line_start : Vector2, line_end : Vector2, point_position : Vector2) -> float:
+	var line_direction = (line_start - line_end).normalized()
+	var vector_to_object = point_position - line_start
+	var distance = line_direction.dot(vector_to_object)
+	return distance
 
-func recalculate_path():
-	await NavigationServer2D.map_changed
+func recalculate_path() -> void:
 	$NavigationAgent2D.target_position = $NavigationAgent2D.target_position
+	
+func _on_waypoint_reached(details: Dictionary) -> void:
+	current_path_index += 1
+	
+func trigger_white_flash() -> void:
+	var mat = sprite.material as ShaderMaterial
+	mat.set_shader_parameter("active", true)
+	await get_tree().create_timer(0.4).timeout
+	mat.set_shader_parameter("active", false)
+	
+func _on_navigation_agent_2d_velocity_computed(safe_velocity: Vector2) -> void:
+	velocity = safe_velocity
+	if not $NavigationAgent2D.is_navigation_finished():
+		set_anim(safe_velocity.length_squared() > 100)
+		move_and_slide()
+		# Snap back to navmesh
+		global_position = NavigationServer2D.map_get_closest_point(
+			$NavigationAgent2D.get_navigation_map(), global_position)
+		
+		# If the unit gets too far off path due to Godots RVO Avoidance system, we recalculate the path
+		if (current_path_index < $NavigationAgent2D.get_current_navigation_path().size()-1 &&
+			point_to_line_dist(
+				$NavigationAgent2D.get_current_navigation_path()[current_path_index-1],
+				$NavigationAgent2D.get_current_navigation_path()[current_path_index],
+				global_position
+			) > 40):
+			# White flash to indicate that this happens
+			# trigger_white_flash()
+			recalculate_path()
+	else:
+		set_anim(false)
+		velocity = Vector2.ZERO
+		move_and_slide()
+		# Makes units able to walk into each other os that they can finish pathfinding and does not stall on each other
+		$NavigationAgent2D.avoidance_enabled = false
+		
