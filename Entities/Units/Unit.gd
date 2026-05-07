@@ -36,12 +36,12 @@ var is_animated: bool = false
 var current_path_index: int = 0
 @onready var sprite = $Arthax # For shader, could be removed
 var is_animated: bool = false
-var current_path_index: int = 0
-@onready var sprite = $Arthax # For shader, could be removed
 
 ## -----------------------------------------------------------------------
 ## Pathfinding
 ## -----------------------------------------------------------------------
+var current_path_index: int = 0
+@onready var sprite = $Arthax # For shader, could be removed
 
 ## -----------------------------------------------------------------------
 ## AI Command Queue
@@ -245,26 +245,6 @@ func _on_cq_queue_empty(uid: int) -> void:
 	if not is_idle:
 		is_idle = true
 		unit_idled.emit(uid)
-
-# -----------------------------------------------------------------
-# Projectile firing
-# -----------------------------------------------------------------
-
-## Spawn a Projectile aimed at `target` (a Node2D) or at a Vector2 point.
-## The projectile is added to the world (under the unit's parent) so it
-## survives the unit dying / being freed mid-flight.
-func fire_projectile(target) -> Projectile:
-	var dmg: int = projectile_damage if projectile_damage >= 0 else attack_damage
-	var projectile := Projectile.create(self, target, dmg, projectile_speed)
-	projectile.spread_radians = projectile_spread_radians
-	projectile.aim_jitter_pixels = projectile_aim_jitter_pixels
-
-	var spawn_parent: Node = get_parent()
-	if spawn_parent == null:
-		spawn_parent = self
-	spawn_parent.add_child(projectile)
-	projectile.global_position = global_position
-	return projectile
 	
 # Small function to set animation. I don't know if starting animation is expensive.
 # Otherwise just remove and set directly
@@ -347,6 +327,11 @@ func trigger_white_flash() -> void:
 	mat.set_shader_parameter("active", true)
 	await get_tree().create_timer(0.4).timeout
 	mat.set_shader_parameter("active", false)
+
+func get_navigation_path_segment(amount_of_segments: int) -> PackedVector2Array:
+	var max_segment_index = min(current_path_index + amount_of_segments, $NavigationAgent2D.get_current_navigation_path().size()-1) 
+	var path = $NavigationAgent2D.get_current_navigation_path().slice(current_path_index, max_segment_index)
+	return path
 	
 func _on_navigation_agent_2d_velocity_computed(safe_velocity: Vector2) -> void:
 	velocity = safe_velocity
@@ -373,4 +358,3 @@ func _on_navigation_agent_2d_velocity_computed(safe_velocity: Vector2) -> void:
 		move_and_slide()
 		# Makes units able to walk into each other os that they can finish pathfinding and does not stall on each other
 		$NavigationAgent2D.avoidance_enabled = false
-		
