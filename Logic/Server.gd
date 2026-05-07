@@ -4,8 +4,10 @@ extends Node
 ## state, and distributes it to connected clients via RPC.
 
 @onready var units = get_node("/root/World/Units")     
-@onready var objects = get_node("/root/World/Objects")  
-@onready var buildings = get_node("/root/World/Houses") 
+@onready var objects = get_node("/root/World/NavigationRegion2D/Objects")  
+@onready var buildings = get_node("/root/World/NavigationRegion2D/Houses") 
+
+var queued_objects: Array[Dictionary] = []
 
 ## Initialises the ENet server on port 12345 with a maximum of 32 clients.
 ## Connects the peer_connected signal to track incoming connections.
@@ -22,7 +24,8 @@ func _ready():
 ## Called when a new client connects. Logs the peer ID.
 func _on_peer_connected(id: int):
 	print("Client connected: ", id)
-
+	
+	
 # -----------------------------------------------------------------------
 # Client RPC stubs
 # These functions are never executed on the server. They exist solely so
@@ -50,14 +53,39 @@ func receive_static_state(state: Dictionary):
 
 ## Broadcasts a dynamic state update to all connected peers.
 ## [param state] A dictionary containing the current dynamic world state.
-func broadcast_state(state: Dictionary) -> void:
+func broadcast_state(tick: int) -> void:
 	var peers = multiplayer.get_peers()
 	print("Broadcasting to peers: ", peers)
 	
 	# TODO:
-	# Expand the state to not only include the current tick but the actual dynamic state too
-	
+	# Expand the state to also include map-data
+	# Create unit paths:
+	var state = {
+		"current_tick" : tick,
+		# Always send all units since the majority are likely to be dynamic 
+		"units" : units.get_children().map(func(x): return build_dynamic_unit(x)),
+		# For objects, we only send objects that are modified since there are a lot of these and they are likely to be mostly static 
+		"modified_objects" : queued_objects
+	}
+	queued_objects = []
+	print("Dynamic state: ", state)
 	rpc("receive_state", state)
+
+func build_dynamic_unit(unit):
+	return {
+		"meta_values" : serialize_core_state_variables(unit),
+		"path" : unit.get_navigation_path_segment(4),
+		"speed" : unit.speed
+	} 
+
+# Signal called from objects when they are modified
+# Should maybe add TTL in object to broadcast a few times. This requires idempotency from Interface
+func _on_ressource_modified(object):
+	queued_objects.append({
+		"meta_values" : serialize_core_state_variables(object),
+		"destroyed" : object.amount == 0,
+		"amount_left" : object.amount
+	})
 
 ## Handles a client request for the full static world state.
 ## Serialises, compresses, and sends the state only to the requesting peer.
@@ -96,6 +124,7 @@ func serialize_unit(unit: Node) -> Dictionary:
 		"attack_cooldown"  : unit.attack_cooldown,
 		"current_health"   : unit.current_health
 	}
+
 
 ## Serialises a world object node into a transmittable dictionary
 func serialize_object(object: Node) -> Dictionary:

@@ -17,10 +17,15 @@ class_name MapResource
 
 @onready var nav_region = $"/root/World/NavigationRegion2D"
 
+@onready var server = get_node("/root/World/ClientGateway")     
+
 var amount: int = 1
 var maxAmount: int = 1 
 var currentTime: float
 var units_harvesting: int = 0
+
+# Signal for notifying the server when the object must be queued for broadcast 
+signal modified
 
 func _ready() -> void:
 	player_id = -1  # Neutral / environment object
@@ -33,16 +38,15 @@ func _ready() -> void:
 	if is_in_group("units"):
 		remove_from_group("units")
 	add_to_group("resources")
+	self.modified.connect(server._on_ressource_modified)
+	
 
 func harvest():
 	if amount > 0:
 		amount -= 1
 		if amount <= 0:
-			deplete()
+			on_finished_harvesting()
 
-func deplete():
-	# Your depletion logic
-	pass
 
 func _on_harvest_area_body_entered(body: Node2D) -> void:
 	# Checks if the body is a 'Unit' class
@@ -65,9 +69,11 @@ func _on_timer_timeout() -> void:
 		tween.tween_property(bar, "value", currentTime, 0.5)
 	
 	if currentTime <= 0:
-		on_finished_harvesting()
+		harvest()
 
+		
 func on_finished_harvesting():
-	print(resource_name, " depleted!")
+	modified.emit(self)
 	queue_free()
 	nav_region.rebuild_nav()
+	

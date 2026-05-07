@@ -51,3 +51,6 @@ func _process_simulation() -> void:
 	var tick = {"TICK": tick_count}
 	server.broadcast_state(tick)
 	
+	# 4. Broadcast the state in the server
+	server.broadcast_state(tick_count)
+	
