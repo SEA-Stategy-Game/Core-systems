@@ -17,13 +17,14 @@ var current_health: int
 @onready var box = get_node("HitBox")
 @onready var anim = get_node("AnimationPlayer")
 @onready var attack_range_area: Area2D = get_node_or_null("Range")
+@onready var tile_map: TileMapLayer = get_node("/root/World/TileMapLayer")     
 
 ## -----------------------------------------------------------------------
 ## Movement (manual player control -- right-click)
 ## -----------------------------------------------------------------------
 @onready var target: Vector2 = global_position
 var follow_cursor: bool = false
-var Speed: int = 50
+var speed: int = 50
 
 ## -----------------------------------------------------------------------
 ## AI Command Queue
@@ -110,6 +111,12 @@ func get_closest_hostile() -> Node2D:
 			closest = h
 	return closest
 
+func get_local_movement_speed() -> float:
+	var tile = tile_map.get_tile_at_world_pos(global_position)
+	if tile == null:
+		return speed
+	return speed * tile.get_movement_multiplier()
+
 # -----------------------------------------------------------------
 # IDamageable contract
 # -----------------------------------------------------------------
@@ -181,7 +188,7 @@ func _physics_process(delta) -> void:
 		return  # AI commands take priority -- skip manual logic
 
 	# 2. Otherwise, fall back to manual right-click movement.
-	velocity = global_position.direction_to(target) * Speed
+	velocity = global_position.direction_to(target) * get_local_movement_speed()
 	if global_position.distance_to(target) > 10:
 		move_and_slide()
 	else:
