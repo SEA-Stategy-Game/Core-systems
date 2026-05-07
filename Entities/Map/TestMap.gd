@@ -1,27 +1,26 @@
-extends RefCounted
-class_name TestMap
+class_name TestMap extends GameMap
 
-static func build_test_map(map: GameMap) -> void:
-    map.width = 150
-    map.height = 150
-    map.initialize_tiles()
+func initialize_tiles() -> void:
+	width = 16
+	height = 16
+	super.initialize_tiles()
+	
+	# Interior defaults to plains.
+	_fill_rect(0, 0, width/2, height/2, MapTile.TerrainType.FOREST)
+	_fill_rect(width/2, 0, width/2, height/2, MapTile.TerrainType.HILLS)
+	_fill_rect(0, height/2, width/2, height/2, MapTile.TerrainType.WATER)
+	_fill_rect(width/2, height/2, width/2, height/2, MapTile.TerrainType.PLAINS)
+	
+	var border := 5
+	_fill_water_border(border)
 
-    var border := 5
-    _fill_water_border(map, border)
+func _fill_water_border(border: int) -> void:
+	for y in range(height):
+		for x in range(width):
+			if x < border or y < border or x >= width - border or y >= height - border:
+				set_tile(x, y, MapTile.TerrainType.WATER)
 
-    # Interior defaults to plains.
-    _fill_rect(map, 20, 20, 55, 40, MapTile.TerrainType.FOREST)
-    _fill_rect(map, 10, 80, 120, 12, MapTile.TerrainType.FOREST)
-    _fill_rect(map, 95, 30, 14, 12, MapTile.TerrainType.HILLS)
-    _fill_rect(map, 60, 110, 8, 6, MapTile.TerrainType.HILLS)
-
-static func _fill_water_border(map: GameMap, border: int) -> void:
-    for y in range(map.height):
-        for x in range(map.width):
-            if x < border or y < border or x >= map.width - border or y >= map.height - border:
-                map.set_tile(x, y, MapTile.TerrainType.WATER)
-
-static func _fill_rect(map: GameMap, x0: int, y0: int, w: int, h: int, terrain: int) -> void:
-    for y in range(y0, y0 + h):
-        for x in range(x0, x0 + w):
-            map.set_tile(x, y, terrain)
+func _fill_rect(x0: int, y0: int, w: int, h: int, terrain: int) -> void:
+	for y in range(y0, y0 + h):
+		for x in range(x0, x0 + w):
+			set_tile(x, y, terrain)
