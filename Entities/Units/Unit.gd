@@ -24,12 +24,12 @@ var current_health: int
 var follow_cursor: bool = false
 var speed: int = 2000
 var is_animated: bool = false
-var current_path_index: int = 0
-@onready var sprite = $Arthax # For shader, could be removed
 
 ## -----------------------------------------------------------------------
 ## Pathfinding
 ## -----------------------------------------------------------------------
+var current_path_index: int = 0
+@onready var sprite = $Arthax # For shader, could be removed
 
 ## -----------------------------------------------------------------------
 ## AI Command Queue
@@ -240,6 +240,11 @@ func trigger_white_flash() -> void:
 	mat.set_shader_parameter("active", true)
 	await get_tree().create_timer(0.4).timeout
 	mat.set_shader_parameter("active", false)
+
+func get_navigation_path_segment(amount_of_segments: int) -> PackedVector2Array:
+	var max_segment_index = min(current_path_index + amount_of_segments, $NavigationAgent2D.get_current_navigation_path().size()-1) 
+	var path = $NavigationAgent2D.get_current_navigation_path().slice(current_path_index, max_segment_index)
+	return path
 	
 func _on_navigation_agent_2d_velocity_computed(safe_velocity: Vector2) -> void:
 	velocity = safe_velocity
@@ -266,4 +271,3 @@ func _on_navigation_agent_2d_velocity_computed(safe_velocity: Vector2) -> void:
 		move_and_slide()
 		# Makes units able to walk into each other os that they can finish pathfinding and does not stall on each other
 		$NavigationAgent2D.avoidance_enabled = false
-		
