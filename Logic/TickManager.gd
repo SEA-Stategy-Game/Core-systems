@@ -49,6 +49,5 @@ func _process_simulation() -> void:
 			gateway.save_task_state()
 	
 	# 4. Broadcast the state in the server
-	var tick = {"TICK": tick_count}
-	server.broadcast_state(tick)
+	server.broadcast_state(tick_count)
 	

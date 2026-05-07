@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dweqb87bqh6d3" path="res://Entities/Units/Unit.gd" id="1_ij6vw"]
 [ext_resource type="Texture2D" uid="uid://b68isfnk756nx" path="res://Assets/MiniWorldSprites/Characters/Champions/Arthax.png" id="2_uhwgi"]
-[ext_resource type="Shader" uid="uid://c2phvlug0na42" path="res://Entities/Units/WhiteFlash.gdshader" id="2_uo5aa"]
+[ext_resource type="Shader" uid="uid://cl32f86b4duie" path="res://Entities/Units/WhiteFlash.gdshader" id="2_uo5aa"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_bl5ya"]
 
@@ -66,7 +66,6 @@ script = ExtResource("1_ij6vw")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=186835737 groups=["Unit"]]
 shape = SubResource("CircleShape2D_bl5ya")
-disabled = true
 debug_color = Color(0, 0.6, 0.69803923, 0)
 
 [node name="Arthax" type="Sprite2D" parent="." unique_id=1685461738 groups=["Unit"]]
@@ -107,10 +106,6 @@ neighbor_distance = 50.0
 max_neighbors = 4
 time_horizon_agents = 0.5
 time_horizon_obstacles = 1.0
-<<<<<<< HEAD
-=======
-debug_enabled = true
->>>>>>> 5f58898bc6a64dad6ccc0d85bcb8153e98ce9f1f
 
 [connection signal="input_event" from="." to="." method="_on_input_event"]
 [connection signal="velocity_computed" from="NavigationAgent2D" to="." method="_on_navigation_agent_2d_velocity_computed"]

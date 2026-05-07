@@ -6,9 +6,10 @@
 [ext_resource type="PackedScene" uid="uid://biio3e1hn22ty" path="res://Entities/Resource/Tree.tscn" id="4_aqk2v"]
 [ext_resource type="PackedScene" uid="uid://b1wdh83xgdlb3" path="res://Entities/Units/unit.tscn" id="5_gbfbk"]
 [ext_resource type="Texture2D" uid="uid://smm6t2i77fdv" path="res://Assets/MiniWorldSprites/Ground/TexturedGrass.png" id="6_dwbse"]
-[ext_resource type="Script" uid="uid://dqrrn4ao37rfj" path="res://navigation_region_2d.gd" id="6_ioo17"]
+[ext_resource type="Script" uid="uid://dugrm8eqjxxd4" path="res://navigation_region_2d.gd" id="6_ioo17"]
 [ext_resource type="PackedScene" uid="uid://c5ee63xefwvh6" path="res://Houses/Barracks.tscn" id="7_pkg7o"]
 [ext_resource type="PackedScene" uid="uid://cwxsdlngu3cq4" path="res://Entities/Resource/Stone.tscn" id="8_gbfbk"]
+[ext_resource type="Script" uid="uid://drr06pml6a533" path="res://Logic/Server.gd" id="9_ioo17"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_gbfbk"]
 vertices = PackedVector2Array(-159.67969, 29.296875, -158.6875, 29.5625, -159.35156, 32, -168, 23.351563, -165.5625, 22.6875, -165.29688, 23.679688, -158.6875, 34.429688, -159.67969, 34.703125, -170.70313, 23.679688, -170.42969, 22.6875, -165.29688, 40.320313, -165.5625, 41.296875, -168, 40.648438, -176.64844, 32, -177.29688, 29.5625, -176.32031, 29.296875, -170.42969, 41.296875, -170.70313, 40.320313, -176.32031, 34.703125, -177.29688, 34.429688, 394, -170, 222, -170, -55.648438, -184, -57.703125, -191.67969, -128.64844, 32, -9, 18, 25, 18, 46, 178, -130.70313, 39.679688, 222, 6, 46, 6, 25, -18, -10.6484375, -68, -12.703125, -75.67969, -103, -160.64844, -102.109375, -160.88281, -102.35156, -160, -12.703125, -60.320313, -9, -18, -18.320313, -54.703125, -130.70313, 24.320313, -26, -52.648438, -158.35156, -208, -157.6875, -205.5625, -158.67969, -205.29688, -84.296875, -191.67969, -84.5625, -190.6875, -87, -191.35156, -97.703125, -200.32031, -199.67969, 45.296875, -198.6875, 45.5625, -199.35156, 48, -184, 63.351563, -181.5625, 62.6875, -181.29688, 63.679688, 590, -358, 590, 286, 394, 286, -566, -358, -103.32031, -221.29688, -111, -223.35156, -118.67969, -221.29688, -119, -220.97656, -119.32031, -221.29688, -134.67969, -221.29688, -135, -220.97656, -135.32031, -221.29688, -135.32031, -194.70313, -135, -195.02344, -134.67969, -194.70313, -135.64844, -192, -119.32031, -194.70313, -119, -195.02344, -118.67969, -194.70313, -119, -191.35156, -94.67969, -189.29688, -95, -188.97656, -95.32031, -189.29688, -110.67969, -189.29688, -111, -188.97656, -111.32031, -189.29688, -111, -192.64844, -111.32031, -162.70313, -111, -163.02344, -110.67969, -162.70313, -73.703125, -167.67969, -74.02344, -168, -73.703125, -168.32031, -71, -168.64844, 81.32031, -157.29688, 81, -156.97656, 80.67969, -157.29688, 65.32031, -157.29688, 65, -156.97656, 64.67969, -157.29688, -126.67969, -157.29688, -127, -156.97656, -127.32031, -157.29688, -142.67969, -157.29688, -143, -156.97656, -143.32031, -157.29688, -143.32031, -130.70313, -143, -131.02344, -142.67969, -130.70313, -168, -7.3515625, -127.32031, -130.70313, -127, -131.02344, -126.67969, -130.70313, 64.67969, -130.70313, 65, -131.02344, 65.32031, -130.70313, 80.67969, -130.70313, 81, -131.02344, 81.32031, -130.70313, 174, 178, 174, 286, -566, 286, -199.35156, 16, -198.6875, 18.429688, -199.67969, 18.703125, -154.70313, 63.679688, -154.42969, 62.6875, -152, 63.351563, -181.29688, 0.3203125, -181.5625, 1.296875, -184, 0.6484375, -136.64844, 48, -137.29688, 45.5625, -136.32031, 45.296875, -136.29688, -194.42969, -73.42969, -169.29688, -136.32031, 18.703125, -137.29688, 18.429688, -136.64844, 16, -39.296875, -60.320313, -152, 0.6484375, -154.42969, 1.296875, -154.70313, 0.3203125, -39.296875, -75.67969, -41.351563, -68, 104.35156, -144, 102.296875, -151.67969, -33.679688, -54.703125, -138.70313, 8.3203125, -137.70313, -184.32031, -127, -192.64844, -126.67969, -189.29688, -132.29688, -183.67969, -71.64844, -160, -63.320313, -170.70313, -138.70313, 55.679688, -144.32031, 2.703125, -144.32031, 61.296875, -160.32031, 69.296875, -57.703125, -176.32031, -105.703125, -136.32031, -103.64844, -144, -87, -144.64844, 41.648438, -144, 43.703125, -136.32031, -95.64844, -208, -97.703125, -215.67969, -63.320313, -197.29688, -71, -199.35156, -18.320313, -81.296875, 102.296875, -136.32031, 96.67969, -157.29688, -73.703125, -152.32031, 57, -159.35156, -111.32031, -130.70313, 49.320313, -130.70313, -26, -83.35156, -33.679688, -81.296875, -78.67969, -197.29688, -103.32031, -194.70313, -103, -191.35156, -134.35156, -176, -143.32031, -178.70313, -132.29688, -168.32031, -151, -176.64844, -160.32031, -5.296875, -119, -128.64844, -127, -223.35156, -143, -223.35156, -150.67969, -221.29688, -156.29688, -215.67969, -164.29688, -199.67969, -166.35156, -192, -164.29688, -184.32031, -158.67969, -178.70313, -164.29688, -151.67969, -175.67969, -5.296875, -164.29688, -136.32031, -158.67969, -130.70313, -205.29688, 24.320313, -205.29688, 39.679688, -175.67969, 69.296875, 96.67969, -130.70313, -111.32031, -157.29688, -100.296875, -152.32031, -105.703125, -151.67969, 89, -128.64844, 73, -128.64844, 57, -128.64844, -135, -128.64844, -151, -128.64844, -191.67969, 2.703125, -166.35156, -144, -197.29688, 8.3203125, -151, -159.35156, -126.67969, -162.70313, -135, -159.35156, 89, -159.35156, -197.29688, 55.679688, -191.67969, 61.296875, -168, 71.35156, -207.35156, 32, -158.67969, -157.29688, -119, -160.64844, -119, -159.35156, -94.67969, -146.70313, -79.32031, -146.70313, 43.703125, -151.67969, 49.320313, -157.29688, 73, -159.35156)
@@ -35,18 +36,7 @@ script = ExtResource("1_f3sb7")
 [node name="Units" type="Node2D" parent="." unique_id=1851347236 groups=["units"]]
 
 [node name="Unit" parent="Units" unique_id=1684801707 instance=ExtResource("5_gbfbk")]
-position = Vector2(-176, 32)
-
-[node name="Unit2" parent="Units" unique_id=794963320 instance=ExtResource("5_gbfbk")]
-position = Vector2(-48, 56)
-
-[node name="Unit3" parent="Units" unique_id=1722076510 instance=ExtResource("5_gbfbk")]
-position = Vector2(-13, 55)
-
-[node name="Unit4" parent="Units" unique_id=756994126 instance=ExtResource("5_gbfbk")]
-position = Vector2(-136, -112)
-entity_id = 0
-player_id = 1
+position = Vector2(-126, -79)
 
 [node name="NavigationRegion2D" type="NavigationRegion2D" parent="." unique_id=1088668876]
 position = Vector2(-8, 0)
@@ -56,85 +46,83 @@ script = ExtResource("6_ioo17")
 [node name="Objects" type="Node2D" parent="NavigationRegion2D" unique_id=64952163]
 position = Vector2(8, 0)
 
-[node name="ClientGateway" type="Node2D" parent="NavigationRegion2D/Objects" unique_id=416014866]
-script = ExtResource("9_ioo17")
+[node name="Stone" parent="NavigationRegion2D/Objects" unique_id=1921004082 instance=ExtResource("8_gbfbk")]
+position = Vector2(-34, -60)
 
-[node name="TreeMaze" type="Node2D" parent="NavigationRegion2D/Objects" unique_id=1839866181]
-
-[node name="Tree" parent="NavigationRegion2D/Objects/TreeMaze" unique_id=1239852375 instance=ExtResource("4_aqk2v")]
+[node name="Tree" parent="NavigationRegion2D/Objects" unique_id=1239852375 instance=ExtResource("4_aqk2v")]
 position = Vector2(-160, -136)
 
-[node name="Tree2" parent="NavigationRegion2D/Objects/TreeMaze" unique_id=1161740943 instance=ExtResource("4_aqk2v")]
+[node name="Tree2" parent="NavigationRegion2D/Objects" unique_id=1161740943 instance=ExtResource("4_aqk2v")]
 position = Vector2(-144, -136)
 
-[node name="Tree3" parent="NavigationRegion2D/Objects/TreeMaze" unique_id=134792671 instance=ExtResource("4_aqk2v")]
+[node name="Tree3" parent="NavigationRegion2D/Objects" unique_id=134792671 instance=ExtResource("4_aqk2v")]
 position = Vector2(-128, -136)
 
-[node name="Tree4" parent="NavigationRegion2D/Objects/TreeMaze" unique_id=2114905762 instance=ExtResource("4_aqk2v")]
+[node name="Tree4" parent="NavigationRegion2D/Objects" unique_id=2114905762 instance=ExtResource("4_aqk2v")]
 position = Vector2(-128, -168)
 
-[node name="Tree5" parent="NavigationRegion2D/Objects/TreeMaze" unique_id=1449193365 instance=ExtResource("4_aqk2v")]
+[node name="Tree5" parent="NavigationRegion2D/Objects" unique_id=1449193365 instance=ExtResource("4_aqk2v")]
 position = Vector2(-112, -168)
 
-[node name="Tree6" parent="NavigationRegion2D/Objects/TreeMaze" unique_id=2130586176 instance=ExtResource("4_aqk2v")]
+[node name="Tree6" parent="NavigationRegion2D/Objects" unique_id=2130586176 instance=ExtResource("4_aqk2v")]
 position = Vector2(-96, -168)
 
-[node name="Tree7" parent="NavigationRegion2D/Objects/TreeMaze" unique_id=128178965 instance=ExtResource("4_aqk2v")]
+[node name="Tree7" parent="NavigationRegion2D/Objects" unique_id=128178965 instance=ExtResource("4_aqk2v")]
 position = Vector2(-152, -200)
 
-[node name="Tree8" parent="NavigationRegion2D/Objects/TreeMaze" unique_id=1963045462 instance=ExtResource("4_aqk2v")]
+[node name="Tree8" parent="NavigationRegion2D/Objects" unique_id=1963045462 instance=ExtResource("4_aqk2v")]
 position = Vector2(-136, -200)
 
-[node name="Tree9" parent="NavigationRegion2D/Objects/TreeMaze" unique_id=493655121 instance=ExtResource("4_aqk2v")]
+[node name="Tree9" parent="NavigationRegion2D/Objects" unique_id=493655121 instance=ExtResource("4_aqk2v")]
 position = Vector2(-120, -200)
 
-[node name="Tree10" parent="NavigationRegion2D/Objects/TreeMaze" unique_id=377290432 instance=ExtResource("4_aqk2v")]
+[node name="Tree10" parent="NavigationRegion2D/Objects" unique_id=377290432 instance=ExtResource("4_aqk2v")]
 position = Vector2(-160, -184)
 
-[node name="Tree11" parent="NavigationRegion2D/Objects/TreeMaze" unique_id=1032685824 instance=ExtResource("4_aqk2v")]
+[node name="Tree11" parent="NavigationRegion2D/Objects" unique_id=1032685824 instance=ExtResource("4_aqk2v")]
 position = Vector2(-96, -152)
 
-[node name="Tree12" parent="NavigationRegion2D/Objects/TreeMaze" unique_id=707792734 instance=ExtResource("4_aqk2v")]
+[node name="Tree12" parent="NavigationRegion2D/Objects" unique_id=707792734 instance=ExtResource("4_aqk2v")]
 position = Vector2(-80, -176)
 
-[node name="StoneHenge" type="Node2D" parent="NavigationRegion2D/Objects" unique_id=935687079]
-
-[node name="Stone2" parent="NavigationRegion2D/Objects/StoneHenge" unique_id=197178265 instance=ExtResource("8_gbfbk")]
+[node name="Stone2" parent="NavigationRegion2D/Objects" unique_id=197178265 instance=ExtResource("8_gbfbk")]
 position = Vector2(-192, 24)
 
-[node name="Stone3" parent="NavigationRegion2D/Objects/StoneHenge" unique_id=878694018 instance=ExtResource("8_gbfbk")]
+[node name="Stone3" parent="NavigationRegion2D/Objects" unique_id=878694018 instance=ExtResource("8_gbfbk")]
 position = Vector2(-176, 16)
 
-[node name="Stone4" parent="NavigationRegion2D/Objects/StoneHenge" unique_id=1347477073 instance=ExtResource("8_gbfbk")]
+[node name="Stone4" parent="NavigationRegion2D/Objects" unique_id=1347477073 instance=ExtResource("8_gbfbk")]
 position = Vector2(-160, 24)
 
-[node name="Stone5" parent="NavigationRegion2D/Objects/StoneHenge" unique_id=1332675886 instance=ExtResource("8_gbfbk")]
+[node name="Stone5" parent="NavigationRegion2D/Objects" unique_id=1332675886 instance=ExtResource("8_gbfbk")]
 position = Vector2(-152, 40)
 
-[node name="Stone6" parent="NavigationRegion2D/Objects/StoneHenge" unique_id=113364537 instance=ExtResource("8_gbfbk")]
+[node name="Stone6" parent="NavigationRegion2D/Objects" unique_id=113364537 instance=ExtResource("8_gbfbk")]
 position = Vector2(-160, 56)
 
-[node name="Stone7" parent="NavigationRegion2D/Objects/StoneHenge" unique_id=1460152164 instance=ExtResource("8_gbfbk")]
+[node name="Stone7" parent="NavigationRegion2D/Objects" unique_id=1460152164 instance=ExtResource("8_gbfbk")]
 position = Vector2(-200, 40)
 
-[node name="Stone8" parent="NavigationRegion2D/Objects/StoneHenge" unique_id=1581381074 instance=ExtResource("8_gbfbk")]
+[node name="Stone8" parent="NavigationRegion2D/Objects" unique_id=1581381074 instance=ExtResource("8_gbfbk")]
 position = Vector2(-192, 56)
 
-[node name="Stone9" parent="NavigationRegion2D/Objects/StoneHenge" unique_id=1610620610 instance=ExtResource("8_gbfbk")]
+[node name="Stone9" parent="NavigationRegion2D/Objects" unique_id=1610620610 instance=ExtResource("8_gbfbk")]
 position = Vector2(-176, 64)
 
-[node name="TreeWall" type="Node2D" parent="NavigationRegion2D/Objects" unique_id=252892645]
-
-[node name="Tree" parent="NavigationRegion2D/Objects/TreeWall" unique_id=1125602020 instance=ExtResource("4_aqk2v")]
+[node name="Tree13" parent="NavigationRegion2D/Objects" unique_id=1125602020 instance=ExtResource("4_aqk2v")]
 position = Vector2(48, -136)
 
-[node name="Tree2" parent="NavigationRegion2D/Objects/TreeWall" unique_id=185442891 instance=ExtResource("4_aqk2v")]
+[node name="Tree14" parent="NavigationRegion2D/Objects" unique_id=185442891 instance=ExtResource("4_aqk2v")]
 position = Vector2(80, -136)
 
-[node name="Tree3" parent="NavigationRegion2D/Objects/TreeWall" unique_id=716526737 instance=ExtResource("4_aqk2v")]
+[node name="Tree15" parent="NavigationRegion2D/Objects" unique_id=716526737 instance=ExtResource("4_aqk2v")]
 position = Vector2(64, -136)
 
 [node name="Houses" type="Node2D" parent="NavigationRegion2D" unique_id=350287105]
 position = Vector2(8, 0)
 
 [node name="House" parent="NavigationRegion2D/Houses" unique_id=334523237 instance=ExtResource("7_pkg7o")]
+
+[node name="ClientGateway" type="Node2D" parent="." unique_id=334622980]
+position = Vector2(2, -12)
+script = ExtResource("9_ioo17")
