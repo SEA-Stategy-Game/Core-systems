@@ -21,7 +21,7 @@ outlines = Array[PackedVector2Array]([PackedVector2Array(600, -368, -576, -368, 
 [ext_resource type="Script" path="res://navigation_region_2d.gd" id="6_ioo17"]
 [ext_resource type="PackedScene" uid="uid://c5ee63xefwvh6" path="res://Houses/Barracks.tscn" id="7_pkg7o"]
 [ext_resource type="PackedScene" uid="uid://cwxsdlngu3cq4" path="res://Entities/Resource/Stone.tscn" id="8_gbfbk"]
-[ext_resource type="Script" path="res://Logic/Server.gd" id="9_ioo17"]
+[ext_resource type="Script" uid="uid://drr06pml6a533" path="res://Logic/Server.gd" id="9_ioo17"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_k3n1d"]
 
