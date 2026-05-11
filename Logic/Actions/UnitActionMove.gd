@@ -36,7 +36,15 @@ func tick(unit: CharacterBody2D, _delta: float) -> int:
 		_target_position = _target_node.global_position
 
 	var direction = unit.global_position.direction_to(_target_position)
-	var speed = unit.Speed if "Speed" in unit else 50
+	var base_speed = unit.Speed if "Speed" in unit else 50
+	var multiplier: float = 1.0
+	if Engine.has_singleton("MapManager"):
+		var mm = Engine.get_singleton("MapManager")
+		if mm and mm.has_method("get_tile_at_world_pos"):
+			var tile = mm.get_tile_at_world_pos(unit.global_position)
+			if tile and tile.has_method("get_movement_multiplier"):
+				multiplier = tile.get_movement_multiplier()
+	var speed = base_speed * multiplier
 	unit.velocity = direction * speed
 
 	if unit.global_position.distance_to(_target_position) > _arrival_radius:

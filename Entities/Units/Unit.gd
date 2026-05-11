@@ -17,6 +17,7 @@ var current_health: int
 @onready var box = get_node("HitBox")
 @onready var anim = get_node("AnimationPlayer")
 @onready var attack_range_area: Area2D = get_node_or_null("Range")
+@onready var tile_map: TileMapLayer = get_node("/root/World/TileMapLayer")     
 
 ## -----------------------------------------------------------------------
 ## Movement (manual player control -- right-click)
@@ -118,6 +119,12 @@ func get_closest_hostile() -> Node2D:
 			closest_dist = d
 			closest = h
 	return closest
+
+func get_local_movement_speed() -> float:
+	var tile = tile_map.get_tile_at_world_pos(global_position)
+	if tile == null:
+		return speed
+	return speed * tile.get_movement_multiplier()
 
 # -----------------------------------------------------------------
 # IDamageable contract
