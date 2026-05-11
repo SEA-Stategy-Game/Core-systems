@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dweqb87bqh6d3" path="res://Entities/Units/Unit.gd" id="1_ij6vw"]
 [ext_resource type="Texture2D" uid="uid://b68isfnk756nx" path="res://Assets/MiniWorldSprites/Characters/Champions/Arthax.png" id="2_uhwgi"]
-[ext_resource type="Shader" uid="uid://cl32f86b4duie" path="res://Entities/Units/WhiteFlash.gdshader" id="2_uo5aa"]
+[ext_resource type="Shader" path="res://Entities/Units/WhiteFlash.gdshader" id="2_uo5aa"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_bl5ya"]
 
@@ -118,7 +118,6 @@ shape = SubResource("CircleShape2D_owuc0")
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1564493811]
 path_desired_distance = 10.0
-avoidance_enabled = true
 neighbor_distance = 50.0
 max_neighbors = 4
 time_horizon_agents = 0.5
