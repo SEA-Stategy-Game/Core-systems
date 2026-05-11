@@ -180,7 +180,7 @@ script = ExtResource("1_f3sb7")
 [node name="Units" type="Node2D" parent="." unique_id=1851347236 groups=["units"]]
 
 [node name="Unit" parent="Units" unique_id=1684801707 instance=ExtResource("5_gbfbk")]
-position = Vector2(432, 412)
+position = Vector2(433, 413)
 
 [node name="ClientGateway" type="Node2D" parent="." unique_id=334622980]
 position = Vector2(3, -10)

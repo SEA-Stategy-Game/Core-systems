@@ -101,10 +101,11 @@ shape = SubResource("CircleShape2D_owuc0")
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1564493811]
 path_desired_distance = 10.0
-neighbor_distance = 50.0
-max_neighbors = 4
+avoidance_enabled = true
+neighbor_distance = 40.0
 time_horizon_agents = 0.5
 time_horizon_obstacles = 1.0
+max_speed = 50.0
 
 [connection signal="input_event" from="." to="." method="_on_input_event"]
 [connection signal="velocity_computed" from="NavigationAgent2D" to="." method="_on_navigation_agent_2d_velocity_computed"]
