@@ -233,12 +233,8 @@ func _physics_process(delta) -> void:
 	if $NavigationAgent2D.is_navigation_finished():
 		return
 	var nav_point_direction = to_local($NavigationAgent2D.get_next_path_position()).normalized()
-	velocity = nav_point_direction * speed * delta * get_local_movement_speed()
-	move_and_slide()
-	#$NavigationAgent2D.set_velocity(desired_velocity)
-	# Snap back to navmesh
-	global_position = NavigationServer2D.map_get_closest_point(
-		$NavigationAgent2D.get_navigation_map(), global_position)
+	var desired_velocity = nav_point_direction * speed * delta * get_local_movement_speed()
+	$NavigationAgent2D.set_velocity(desired_velocity)
 	
 	var nav_point_direction = to_local($NavigationAgent2D.get_next_path_position()).normalized()
 	var desired_velocity = nav_point_direction * speed * delta
@@ -346,7 +342,7 @@ func get_navigation_path_segment(amount_of_segments: int) -> PackedVector2Array:
 	var path = $NavigationAgent2D.get_current_navigation_path().slice(current_path_index, max_segment_index)
 	return path
 	
-## Deprecated function, used for setting avoidance navigation (using Godots RVO)
+## Used-to-be deprecated function, used for setting avoidance navigation (using Godots RVO)
 # Called when avoidance on the navigation agaent is set and NavigationAgent2D.set_velocity(desired_velocity) is called
 func _on_navigation_agent_2d_velocity_computed(safe_velocity: Vector2) -> void:
 	velocity = safe_velocity
@@ -372,4 +368,4 @@ func _on_navigation_agent_2d_velocity_computed(safe_velocity: Vector2) -> void:
 		velocity = Vector2.ZERO
 		move_and_slide()
 		# Makes units able to walk into each other os that they can finish pathfinding and does not stall on each other
-		$NavigationAgent2D.avoidance_enabled = false
+		#$NavigationAgent2D.avoidance_enabled = false
