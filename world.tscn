@@ -183,5 +183,5 @@ script = ExtResource("1_f3sb7")
 position = Vector2(432, 412)
 
 [node name="ClientGateway" type="Node2D" parent="." unique_id=334622980]
-position = Vector2(2, -12)
+position = Vector2(3, -10)
 script = ExtResource("9_ioo17")
