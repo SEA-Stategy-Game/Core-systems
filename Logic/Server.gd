@@ -4,8 +4,9 @@ extends Node
 ## state, and distributes it to connected clients via RPC.
 
 @onready var units = get_node("/root/World/Units")     
-@onready var objects = get_node("/root/World/NavigationRegion2D/Objects")  
-@onready var buildings = get_node("/root/World/NavigationRegion2D/Houses") 
+@onready var objects = get_node("/root/World/NavigationRegion2D/TileMapLayer/Objects")  
+@onready var buildings = get_node("/root/World/NavigationRegion2D/TileMapLayer/Houses") 
+@onready var map_manager = get_node("/root/World/NavigationRegion2D/TileMapLayer") 
 
 var queued_objects: Array[Dictionary] = []
 
@@ -104,7 +105,8 @@ func on_static_state_requested() -> void:
 func build_entire_state() -> Dictionary:
 	return {
 		"units"   : units.get_children().map(func(x): return serialize_unit(x)),
-		"objects" : objects.get_children().map(func(x): return serialize_object(x))
+		"objects" : objects.get_children().map(func(x): return serialize_object(x)),
+		"map"	  : map_manager.game_map.get_all_tiles().map(func(x): return serialize_map_tile(x))
 	}
 
 ## Serialises the core properties shared by all entities.
@@ -114,6 +116,14 @@ func serialize_core_state_variables(entity: Node) -> Dictionary:
 		"max_health" : entity.max_health,
 		"player_id"  : entity.player_id,
 		"position"   : entity.position
+	}
+
+## Serialises a map-tile
+func serialize_map_tile(tile) -> Dictionary:
+	return {
+		"x" : tile.x,
+		"y" : tile.y,
+		"terrain_type" : tile.TerrainType
 	}
 
 ## Serialises a unit node into a transmittable dictionary

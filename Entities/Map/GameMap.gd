@@ -32,5 +32,8 @@ func get_tile(x: int, y: int):
 		return null
 	return tiles[_index(x, y)]
 
+func get_all_tiles():
+	return tiles;
+
 func _get_tile(x: int, y: int):
 	return get_tile(x, y)
