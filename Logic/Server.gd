@@ -68,14 +68,14 @@ func broadcast_state(tick: int) -> void:
 		"modified_objects" : queued_objects
 	}
 	queued_objects = []
-	print("Dynamic state: ", state)
+	#print("Dynamic state: ", state)
 	rpc("receive_state", state)
 
 func build_dynamic_unit(unit):
 	return {
 		"meta_values" : serialize_core_state_variables(unit),
 		"path" : unit.get_navigation_path_segment(4),
-		"speed" : unit.speed
+		"speed" : unit.get_local_movement_speed()
 	} 
 
 # Signal called from objects when they are modified

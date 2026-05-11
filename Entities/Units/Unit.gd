@@ -17,13 +17,13 @@ var current_health: int
 @onready var box = get_node("HitBox")
 @onready var anim = get_node("AnimationPlayer")
 @onready var attack_range_area: Area2D = get_node_or_null("Range")
-@onready var tile_map: TileMapLayer = get_node("/root/World/TileMapLayer")     
+@onready var tile_map: TileMapLayer = get_node("/root/World/NavigationRegion2D/TileMapLayer")     
 
 ## -----------------------------------------------------------------------
 ## Movement (manual player control -- right-click)
 ## -----------------------------------------------------------------------
 var follow_cursor: bool = false
-var speed: int = 2000
+var speed: int = 70
 var is_animated: bool = false
 
 ## -----------------------------------------------------------------------
@@ -177,7 +177,7 @@ func _input(event) -> void:
 			current_path_index = 0;
 			set_anim(velocity.length_squared() > 100)
 			# Makes units use the Godot RVO avoidance mechanism
-			$NavigationAgent2D.avoidance_enabled = true
+			# $NavigationAgent2D.avoidance_enabled = true
 			
 # -----------------------------------------------------------------
 # Physics / tick processing
@@ -199,11 +199,17 @@ func _physics_process(delta) -> void:
 			is_idle = false
 		command_queue.process_tick(delta)
 		return  # AI commands take priority -- skip manual logic
-
+	
 	# 2. Otherwise, fall back to manual right-click movement.
+	if $NavigationAgent2D.is_navigation_finished():
+		return
 	var nav_point_direction = to_local($NavigationAgent2D.get_next_path_position()).normalized()
-	var desired_velocity = nav_point_direction * speed * delta
-	$NavigationAgent2D.set_velocity(desired_velocity)
+	velocity = nav_point_direction * speed * delta * get_local_movement_speed()
+	move_and_slide()
+	#$NavigationAgent2D.set_velocity(desired_velocity)
+	# Snap back to navmesh
+	global_position = NavigationServer2D.map_get_closest_point(
+		$NavigationAgent2D.get_navigation_map(), global_position)
 	
 # -----------------------------------------------------------------
 # Signal relays
@@ -253,6 +259,8 @@ func get_navigation_path_segment(amount_of_segments: int) -> PackedVector2Array:
 	var path = $NavigationAgent2D.get_current_navigation_path().slice(current_path_index, max_segment_index)
 	return path
 	
+## Deprecated function, used for setting avoidance navigation (using Godots RVO)
+# Called when avoidance on the navigation agaent is set and NavigationAgent2D.set_velocity(desired_velocity) is called
 func _on_navigation_agent_2d_velocity_computed(safe_velocity: Vector2) -> void:
 	velocity = safe_velocity
 	if not $NavigationAgent2D.is_navigation_finished():

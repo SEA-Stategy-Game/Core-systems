@@ -1,8 +1,8 @@
 class_name TestMap extends GameMap
 
 func initialize_tiles() -> void:
-	width = 16
-	height = 16
+	width = 32
+	height = 32
 	super.initialize_tiles()
 	
 	# Interior defaults to plains.

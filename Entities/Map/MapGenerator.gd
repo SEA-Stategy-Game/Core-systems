@@ -1,6 +1,7 @@
 class_name MapGenerator extends GameMap
 
 @export var water_border: int = 5
+@export var plains_threshold: float = 0.50
 @export var forest_threshold: float = 0.70
 @export var hills_threshold: float = 0.90
 
@@ -36,4 +37,6 @@ func _classify(n: float) -> int:
 		return MapTile.TerrainType.HILLS
 	if n > forest_threshold:
 		return MapTile.TerrainType.FOREST
-	return MapTile.TerrainType.PLAINS
+	if n > plains_threshold:
+		return MapTile.TerrainType.PLAINS
+	return MapTile.TerrainType.WATER

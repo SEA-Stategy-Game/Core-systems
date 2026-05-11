@@ -47,9 +47,9 @@ func get_movement_multiplier() -> float:
 		TerrainType.PLAINS:
 			return 1.10
 		TerrainType.FOREST:
-			return 0.65
+			return 0.75
 		TerrainType.HILLS:
-			return 0.80
+			return 0.6
 		TerrainType.WATER:
 			return 0.0
 		_:
