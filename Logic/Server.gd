@@ -70,7 +70,9 @@ func broadcast_state(tick: int) -> void:
 	}
 	queued_objects = []
 	#print("Dynamic state: ", state)
-	rpc("receive_state", state)
+	var bytes = JSON.stringify(state).to_utf8_buffer()
+	var compressed = bytes.compress(FileAccess.COMPRESSION_GZIP)
+	rpc("receive_state", compressed)
 
 func build_dynamic_unit(unit):
 	return {

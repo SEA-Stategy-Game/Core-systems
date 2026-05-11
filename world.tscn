@@ -239,5 +239,5 @@ position = Vector2(8, 0)
 
 [node name="House" parent="NavigationRegion2D/Houses" unique_id=334523237 instance=ExtResource("7_pkg7o")]
 [node name="ClientGateway" type="Node2D" parent="." unique_id=334622980]
-position = Vector2(2, -12)
+position = Vector2(3, -10)
 script = ExtResource("9_ioo17")
