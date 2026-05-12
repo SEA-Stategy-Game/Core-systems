@@ -125,7 +125,7 @@ func serialize_map_tile(tile) -> Dictionary:
 	return {
 		"x" : tile.x,
 		"y" : tile.y,
-		"terrain_type" : tile.TerrainType
+		"terrain_type" : tile.terrain
 	}
 
 ## Serialises a unit node into a transmittable dictionary
