@@ -251,9 +251,11 @@ func trigger_white_flash() -> void:
 	mat.set_shader_parameter("active", false)
 
 func get_navigation_path_segment(amount_of_segments: int) -> PackedVector2Array:
-	var max_segment_index = min(current_path_index + amount_of_segments, $NavigationAgent2D.get_current_navigation_path().size()-1) 
-	var path = $NavigationAgent2D.get_current_navigation_path().slice(current_path_index, max_segment_index)
-	return path
+	var path = $NavigationAgent2D.get_current_navigation_path()
+	if path.is_empty() or current_path_index >= path.size():
+		return PackedVector2Array()
+	var end_index = min(current_path_index + amount_of_segments, path.size())
+	return path.slice(current_path_index, end_index)
 	
 ## Used-to-be deprecated function, used for setting avoidance navigation (using Godots RVO)
 # Called when avoidance on the navigation agaent is set and NavigationAgent2D.set_velocity(desired_velocity) is called
