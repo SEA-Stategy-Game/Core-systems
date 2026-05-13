@@ -7,11 +7,11 @@
 extends RefCounted
 class_name UnitActionMove
 
-const ActionState = IUnitAction.ActionState
+const ACTION_STATE = IUnitAction.ActionState
 
 var _target_position: Vector2 = Vector2.ZERO
 var _arrival_radius: float = 12.0
-var _state: int = ActionState.PENDING
+var _state: int = ACTION_STATE.PENDING
 var _target_node: Node2D = null  # Optional -- used to follow a moving target
 
 # -----------------------------------------------------------------
@@ -19,7 +19,7 @@ var _target_node: Node2D = null  # Optional -- used to follow a moving target
 # -----------------------------------------------------------------
 
 func start(unit: CharacterBody2D, target: Node2D) -> void:
-	_state = ActionState.RUNNING
+	_state = ACTION_STATE.RUNNING
 	_target_node = target
 	if target:
 		_target_position = target.global_position
@@ -28,7 +28,7 @@ func start(unit: CharacterBody2D, target: Node2D) -> void:
 		unit.get_node("AnimationPlayer").play("Walk Down")
 
 func tick(unit: CharacterBody2D, _delta: float) -> int:
-	if _state != ActionState.RUNNING:
+	if _state != ACTION_STATE.RUNNING:
 		return _state
 
 	# If following a live node, update destination every tick
@@ -51,14 +51,14 @@ func tick(unit: CharacterBody2D, _delta: float) -> int:
 		unit.move_and_slide()
 	else:
 		unit.velocity = Vector2.ZERO
-		_state = ActionState.COMPLETED
+		_state = ACTION_STATE.COMPLETED
 		if unit.has_node("AnimationPlayer"):
 			unit.get_node("AnimationPlayer").stop()
 
 	return _state
 
 func cancel(unit: CharacterBody2D) -> void:
-	_state = ActionState.FAILED
+	_state = ACTION_STATE.FAILED
 	unit.velocity = Vector2.ZERO
 	if unit.has_node("AnimationPlayer"):
 		unit.get_node("AnimationPlayer").stop()
@@ -75,12 +75,12 @@ func serialize() -> Dictionary:
 # -----------------------------------------------------------------
 static func create(destination: Vector2) -> UnitActionMove:
 	var action = UnitActionMove.new()
-	action._target_position = destination
+	action.target_position = destination
 	return action
 
 static func create_to_node(target_node: Node2D) -> UnitActionMove:
 	var action = UnitActionMove.new()
 	if target_node:
-		action._target_position = target_node.global_position
-		action._target_node = target_node
+		action.target_position = target_node.global_position
+		action.target_node = target_node
 	return action
