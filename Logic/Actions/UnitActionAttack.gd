@@ -1,4 +1,3 @@
-## UnitActionAttack.gd
 ## -----------------------------------------------------------------------
 ## Concrete IUnitAction -- proximity-based combat using Area2D.
 ##
@@ -10,9 +9,9 @@
 extends RefCounted
 class_name UnitActionAttack
 
-const ActionState = IUnitAction.ActionState
+const ACTION_STATE = IUnitAction.ActionState
 
-var _state: int = ActionState.PENDING
+var _state: int = ACTION_STATE.PENDING
 var _attack_damage: int = 10
 var _attack_cooldown: float = 1.0
 var _cooldown_timer: float = 0.0
@@ -26,7 +25,7 @@ var _target_node: Node2D = null
 # -----------------------------------------------------------------
 
 func start(unit: CharacterBody2D, target: Node2D) -> void:
-	_state = ActionState.RUNNING
+	_state = ACTION_STATE.RUNNING
 	_target_node = target
 
 	# Read combat stats from the unit
@@ -41,7 +40,7 @@ func start(unit: CharacterBody2D, target: Node2D) -> void:
 	print("[COMBAT_LOG] Unit ", _get_uid(unit), " entering combat state.")
 
 func tick(unit: CharacterBody2D, delta: float) -> int:
-	if _state != ActionState.RUNNING:
+	if _state != ACTION_STATE.RUNNING:
 		return _state
 
 	_cooldown_timer -= delta
@@ -58,7 +57,7 @@ func tick(unit: CharacterBody2D, delta: float) -> int:
 
 	# If no specific target and nothing in our Area2D, combat is complete
 	if not is_instance_valid(_target_node):
-		_state = ActionState.COMPLETED
+		_state = ACTION_STATE.COMPLETED
 		print("[COMBAT_LOG] Unit ", _get_uid(unit), " no hostiles. Exiting combat.")
 		if unit.has_node("AnimationPlayer"):
 			unit.get_node("AnimationPlayer").stop()
@@ -73,7 +72,6 @@ func tick(unit: CharacterBody2D, delta: float) -> int:
 
 	# We fall back to a reasonable distance check if Area2D logic isn't fully ready
 	# but primarily rely on the Area2D in_range flag
-	var dist = unit.global_position.distance_to(_target_node.global_position)
 	if not in_range:
 		# Chase the target if it's out of Area2D range
 		var direction = unit.global_position.direction_to(_target_node.global_position)
@@ -109,7 +107,7 @@ func tick(unit: CharacterBody2D, delta: float) -> int:
 	return _state
 
 func cancel(unit: CharacterBody2D) -> void:
-	_state = ActionState.FAILED
+	_state = ACTION_STATE.FAILED
 	unit.velocity = Vector2.ZERO
 	if unit.has_node("AnimationPlayer"):
 		unit.get_node("AnimationPlayer").stop()
@@ -145,5 +143,5 @@ static func create_auto() -> UnitActionAttack:
 ## Create an attack action focused on a specific target node.
 static func create_focused(target: Node2D) -> UnitActionAttack:
 	var action = UnitActionAttack.new()
-	action._target_node = target
+	action.target_node = target
 	return action

@@ -10,7 +10,7 @@ class_name MapResource
 
 # Init
 @export var resource_name: String = "Resource"
-@export var totalTime: float = 5.0
+@export var total_time: float = 5.0
 
 @onready var bar = $ProgressBar
 @onready var timer = $ProgressBar/Timer
@@ -20,8 +20,8 @@ class_name MapResource
 @onready var server = get_node("/root/World/ClientGateway")     
 
 var amount: int = 1
-var maxAmount: int = 1 
-var currentTime: float
+var max_amount: int = 1 
+var current_time: float
 var units_harvesting: int = 0
 
 # Signal for notifying the server when the object must be queued for broadcast 
@@ -38,7 +38,8 @@ func _ready() -> void:
 	if is_in_group("units"):
 		remove_from_group("units")
 	add_to_group("resources")
-	self.modified.connect(server._on_ressource_modified)
+	if multiplayer.is_server():
+		self.modified.connect(server._on_ressource_modified)
 	
 
 func harvest():

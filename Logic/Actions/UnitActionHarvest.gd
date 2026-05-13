@@ -10,9 +10,9 @@
 extends RefCounted
 class_name UnitActionHarvest
 
-const ActionState = IUnitAction.ActionState
+const ACTION_STATE = IUnitAction.ActionState
 
-var _state: int = ActionState.PENDING
+var _state: int = ACTION_STATE.PENDING
 var _target_node: Node2D = null
 var _elapsed: float = 0.0
 var _harvest_duration: float = 5.0  # Overridden from resource's totalTime
@@ -22,11 +22,11 @@ var _harvest_duration: float = 5.0  # Overridden from resource's totalTime
 # -----------------------------------------------------------------
 
 func start(unit: CharacterBody2D, target: Node2D) -> void:
-	_state = ActionState.RUNNING
+	_state = ACTION_STATE.RUNNING
 	_target_node = target
 
 	if not is_instance_valid(target):
-		_state = ActionState.FAILED
+		_state = ACTION_STATE.FAILED
 		return
 
 	# Read harvest time from the resource if available
@@ -54,12 +54,12 @@ func start(unit: CharacterBody2D, target: Node2D) -> void:
 					timer.start()
 
 func tick(unit: CharacterBody2D, delta: float) -> int:
-	if _state != ActionState.RUNNING:
+	if _state != ACTION_STATE.RUNNING:
 		return _state
 
 	# Resource was depleted or removed
 	if not is_instance_valid(_target_node):
-		_state = ActionState.COMPLETED
+		_state = ACTION_STATE.COMPLETED
 		if unit.has_node("AnimationPlayer"):
 			unit.get_node("AnimationPlayer").stop()
 		return _state
@@ -69,13 +69,13 @@ func tick(unit: CharacterBody2D, delta: float) -> int:
 	# Safety timeout -- if the resource is still alive but the harvest
 	# duration has far exceeded expectations, mark as completed.
 	if _elapsed > _harvest_duration * 3.0:
-		_state = ActionState.COMPLETED
+		_state = ACTION_STATE.COMPLETED
 		_cleanup(unit)
 
 	return _state
 
 func cancel(unit: CharacterBody2D) -> void:
-	_state = ActionState.FAILED
+	_state = ACTION_STATE.FAILED
 	_cleanup(unit)
 
 func serialize() -> Dictionary:
@@ -108,7 +108,7 @@ func _cleanup(unit: CharacterBody2D) -> void:
 # -----------------------------------------------------------------
 static func create(resource_node: Node2D) -> UnitActionHarvest:
 	var action = UnitActionHarvest.new()
-	action._target_node = resource_node
+	action.target_node = resource_node
 	if resource_node and "totalTime" in resource_node:
-		action._harvest_duration = resource_node.totalTime
+		action.harvest_duration = resource_node.totalTime
 	return action

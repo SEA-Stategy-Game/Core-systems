@@ -330,6 +330,9 @@ func _find_unit(unit_id: int) -> CharacterBody2D:
 func _find_resource(resource_id: int) -> Node2D:
 	# Search in Objects and direct World children
 	var search_roots: Array = []
+	var tile_objects = get_tree().get_root().get_node_or_null("World/NavigationRegion2D/TileMapLayer/Objects")
+	if tile_objects:
+		search_roots.append(tile_objects)
 	var objects = get_tree().get_root().get_node_or_null("World/Objects")
 	if objects:
 		search_roots.append(objects)
@@ -435,15 +438,15 @@ func _on_queue_empty(unit_id: int) -> void:
 			# Phase 1 complete (move + harvest done) -- now return to base
 			_initiate_return_to_base(unit_id, cr_state["player_id"])
 			return
-		elif cr_state["state"] == "RETURNING":
-			# Phase 2 complete -- unit has arrived at base
-			_chop_return_state.erase(unit_id)
-			var unit = _find_unit(unit_id)
-			if unit and "is_idle" in unit:
-				unit.is_idle = true
-			print("[IDLE_REPORT] Unit ", unit_id, " returned to base. Chop-and-return complete. is_idle = true")
-			unit_idled.emit(unit_id)
-			return
+			if cr_state["state"] == "RETURNING":
+				# Phase 2 complete -- unit has arrived at base
+				_chop_return_state.erase(unit_id)
+				var unit = _find_unit(unit_id)
+				if unit and "is_idle" in unit:
+					unit.is_idle = true
+				print("[IDLE_REPORT] Unit ", unit_id, " returned to base. Chop-and-return complete. is_idle = true")
+				unit_idled.emit(unit_id)
+				return
 
 	# Standard idle handling
 	var unit = _find_unit(unit_id)
