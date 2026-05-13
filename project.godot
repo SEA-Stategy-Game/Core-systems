@@ -23,10 +23,6 @@ TickManager="*res://Logic/TickManager.gd"
 PlanReceiver="*res://Logic/PlanReceiver.gd"
 DebugWindow="*res://UI/DebugWindow.tscn"
 
-[dotnet]
-
-project/assembly_name="New Game Project"
-
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/gut/plugin.cfg")
