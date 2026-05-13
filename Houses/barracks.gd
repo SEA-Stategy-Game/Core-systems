@@ -29,6 +29,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			if Selected == true:
 				Game.spawnUnit(global_position)
 
+
 func _on_mouse_entered() -> void:
 	mouseEntered = true
 

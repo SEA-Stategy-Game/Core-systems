@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dweqb87bqh6d3" path="res://Entities/Units/Unit.gd" id="1_ij6vw"]
 [ext_resource type="Texture2D" uid="uid://b68isfnk756nx" path="res://Assets/MiniWorldSprites/Characters/Champions/Arthax.png" id="2_uhwgi"]
-[ext_resource type="Shader" path="res://Entities/Units/WhiteFlash.gdshader" id="2_uo5aa"]
+[ext_resource type="Shader" uid="uid://cl32f86b4duie" path="res://Entities/Units/WhiteFlash.gdshader" id="2_uo5aa"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_bl5ya"]
 

@@ -4,7 +4,7 @@ extends TileMapLayer
 
 # Change this instance to change the type of map that is generated
 # E.g. GameMap, TestMap, or MapGenerator 
-var game_map: GameMap = TestMap.new()
+var game_map: GameMap = MapGenerator.new()
 @onready var nav_region = $"/root/World/NavigationRegion2D"
 
 func draw_tile(tile):

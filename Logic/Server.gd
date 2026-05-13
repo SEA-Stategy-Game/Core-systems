@@ -117,7 +117,7 @@ func serialize_core_state_variables(entity: Node) -> Dictionary:
 		"entity_id"  : entity.entity_id,
 		"max_health" : entity.max_health,
 		"player_id"  : entity.player_id,
-		"position"   : entity.position
+		"position"   : entity.global_position
 	}
 
 ## Serialises a map-tile
