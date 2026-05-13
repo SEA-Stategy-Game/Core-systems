@@ -10,8 +10,9 @@ func spawn_unit(position):
 	var has_spawn = false
 	for i in path.get_child_count():
 		if "spawnUnit" in path.get_child(i).name:
-			hasSpawn = true
-	if hasSpawn == false:
-		var spawn_unit = spawn.instantiate()
-		spawnUnit.housePos = position
-		path.add_child(spawnUnit)
+			has_spawn = true
+			
+	if has_spawn == false:
+		var spawn_unit_instance = spawn.instantiate()
+		spawn_unit_instance.housePos = position
+		path.add_child(spawn_unit_instance)
