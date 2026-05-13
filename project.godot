@@ -34,6 +34,9 @@ PlanReceiver="*res://Logic/PlanReceiver.gd"
 [dotnet]
 
 project/assembly_name="New Game Project"
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/gut/plugin.cfg")
 
 [input]
 
