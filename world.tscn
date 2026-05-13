@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://rfmjt4xqtei2" path="res://Assets/Interface/MapTiles.png" id="3_k3n1d"]
 [ext_resource type="Script" uid="uid://cdh1ehimmosb3" path="res://Entities/Map/MapManager.gd" id="4_2o6r5"]
 [ext_resource type="PackedScene" uid="uid://b1wdh83xgdlb3" path="res://Entities/Units/unit.tscn" id="5_gbfbk"]
-[ext_resource type="Script" uid="uid://dqrrn4ao37rfj" path="res://navigation_region_2d.gd" id="6_ioo17"]
+[ext_resource type="Script" uid="uid://cx7sdwpomg3qv" path="res://navigation_region_2d.gd" id="6_ioo17"]
 [ext_resource type="PackedScene" uid="uid://c5ee63xefwvh6" path="res://Houses/Barracks.tscn" id="7_pkg7o"]
 [ext_resource type="Script" uid="uid://dti53y7pj2v6a" path="res://Logic/Server.gd" id="9_ioo17"]
 
@@ -86,11 +86,15 @@ script = ExtResource("4_2o6r5")
 position = Vector2(557, 492)
 
 [node name="House" parent="NavigationRegion2D/TileMapLayer/Houses" unique_id=334523237 instance=ExtResource("7_pkg7o")]
-position = Vector2(5, 12)
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=118205968]
 position = Vector2(573, 323)
 script = ExtResource("1_f3sb7")
+CamSpeed = null
+ZoomSpeed = null
+ZoomMargin = null
+ZoomMin = null
+ZoomMax = null
 
 [node name="UI" parent="." unique_id=1080200729 instance=ExtResource("3_036b0")]
 
