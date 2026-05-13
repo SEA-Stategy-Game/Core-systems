@@ -1,5 +1,6 @@
 extends Node2D
 
+
 var units = []
 
 func _ready():
@@ -7,6 +8,12 @@ func _ready():
 	Game.spawnUnit(position)
 	if has_node("Camera2D"):
 		$Camera2D.area_selected.connect(_on_area_selected)
+
+	#if Engine.has_singleton("MapManager"):
+	#	var mm = Engine.get_singleton("MapManager")
+	#	if mm:
+	#		mm.map_node = game_map
+	#		mm.tile_size = game_map.tile_size
 
 func get_units():
 	units = null

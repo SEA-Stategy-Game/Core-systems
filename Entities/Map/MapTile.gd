@@ -1,20 +1,20 @@
 extends RefCounted
 class_name MapTile
 
-
 enum TerrainType {
-	DIRT,
-	WATER,
-	MOUNTAIN
+	PLAINS,
+	FOREST,
+	HILLS,
+	WATER
 }
 
 var x: int
 var y: int
-var terrain: TerrainType = TerrainType.DIRT
+var terrain: TerrainType = TerrainType.PLAINS
 var map_object: Variant = null
 var is_occupied: bool = false
 
-func _init(tile_x: int = 0, tile_y: int = 0, tile_terrain: TerrainType = TerrainType.DIRT, tile_object: Variant = null) -> void:
+func _init(tile_x: int = 0, tile_y: int = 0, tile_terrain: TerrainType = TerrainType.PLAINS, tile_object: Variant = null) -> void:
 	x = tile_x
 	y = tile_y
 	terrain = tile_terrain
@@ -40,12 +40,35 @@ func has_map_object() -> bool:
 func is_walkable() -> bool:
 	if is_occupied:
 		return false
+	return terrain != TerrainType.WATER
 
+func get_movement_multiplier() -> float:
 	match terrain:
-		TerrainType.WATER, TerrainType.MOUNTAIN:
-			return false
+		TerrainType.PLAINS:
+			return 1.10
+		TerrainType.FOREST:
+			return 0.75
+		TerrainType.HILLS:
+			return 0.6
+		TerrainType.WATER:
+			return 0.0
 		_:
-			return true
+			return 1.0
+
+# Position of image in atlas
+# We are missing a few images in the atlas
+func get_atlas_coordinates() -> Vector2i:
+	match terrain:
+		TerrainType.PLAINS:
+			return Vector2i(1, 1)
+		TerrainType.FOREST:
+			return Vector2i(2, 3)
+		TerrainType.HILLS:
+			return Vector2i(3, 3)
+		TerrainType.WATER:
+			return Vector2i(1, 3)
+		_:
+			return Vector2i(-1, -1)
 
 func take_damage(dmg: int) -> void:
 	if map_object == null:

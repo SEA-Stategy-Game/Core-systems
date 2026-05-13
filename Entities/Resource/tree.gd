@@ -11,6 +11,7 @@ func _ready() -> void:
 	
 	bar.max_value = totalTime
 	bar.value = currentTime
+	resource_name = "ressource_tree"
 
 func on_finished_harvesting():
 	Game.Wood += 1
