@@ -4,18 +4,21 @@ class_name MapGenerator extends GameMap
 @export var plains_threshold: float = 0.50
 @export var forest_threshold: float = 0.70
 @export var hills_threshold: float = 0.90
+var rng = RandomNumberGenerator.new()
 
 func initialize_tiles():
 	generate();
 
-func generate(seed: int = -1) -> void:
-	super.initialize_tiles()
-	
-	var rng = RandomNumberGenerator.new()
+func _init(seed: int = -1) -> void:
 	if seed < 0:
 		rng.randomize()
 	else:
 		rng.seed = seed
+	ResourceSpawner.set_rng(rng)
+	super()
+
+func generate() -> void:
+	super.initialize_tiles()
 
 	var noise = FastNoiseLite.new()
 	noise.seed = rng.randi()

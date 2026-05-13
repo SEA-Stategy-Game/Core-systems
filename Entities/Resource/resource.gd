@@ -41,7 +41,6 @@ func _ready() -> void:
 	if multiplayer.is_server():
 		self.modified.connect(server._on_ressource_modified)
 	
-
 func harvest():
 	if amount > 0:
 		amount -= 1

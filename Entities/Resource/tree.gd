@@ -1,3 +1,4 @@
+class_name TreeResource
 extends MapResource
 
 func _ready() -> void:

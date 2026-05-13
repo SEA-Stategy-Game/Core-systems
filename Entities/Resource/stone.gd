@@ -1,3 +1,4 @@
+class_name StoneResource
 extends MapResource
 
 func _ready() -> void:
