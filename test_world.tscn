@@ -5,8 +5,12 @@
 [ext_resource type="PackedScene" uid="uid://djf7keuxeyyoh" path="res://UI/ui.tscn" id="3_036b0"]
 [ext_resource type="Texture2D" uid="uid://b1ny3rgjvrwkr" path="res://Assets/Interface/MapTiles.png" id="3_k3n1d"]
 [ext_resource type="Script" uid="uid://c16wqq7iy6opl" path="res://Entities/Map/MapManager.gd" id="4_2o6r5"]
+[ext_resource type="PackedScene" uid="uid://biio3e1hn22ty" path="res://Entities/Resource/Tree.tscn" id="4_aqk2v"]
 [ext_resource type="PackedScene" uid="uid://b1wdh83xgdlb3" path="res://Entities/Units/unit.tscn" id="5_gbfbk"]
+[ext_resource type="Texture2D" uid="uid://smm6t2i77fdv" path="res://Assets/MiniWorldSprites/Ground/TexturedGrass.png" id="6_dwbse"]
 [ext_resource type="Script" uid="uid://dqrrn4ao37rfj" path="res://navigation_region_2d.gd" id="6_ioo17"]
+[ext_resource type="PackedScene" uid="uid://c5ee63xefwvh6" path="res://Houses/Barracks.tscn" id="7_pkg7o"]
+[ext_resource type="PackedScene" uid="uid://cwxsdlngu3cq4" path="res://Entities/Resource/Stone.tscn" id="8_gbfbk"]
 [ext_resource type="Script" uid="uid://b5dawa3csedrs" path="res://Logic/Server.gd" id="9_ioo17"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_k3n1d"]
@@ -70,6 +74,14 @@ sources/0 = SubResource("TileSetAtlasSource_70uel")
 [node name="World" type="Node2D" unique_id=777208976]
 script = ExtResource("1_tlwt5")
 
+[node name="TextureRect" type="TextureRect" parent="." unique_id=904408715]
+offset_left = -2768.0
+offset_top = -1800.0
+offset_right = 3183.0
+offset_bottom = 2060.0
+texture = ExtResource("6_dwbse")
+stretch_mode = 1
+
 [node name="NavigationRegion2D" type="NavigationRegion2D" parent="." unique_id=1480118946]
 navigation_polygon = SubResource("NavigationPolygon_k3n1d")
 script = ExtResource("6_ioo17")
@@ -82,11 +94,85 @@ script = ExtResource("4_2o6r5")
 [node name="Objects" type="Node2D" parent="NavigationRegion2D/TileMapLayer" unique_id=64952163]
 position = Vector2(557, 492)
 
+[node name="Stone" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=1921004082 instance=ExtResource("8_gbfbk")]
+position = Vector2(-34, -60)
+
+[node name="Tree" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=1239852375 instance=ExtResource("4_aqk2v")]
+position = Vector2(-160, -136)
+
+[node name="Tree2" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=1161740943 instance=ExtResource("4_aqk2v")]
+position = Vector2(-144, -136)
+
+[node name="Tree3" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=134792671 instance=ExtResource("4_aqk2v")]
+position = Vector2(-128, -136)
+
+[node name="Tree4" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=2114905762 instance=ExtResource("4_aqk2v")]
+position = Vector2(-128, -168)
+
+[node name="Tree5" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=1449193365 instance=ExtResource("4_aqk2v")]
+position = Vector2(-112, -168)
+
+[node name="Tree6" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=2130586176 instance=ExtResource("4_aqk2v")]
+position = Vector2(-96, -168)
+
+[node name="Tree7" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=128178965 instance=ExtResource("4_aqk2v")]
+position = Vector2(-152, -200)
+
+[node name="Tree8" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=1963045462 instance=ExtResource("4_aqk2v")]
+position = Vector2(-136, -200)
+
+[node name="Tree9" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=493655121 instance=ExtResource("4_aqk2v")]
+position = Vector2(-120, -200)
+
+[node name="Tree10" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=377290432 instance=ExtResource("4_aqk2v")]
+position = Vector2(-160, -184)
+
+[node name="Tree11" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=1032685824 instance=ExtResource("4_aqk2v")]
+position = Vector2(-96, -152)
+
+[node name="Tree12" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=707792734 instance=ExtResource("4_aqk2v")]
+position = Vector2(-80, -176)
+
+[node name="Stone2" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=197178265 instance=ExtResource("8_gbfbk")]
+position = Vector2(116, 71)
+
+[node name="Stone3" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=878694018 instance=ExtResource("8_gbfbk")]
+position = Vector2(132, 63)
+
+[node name="Stone4" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=1347477073 instance=ExtResource("8_gbfbk")]
+position = Vector2(148, 71)
+
+[node name="Stone5" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=1332675886 instance=ExtResource("8_gbfbk")]
+position = Vector2(156, 87)
+
+[node name="Stone6" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=113364537 instance=ExtResource("8_gbfbk")]
+position = Vector2(148, 103)
+
+[node name="Stone7" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=1460152164 instance=ExtResource("8_gbfbk")]
+position = Vector2(108, 87)
+
+[node name="Stone8" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=1581381074 instance=ExtResource("8_gbfbk")]
+position = Vector2(116, 103)
+
+[node name="Stone9" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=1610620610 instance=ExtResource("8_gbfbk")]
+position = Vector2(132, 111)
+
+[node name="Tree13" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=1125602020 instance=ExtResource("4_aqk2v")]
+position = Vector2(48, -136)
+
+[node name="Tree14" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=185442891 instance=ExtResource("4_aqk2v")]
+position = Vector2(80, -136)
+
+[node name="Tree15" parent="NavigationRegion2D/TileMapLayer/Objects" unique_id=716526737 instance=ExtResource("4_aqk2v")]
+position = Vector2(64, -136)
+
 [node name="Houses" type="Node2D" parent="NavigationRegion2D/TileMapLayer" unique_id=350287105]
 position = Vector2(557, 492)
 
+[node name="House" parent="NavigationRegion2D/TileMapLayer/Houses" unique_id=334523237 instance=ExtResource("7_pkg7o")]
+
 [node name="Camera2D" type="Camera2D" parent="." unique_id=118205968]
-position = Vector2(573, 323)
+position = Vector2(12, -41)
 script = ExtResource("1_f3sb7")
 
 [node name="UI" parent="." unique_id=1080200729 instance=ExtResource("3_036b0")]
@@ -94,7 +180,7 @@ script = ExtResource("1_f3sb7")
 [node name="Units" type="Node2D" parent="." unique_id=1851347236 groups=["units"]]
 
 [node name="Unit" parent="Units" unique_id=1684801707 instance=ExtResource("5_gbfbk")]
-position = Vector2(433, 499)
+position = Vector2(433, 413)
 
 [node name="ClientGateway" type="Node2D" parent="." unique_id=334622980]
 position = Vector2(3, -10)

@@ -8,7 +8,7 @@ func _ready():
 	Game.spawnUnit(position)
 	if has_node("Camera2D"):
 		$Camera2D.area_selected.connect(_on_area_selected)
-
+	add_child(StoneResource.new())
 	#if Engine.has_singleton("MapManager"):
 	#	var mm = Engine.get_singleton("MapManager")
 	#	if mm:
