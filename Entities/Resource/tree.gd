@@ -1,5 +1,5 @@
+class_name TreeResource
 extends MapResource
-
 
 # Init
 func _ready() -> void:
@@ -8,7 +8,6 @@ func _ready() -> void:
 	amount = 1 
 	totalTime = 5.0
 	currentTime = totalTime
-	
 	bar.max_value = totalTime
 	bar.value = currentTime
 	resource_name = "ressource_tree"
