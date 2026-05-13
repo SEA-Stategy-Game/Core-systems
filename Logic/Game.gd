@@ -2,8 +2,8 @@ extends Node
 
 @onready var spawn = preload("res://Entities/Interfaces/spawn_unit.tscn")
 
-var wood = 0
-var stone = 0
+var Wood = 0
+var Stone = 0
 
 func spawn_unit(position):
 	var path = get_tree().get_root().get_node("World/UI")
