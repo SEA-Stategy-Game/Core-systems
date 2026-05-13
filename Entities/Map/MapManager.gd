@@ -4,7 +4,7 @@ extends TileMapLayer
 
 # Change this instance to change the type of map that is generated
 # E.g. GameMap, TestMap, or MapGenerator 
-@onready var game_map = MapGenerator.new(0);
+var game_map: GameMap = MapGenerator.new()
 @onready var nav_region = $"/root/World/NavigationRegion2D"
 @onready var objects_node = $Objects
 const tree_scene = preload("res://Entities/Resource/Tree.tscn")
