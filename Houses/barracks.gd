@@ -10,7 +10,7 @@ extends StaticBody2D
 @export var max_health: int = 500
 var current_health: int
 
-var mouse_entered = false
+var is_hovered: bool = false
 @onready var select = get_node("Selected")
 var selected = false
 
@@ -19,23 +19,22 @@ func _ready() -> void:
 	add_to_group("buildings")
 	add_to_group("barracks")
 
-func _process() -> void:
-	select.visible = Selected
+func _process(delta: float) -> void:
+	select.visible = selected
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("LeftClick"):
-		if mouseEntered == true and _allow_spawn_ui():
-			Selected = !Selected
-			if Selected == true:
+		if is_hovered == true and _allow_spawn_ui():
+			selected = !selected
+			if selected == true:
 				Game.spawnUnit(global_position)
 
 
 func _on_mouse_entered() -> void:
-	print(mouseEntered)
-	mouseEntered = true
+	is_hovered = true
 
 func _on_mouse_exited():
-	mouseEntered = false
+	is_hovered = false
 
 # -----------------------------------------------------------------
 # IDamageable contract
