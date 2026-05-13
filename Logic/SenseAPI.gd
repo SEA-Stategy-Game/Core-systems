@@ -63,6 +63,42 @@ func get_units_near(origin: Vector2, radius: float) -> Array:
 				result.append(_unit_snapshot(unit))
 	return result
 
+## Return an Array[int] of entity_ids for all idle units belonging to a player.
+func get_idle_units(pid: int) -> Array:
+	var result: Array = []
+	for unit in _tree.get_nodes_in_group("units"):
+		if unit is CharacterBody2D:
+			var unit_pid: int = unit.player_id if "player_id" in unit else 0
+			if unit_pid != pid:
+				continue
+			var idle: bool = true
+			if "command_queue" in unit and unit.command_queue != null:
+				idle = unit.command_queue.is_idle()
+			elif "is_idle" in unit:
+				idle = unit.is_idle
+			if idle:
+				result.append(_get_id(unit))
+	print("[IDLE_REPORT] get_idle_units(player ", pid, "): ", result.size(), " units idle.")
+	return result
+
+## Return an Array[int] of entity_ids for all busy units belonging to a player.
+func get_busy_units(pid: int) -> Array:
+	var result: Array = []
+	for unit in _tree.get_nodes_in_group("units"):
+		if unit is CharacterBody2D:
+			var unit_pid: int = unit.player_id if "player_id" in unit else 0
+			if unit_pid != pid:
+				continue
+			var busy: bool = false
+			if "command_queue" in unit and unit.command_queue != null:
+				busy = not unit.command_queue.is_idle()
+			elif "is_idle" in unit:
+				busy = not unit.is_idle
+			if busy:
+				result.append(_get_id(unit))
+	print("[IDLE_REPORT] get_busy_units(player ", pid, "): ", result.size(), " units busy.")
+	return result
+
 # -----------------------------------------------------------------
 # Resource queries
 # -----------------------------------------------------------------
@@ -151,6 +187,8 @@ func _unit_snapshot(unit: Node) -> Dictionary:
 		"name": unit.name,
 		"position": {"x": unit.global_position.x, "y": unit.global_position.y},
 		"health": unit.current_health if "current_health" in unit else -1,
+		"max_health": unit.max_health if "max_health" in unit else -1,
+		"player_id": unit.player_id if "player_id" in unit else -1,
 		"is_idle": is_idle
 	}
 	if "command_queue" in unit and unit.command_queue != null:
@@ -173,7 +211,9 @@ func _building_snapshot(node: Node) -> Dictionary:
 		"id": _get_id(node),
 		"name": node.name,
 		"type": node.get_class(),
-		"position": {"x": node.global_position.x, "y": node.global_position.y}
+		"position": {"x": node.global_position.x, "y": node.global_position.y},
+		"player_id": node.player_id if "player_id" in node else -1,
+		"health": node.current_health if "current_health" in node else -1
 	}
 
 func _get_id(node: Node) -> int:

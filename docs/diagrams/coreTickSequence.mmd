@@ -1,0 +1,25 @@
+sequenceDiagram
+    autonumber
+    participant TH as TickHandler
+    participant EC as EntityContainer
+    participant PL as Planner
+    participant PERS as Persistence
+
+    TH->>EC: tick()
+    EC->>EC: getActiveEntities()
+
+    loop each Entity
+        alt entity is Unit
+            EC->>PL: checkPlan(unit)
+            PL-->>EC: action
+            EC->>EC: execute Unit flow
+        else entity is Building
+            EC->>PL: checkPlan(building)
+            PL-->>EC: action
+            EC->>EC: execute Building flow
+        end
+    end
+
+    EC->>PERS: saveWorldState()
+    PERS-->>EC: saved
+    EC-->>TH: completeTick()

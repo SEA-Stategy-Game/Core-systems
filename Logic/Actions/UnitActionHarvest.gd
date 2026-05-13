@@ -13,7 +13,7 @@ class_name UnitActionHarvest
 const ActionState = IUnitAction.ActionState
 
 var _state: int = ActionState.PENDING
-var _target_resource: Node2D = null
+var _target_node: Node2D = null
 var _elapsed: float = 0.0
 var _harvest_duration: float = 5.0  # Overridden from resource's totalTime
 
@@ -23,7 +23,7 @@ var _harvest_duration: float = 5.0  # Overridden from resource's totalTime
 
 func start(unit: CharacterBody2D, target: Node2D) -> void:
 	_state = ActionState.RUNNING
-	_target_resource = target
+	_target_node = target
 
 	if not is_instance_valid(target):
 		_state = ActionState.FAILED
@@ -58,7 +58,7 @@ func tick(unit: CharacterBody2D, delta: float) -> int:
 		return _state
 
 	# Resource was depleted or removed
-	if not is_instance_valid(_target_resource):
+	if not is_instance_valid(_target_node):
 		_state = ActionState.COMPLETED
 		if unit.has_node("AnimationPlayer"):
 			unit.get_node("AnimationPlayer").stop()
@@ -80,8 +80,8 @@ func cancel(unit: CharacterBody2D) -> void:
 
 func serialize() -> Dictionary:
 	var target_id: int = -1
-	if is_instance_valid(_target_resource) and "entity_id" in _target_resource:
-		target_id = _target_resource.entity_id
+	if is_instance_valid(_target_node) and "entity_id" in _target_node:
+		target_id = _target_node.entity_id
 	return {
 		"type": "HARVEST",
 		"target_id": target_id,
@@ -94,12 +94,12 @@ func serialize() -> Dictionary:
 # -----------------------------------------------------------------
 
 func _cleanup(unit: CharacterBody2D) -> void:
-	if is_instance_valid(_target_resource):
-		if "units_harvesting" in _target_resource:
-			_target_resource.units_harvesting = maxi(0, _target_resource.units_harvesting - 1)
-			if _target_resource.units_harvesting <= 0:
-				if _target_resource.has_node("ProgressBar/Timer"):
-					_target_resource.get_node("ProgressBar/Timer").stop()
+	if is_instance_valid(_target_node):
+		if "units_harvesting" in _target_node:
+			_target_node.units_harvesting = maxi(0, _target_node.units_harvesting - 1)
+			if _target_node.units_harvesting <= 0:
+				if _target_node.has_node("ProgressBar/Timer"):
+					_target_node.get_node("ProgressBar/Timer").stop()
 	if unit.has_node("AnimationPlayer"):
 		unit.get_node("AnimationPlayer").stop()
 
@@ -108,7 +108,7 @@ func _cleanup(unit: CharacterBody2D) -> void:
 # -----------------------------------------------------------------
 static func create(resource_node: Node2D) -> UnitActionHarvest:
 	var action = UnitActionHarvest.new()
-	action._target_resource = resource_node
+	action._target_node = resource_node
 	if resource_node and "totalTime" in resource_node:
 		action._harvest_duration = resource_node.totalTime
 	return action

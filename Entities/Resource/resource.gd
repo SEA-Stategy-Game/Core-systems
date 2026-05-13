@@ -2,6 +2,12 @@ extends Entity
 
 class_name MapResource
 
+## -----------------------------------------------------------------------
+## Base class for all harvestable resources (trees, stones, etc.).
+## Inherits Entity (IDamageable-compliant).
+## Resources are "neutral" (player_id = -1) by default.
+## -----------------------------------------------------------------------
+
 # Init
 @export var resource_name: String = "Resource"
 @export var totalTime: float = 5.0
@@ -15,10 +21,16 @@ var currentTime: float
 var units_harvesting: int = 0
 
 func _ready() -> void:
+	player_id = -1  # Neutral / environment object
+	current_health = max_health
 	currentTime = totalTime
 	if bar:
 		bar.max_value = totalTime
 		bar.value = currentTime
+	# Resources should not be in the "units" group -- remove if Entity added it
+	if is_in_group("units"):
+		remove_from_group("units")
+	add_to_group("resources")
 
 func harvest():
 	if amount > 0:

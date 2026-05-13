@@ -1,0 +1,39 @@
+sequenceDiagram
+    autonumber
+    participant EC as EntityContainer
+    participant B as Building
+    participant PL as Planner
+    participant RS as ResourceSystem
+    participant CONS as ConstructionSystem
+    participant U as Unit
+    
+    EC->>PL: checkPlan(building)
+    PL-->>EC: action
+
+    alt action == PRODUCE
+        EC->>RS: checkCost(B.cost[])
+        RS-->>EC: enough/notEnough
+        alt enough
+            EC->>B: produce()
+            B-->>EC: production started/completed
+            EC->>EC: createUnit()
+            EC-->>U: new Unit
+        else notEnough
+            EC->>B: tick()
+        end
+
+    else action == UPGRADE
+        EC->>RS: checkCost(B.cost[])
+        RS-->>EC: enough/notEnough
+        alt enough
+            EC->>B: upgrade()
+            B-->>EC: stage increased
+        else notEnough
+            EC->>B: tick()
+        end
+
+    else action == CONSTRUCTION_PROGRESS
+        EC->>CONS: applyBuildProgress(B)
+        CONS-->>EC: progress delta
+        EC->>B: tick()
+    end

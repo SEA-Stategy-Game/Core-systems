@@ -1,6 +1,5 @@
-## PlanReceiver.gd — Autoload singleton
-## Modtager plan-notifikationer fra Planning, henter UnitPlans og driver
-## sekventiel, loopende plan-eksekvering for hver unit via ActionGateway.
+## Receives plan notifications from Planning, retrieves UnitPlans and drives
+## sequential, looping plan execution for each unit via ActionGateway.
 extends Node
 
 const LISTEN_PORT  = 8085
@@ -33,7 +32,7 @@ func _process(_delta: float) -> void:
 		_handle_connection(_server.take_connection())
 
 # ----------------------------------------------------------------
-# HTTP server — modtag notifikation fra Planning
+# HTTP server, receive notification from Planning
 # ----------------------------------------------------------------
 
 func _handle_connection(peer: StreamPeerTCP) -> void:
@@ -41,7 +40,6 @@ func _handle_connection(peer: StreamPeerTCP) -> void:
 	var raw = ""
 	var deadline = Time.get_ticks_msec() + 2000
 
-	# Fase 1: læs indtil headers er modtaget
 	while Time.get_ticks_msec() < deadline:
 		var n = peer.get_available_bytes()
 		if n > 0:
@@ -55,7 +53,6 @@ func _handle_connection(peer: StreamPeerTCP) -> void:
 		_respond(peer, 400)
 		return
 
-	# Fase 2: læs body baseret på Content-Length
 	var content_length = 0
 	for line in raw.split("\r\n"):
 		if line.to_lower().begins_with("content-length:"):
@@ -105,7 +102,7 @@ func _respond(peer: StreamPeerTCP, code: int) -> void:
 	)
 
 # ----------------------------------------------------------------
-# Hent UnitPlans fra Planning og gem i _store
+# Get UnitPlans from Planning and save in _store
 # ----------------------------------------------------------------
 
 func _fetch_and_store(game_id: String, player_id: String, unit_ids: Array) -> void:
@@ -141,7 +138,6 @@ func _fetch_and_store(game_id: String, player_id: String, unit_ids: Array) -> vo
 	var unit_plans: Array = resp_body.get("unit_plans", [])
 	print("PlanReceiver: Modtog %d UnitPlan(s)" % unit_plans.size())
 
-	# Debug: vis alle unit entity_ids i scenen
 	var gateway = get_node_or_null("/root/ActionGateway")
 	if gateway:
 		var all_units = gateway.get_all_units()
@@ -169,7 +165,7 @@ func _fetch_and_store(game_id: String, player_id: String, unit_ids: Array) -> vo
 		_execute_current_step(uid_int)
 
 # ----------------------------------------------------------------
-# Step-eksekvering og looping
+# Step execution and looping
 # ----------------------------------------------------------------
 
 func _on_unit_idled(unit_id: int) -> void:

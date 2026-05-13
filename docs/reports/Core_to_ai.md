@@ -77,10 +77,16 @@ Each wrapper performs **pre-flight** logic: it creates one or more `IUnitAction`
 
 | Gateway Method | Description | Actions Enqueued |
 |---|---|---|
-| `go_chop_tree(unit_id, tree_id)` | Pathfind to a tree, then harvest it | `UnitActionMove` + `UnitActionHarvest` |
-| `go_mine_stone(unit_id, stone_id)` | Pathfind to a stone, then harvest it | `UnitActionMove` + `UnitActionHarvest` |
-| `go_construct(unit_id, scene, pos, dur)` | Pathfind to position, then build | `UnitActionMove` + `UnitActionConstruct` |
-| `move_unit(unit_id, destination)` | Simple move-to-position | `UnitActionMove` |
+| `go_chop_tree(uid, tid, pid)` | Pathfind to a tree, then harvest it | `UnitActionMove` + `UnitActionHarvest` |
+| `go_chop_tree_and_return(uid, tid, pid)` | Composite: move, harvest, auto-return to barracks, idle | `UnitActionMove` + `UnitActionHarvest` + auto `UnitActionMove` |
+| `go_mine_stone(uid, sid, pid)` | Pathfind to a stone, then harvest it | `UnitActionMove` + `UnitActionHarvest` |
+| `go_construct(uid, scene, pos, dur, pid)` | Pathfind to position, then build | `UnitActionMove` + `UnitActionConstruct` |
+| `move_unit(uid, destination, pid)` | Simple move-to-position | `UnitActionMove` |
+| `attack_target(uid, tid, pid)` | Move to and attack a specific hostile | `UnitActionMove` + `UnitActionAttack` |
+| `attack_move(uid, dest, pid)` | Move to position, auto-attack hostiles in range | `UnitActionMove` + `UnitActionAttack` |
+
+> [!IMPORTANT]
+> All commands accept `requesting_player_id` (pid) as the last parameter. Set to `-1` to skip ownership validation (single-player / test mode). Cross-player commands are rejected with `[OWNERSHIP_ERR]`.
 
 ### 3.2 Plan Execution (Push/Pull)
 
@@ -89,11 +95,15 @@ The `execute_plan(plan: Dictionary)` method parses a JSON-style plan and dispatc
 ```json
 {
   "plan_id": "harvest-alpha-001",
+  "player_id": 0,
   "commands": [
     {"unit_id": 1, "action": "MOVE",      "target": {"x": 100, "y": 200}},
     {"unit_id": 1, "action": "HARVEST",    "target_id": 42},
+    {"unit_id": 1, "action": "CHOP_AND_RETURN", "target_id": 42},
     {"unit_id": 2, "action": "CONSTRUCT",  "scene": "res://Houses/Barracks.tscn",
-     "position": {"x": 300, "y": 150}, "duration": 15}
+     "position": {"x": 300, "y": 150}, "duration": 15},
+    {"unit_id": 3, "action": "ATTACK",     "target_id": 99},
+    {"unit_id": 3, "action": "ATTACK_MOVE", "target": {"x": 400, "y": 300}}
   ]
 }
 ```
@@ -106,17 +116,41 @@ The `SenseAPI` class provides read-only queries:
 
 | Method | Returns |
 |---|---|
-| `get_all_units()` | `Array[Dictionary]` -- id, position, health, is\_idle, pending\_actions |
+| `get_all_units()` | `Array[Dictionary]` -- id, position, health, player\_id, is\_idle, pending\_actions |
 | `get_unit(unit_id)` | `Dictionary` -- single unit snapshot |
+| `get_unit_status(unit_id)` | `Dictionary` -- enriched with current\_action and action\_state |
 | `get_units_near(origin, radius)` | `Array[Dictionary]` -- units within radius |
+| `get_idle_units(player_id)` | `Array[int]` -- entity IDs of all idle units for a player |
+| `get_busy_units(player_id)` | `Array[int]` -- entity IDs of all busy units for a player |
 | `get_all_resources()` | `Array[Dictionary]` -- all MapResource nodes |
 | `get_resources_near(origin, radius)` | `Array[Dictionary]` -- filtered by distance |
-| `get_all_buildings()` | `Array[Dictionary]` -- all building nodes |
+| `get_all_buildings()` | `Array[Dictionary]` -- all building nodes (includes player\_id) |
 | `get_buildings_near(origin, radius)` | `Array[Dictionary]` -- filtered by distance |
 | `get_resources_stockpile()` | `Dictionary` -- `{wood: int, stone: int}` |
 | `get_tick_count()` | `int` -- current simulation tick |
 
 All return types are plain `Dictionary` / `Array` for straightforward JSON serialisation.
+
+### 3.4 Multiplayer Ownership
+
+Every entity has a `player_id: int` attribute:
+- **Units**: `player_id` set at spawn, identifies the owning player.
+- **Buildings / Barracks**: `player_id` identifies the builder/owner.
+- **Resources**: `player_id = -1` (neutral / environment).
+
+The `IDamageable` interface ensures any object that can take damage (Units, Buildings, Trees) exposes:
+- `take_damage(amount)` -- apply damage, trigger `die()` if HP <= 0.
+- `get_current_health()` -- current HP.
+- `is_alive()` -- true if HP > 0.
+- `get_player_id()` -- ownership ID.
+
+### 3.5 Logging Tags
+
+| Tag | Usage |
+|---|---|
+| `[OWNERSHIP_ERR]` | Cross-player command rejected by ActionGateway. |
+| `[COMBAT_LOG]` | Damage dealt/received, unit destroyed, combat state changes. |
+| `[IDLE_REPORT]` | Unit idle/busy transitions, chop-and-return completion. |
 
 ---
 
@@ -203,9 +237,12 @@ Restoration is invoked via `ActionGateway.restore_task_state()` during scene loa
 
 | Command String | Gateway Method | Parameters | Expected Result |
 |---|---|---|---|
-| `MOVE` | `move_unit()` | `unit_id: int`, `destination: Vector2` | Unit pathfinds to destination; `task_completed` on arrival |
-| `HARVEST` | `go_chop_tree()` / `go_mine_stone()` | `unit_id: int`, `target_id: int` | Unit moves to resource, harvests until depleted; resource counter updated |
-| `CONSTRUCT` | `go_construct()` | `unit_id: int`, `scene: String`, `pos: Vector2`, `duration: float` | Unit moves to build site, plays build animation, instantiates building scene |
+| `MOVE` | `move_unit()` | `unit_id, destination, player_id` | Unit pathfinds to destination; `task_completed` on arrival |
+| `HARVEST` | `go_chop_tree()` / `go_mine_stone()` | `unit_id, target_id, player_id` | Unit moves to resource, harvests until depleted |
+| `CHOP_AND_RETURN` | `go_chop_tree_and_return()` | `unit_id, tree_id, player_id` | Composite: move, harvest, auto-return to barracks, idle |
+| `CONSTRUCT` | `go_construct()` | `unit_id, scene, pos, dur, player_id` | Unit moves to build site, builds, instantiates building |
+| `ATTACK` | `attack_target()` | `unit_id, target_id, player_id` | Move to hostile and attack until dead |
+| `ATTACK_MOVE` | `attack_move()` | `unit_id, destination, player_id` | Move to position, auto-engage hostiles in range |
 | Full Plan | `execute_plan()` | `plan: Dictionary` (see Section 3.2) | Dispatches all commands; emits `plan_execution_finished` |
 | State Query | `sense().get_*()` | Varies per method (see Section 3.3) | Returns `Dictionary` / `Array` snapshots |
 
@@ -216,10 +253,10 @@ Restoration is invoked via `ActionGateway.restore_task_state()` during scene loa
 ```
 Core-systems/
   Logic/
-    ActionGateway.gd        # Autoload -- AI entry-point
+    ActionGateway.gd        # Autoload -- AI entry-point (ownership validation)
     CommandQueue.gd          # Per-unit sequential command queue
     Game.gd                  # Global game state (existing)
-    SenseAPI.gd              # Read-only query interface
+    SenseAPI.gd              # Read-only query interface (idle/busy queries)
     TaskSerializer.gd        # JSON persistence
     TickManager.gd           # Simulation tick (refactored)
     Interfaces/
@@ -228,9 +265,23 @@ Core-systems/
       UnitActionMove.gd      # MOVE implementation
       UnitActionHarvest.gd   # HARVEST implementation
       UnitActionConstruct.gd # CONSTRUCT implementation
+      UnitActionAttack.gd    # ATTACK implementation (proximity combat)
   Entities/
+    entity.gd                # Base class (player_id, IDamageable)
     Units/
-      Unit.gd                # Refactored -- owns CommandQueue
+      Unit.gd                # Refactored -- player_id, combat stats, CommandQueue
+    Building/
+      building.gd            # Building base (inherits Entity)
+      barrack.gd             # Barracks subclass
+    Resource/
+      resource.gd            # MapResource base (neutral player_id = -1)
+      tree.gd / stone.gd     # Concrete resources
+    Interfaces/
+      IDamageable.gd         # Universal damage interface
+      spawn_unit.gd          # Unit spawning UI
+  Houses/
+    barracks.gd              # Barracks (player_id, IDamageable, "barracks" group)
+  multiplayer_entity_model.tex  # LaTeX documentation
 ```
 
 ---
