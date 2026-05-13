@@ -1,3 +1,4 @@
+class_name StoneResource
 extends MapResource
 
 # Init
@@ -7,9 +8,8 @@ func _ready() -> void:
 	amount = 3
 	totalTime = 10.0
 	currentTime = totalTime
-	
-	bar.max_value = totalTime
-	bar.value = currentTime
+	#bar.max_value = totalTime
+	#bar.value = currentTime
 	resource_name = "ressource_stone"
 
 func on_finished_harvesting():

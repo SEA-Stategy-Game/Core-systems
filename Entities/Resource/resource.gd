@@ -40,7 +40,6 @@ func _ready() -> void:
 	add_to_group("resources")
 	self.modified.connect(server._on_ressource_modified)
 	
-
 func harvest():
 	if amount > 0:
 		amount -= 1
