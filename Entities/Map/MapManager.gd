@@ -27,7 +27,8 @@ func _ready() -> void:
 	nav_region.rebuild_nav()
 	
 func spawn_tree(tile: MapTile) -> void:
-	if randf() > 0.25:
+	var spawn_chance = pos_to_deterministic_float(tile.x, tile.y, 123)
+	if spawn_chance > 0.25:
 		return
 	var tree = tree_scene.instantiate()
 	tree.position = map_to_local(Vector2i(tile.x, tile.y))
@@ -36,13 +37,15 @@ func spawn_tree(tile: MapTile) -> void:
 	tile.place_object(tree)
 
 func spawn_rock(tile: MapTile) -> void:
-	if randf() > 0.25:
+	var spawn_chance = pos_to_deterministic_float(tile.x, tile.y, 456)
+	if spawn_chance > 0.25:
 		return
 	var rock = rock_scene.instantiate()
 	rock.position = map_to_local(Vector2i(tile.x, tile.y))
 	rock.z_index = 1
 	objects_node.call_deferred("add_child", rock)
 	tile.place_object(rock)
+
 func _index(x: int, y: int) -> int:
 	return y * game_map.width + x
 
@@ -61,3 +64,9 @@ func world_to_grid(world_pos: Vector2) -> Vector2i:
 func get_tile_at_world_pos(world_pos: Vector2) -> Variant:
 	var map_pos = local_to_map(to_local(world_pos))
 	return game_map.get_tile(map_pos.x, map_pos.y)
+
+func pos_to_deterministic_float(x: int, y: int, seed_offset: int) -> float:
+	var combined_seed = x * 73856093 ^ y * 19349663 ^ seed_offset
+	var rng = RandomNumberGenerator.new()
+	rng.seed = combined_seed
+	return rng.randf()

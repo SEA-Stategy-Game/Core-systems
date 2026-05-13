@@ -1,11 +1,11 @@
 extends Camera2D
 
 # Camera Control
-@export var CamSpeed = 20.0
-@export var ZoomSpeed = 20.0
-@export var ZoomMargin = 0.1
-@export var ZoomMin = 0.5
-@export var ZoomMax = 3.0
+@export var CamSpeed: float = 20.0
+@export var ZoomSpeed: float = 20.0
+@export var ZoomMargin: float = 0.1
+@export var ZoomMin: float = 0.5
+@export var ZoomMax: float = 3.0
 
 var ZoomFactor = 1.0
 var ZoomPos = Vector2()
@@ -26,7 +26,6 @@ signal start_move_selection(object)
 
 func _ready():
 	pass
-	
 
 # logic for "selecting" units with mouse
 # maybe disable this if client wants
