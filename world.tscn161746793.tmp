@@ -171,6 +171,9 @@ position = Vector2(557, 492)
 
 [node name="House" parent="NavigationRegion2D/TileMapLayer/Houses" unique_id=334523237 instance=ExtResource("7_pkg7o")]
 position = Vector2(5, 12)
+entity_id = null
+player_id = null
+max_health = null
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=118205968]
 position = Vector2(12, -41)

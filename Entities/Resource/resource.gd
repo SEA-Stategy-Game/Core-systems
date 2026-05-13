@@ -30,10 +30,10 @@ signal modified
 func _ready() -> void:
 	player_id = -1  # Neutral / environment object
 	current_health = max_health
-	currentTime = totalTime
+	current_time = total_time
 	if bar:
-		bar.max_value = totalTime
-		bar.value = currentTime
+		bar.max_value = total_time
+		bar.value = current_time
 	# Resources should not be in the "units" group -- remove if Entity added it
 	if is_in_group("units"):
 		remove_from_group("units")
@@ -63,13 +63,13 @@ func _on_harvest_area_body_exited(body: Node2D) -> void:
 			timer.stop()
 
 func _on_timer_timeout() -> void:
-	currentTime -= 1 * units_harvesting
+	current_time -= 1 * units_harvesting
 	
 	if bar:
 		var tween = get_tree().create_tween()
-		tween.tween_property(bar, "value", currentTime, 0.5)
+		tween.tween_property(bar, "value", current_time, 0.5)
 	
-	if currentTime <= 0:
+	if current_time <= 0:
 		harvest()
 
 		
