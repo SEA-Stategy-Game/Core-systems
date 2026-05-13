@@ -1,8 +1,8 @@
 class_name GameMap
 
 var tiles: Array = []
-var width = 32 #obs
-var height = 32 #obs
+var width = 256 #obs
+var height = 256 #obs
 
 func _ready() -> void:
 	if tiles.is_empty():
