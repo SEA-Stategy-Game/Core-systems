@@ -141,5 +141,5 @@ static func create_auto() -> UnitActionAttack:
 ## Create an attack action focused on a specific target node.
 static func create_focused(target: Node2D) -> UnitActionAttack:
 	var action = UnitActionAttack.new()
-	action._target_node = target
+	action.target_node = target
 	return action

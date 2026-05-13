@@ -10,7 +10,7 @@ extends StaticBody2D
 @export var max_health: int = 500
 var current_health: int
 
-var mouseEntered = false
+var mouse_entered = false
 @onready var select = get_node("Selected")
 var selected = false
 
@@ -19,17 +19,15 @@ func _ready() -> void:
 	add_to_group("buildings")
 	add_to_group("barracks")
 
-func _process(delta) -> void:
-	select.visible = selected
+func _process() -> void:
+	select.visible = Selected
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("LeftClick"):
-		print("click! mouseEntered=", mouseEntered, " allow=", _allow_spawn_ui())
 		if mouseEntered == true and _allow_spawn_ui():
-			selected = !selected
-			if selected == true:
-				Game.spawn_unit(global_position)
-
+			Selected = !Selected
+			if Selected == true:
+				Game.spawnUnit(global_position)
 
 
 func _on_mouse_entered() -> void:
@@ -66,5 +64,6 @@ func _allow_spawn_ui() -> bool:
 	var session = get_node_or_null("/root/NetSession")
 	if session and session.is_scenario_active():
 		return false
-
+	if multiplayer.has_multiplayer_peer():
+		return false
 	return true
