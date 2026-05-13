@@ -5,14 +5,24 @@ var width = 32 #obs
 var height = 32 #obs
 
 func _ready() -> void:
+	pass
+		
+func _init() -> void:
 	if tiles.is_empty():
 		initialize_tiles()
+	# This call happens after special map-constructors have painted the map
+	populate_tiles()
+
+func populate_tiles():
+	for y in range(height):
+		for x in range(width):
+			tiles[_index(x, y)].try_spawn_resource()
 
 func initialize_tiles() -> void:
 	tiles.resize(width * height)
 	for y in range(height):
 		for x in range(width):
-			tiles[_index(x, y)] = MapTile.new(x, y, MapTile.TerrainType.PLAINS)
+			tiles[_index(x, y)] = MapTile.new(x, y, MapTile.TerrainType.PLAINS, null)
 
 func _index(x: int, y: int) -> int:
 	return y * width + x
