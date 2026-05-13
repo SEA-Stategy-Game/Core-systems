@@ -18,8 +18,6 @@ func _ready() -> void:
 	current_health = max_health
 	add_to_group("buildings")
 	add_to_group("barracks")
-	mouse_entered.connect(_on_mouse_entered)
-	mouse_exited.connect(_on_mouse_exited)
 
 func _process(delta) -> void:
 	select.visible = selected
