@@ -57,15 +57,15 @@ I `_fetch_and_store`-funktionen, efter at `unit_ids` og `stop_unit_ids` er udtru
 var stop_ids: Array = body.get("stop_unit_ids", [])
 
 for uid_str in stop_ids:
-    var uid_int = int(str(uid_str))
-    # Fjern fra _store så unit_idled-signalet ikke genstartes
-    _store.erase(str(uid_str))
-    # Stop CommandQueue for denne unit
-    if gateway:
-        var unit = gateway._find_unit(uid_int)
-        if unit and unit.command_queue:
-            unit.command_queue.clear()
-    print("PlanReceiver: Stoppede unit %s (ikke i ny plan)" % uid_str)
+	var uid_int = int(str(uid_str))
+	# Fjern fra _store så unit_idled-signalet ikke genstartes
+	_store.erase(str(uid_str))
+	# Stop CommandQueue for denne unit
+	if gateway:
+		var unit = gateway._find_unit(uid_int)
+		if unit and unit.command_queue:
+			unit.command_queue.clear()
+	print("PlanReceiver: Stoppede unit %s (ikke i ny plan)" % uid_str)
 ```
 
 Dette sikrer at units der ikke er med i den nye plan holder op med at arbejde.
