@@ -1,4 +1,3 @@
-## ActionGateway.gd  (Autoload Singleton)
 ## -----------------------------------------------------------------------
 ## THE single entry-point for the AI Planning Team.
 ##
@@ -166,7 +165,7 @@ func attack_target(unit_id: int, target_id: int, requesting_player_id: int = -1)
 			return false
 
 	var move_action = UnitActionMove.create_to_node(target_node)
-	var attack_action = UnitActionAttack.create_focused(target_node)
+	var attack_action = UnitActionAttack.create(null)
 
 	var cq: CommandQueue = _get_or_create_queue(unit)
 	cq.enqueue(move_action)
@@ -183,7 +182,7 @@ func attack_move(unit_id: int, destination: Vector2, requesting_player_id: int =
 		return false
 
 	var move_action = UnitActionMove.create(destination)
-	var attack_action = UnitActionAttack.create_auto()
+	var attack_action = UnitActionAttack.create(null)
 
 	var cq: CommandQueue = _get_or_create_queue(unit)
 	cq.enqueue(move_action)

@@ -1,4 +1,3 @@
-## UnitActionMove.gd
 ## -----------------------------------------------------------------------
 ## Concrete IUnitAction -- moves a unit to a target position.
 ## The action is RUNNING while the unit travels and transitions to
@@ -12,7 +11,8 @@ const ACTION_STATE = IUnitAction.ActionState
 var _target_position: Vector2 = Vector2.ZERO
 var _arrival_radius: float = 12.0
 var _state: int = ACTION_STATE.PENDING
-var _target_node: Node2D = null  # Optional -- used to follow a moving target
+var target_position: Vector2
+var _target_node: Node2D = null
 
 # -----------------------------------------------------------------
 # IUnitAction contract
@@ -73,14 +73,12 @@ func serialize() -> Dictionary:
 # -----------------------------------------------------------------
 # Convenience factory
 # -----------------------------------------------------------------
-static func create(destination: Vector2) -> UnitActionMove:
+static func create(position: Vector2) -> UnitActionMove:
 	var action = UnitActionMove.new()
-	action.target_position = destination
+	action.target_position = position
 	return action
 
-static func create_to_node(target_node: Node2D) -> UnitActionMove:
+static func create_to_node(node: Node2D) -> UnitActionMove:
 	var action = UnitActionMove.new()
-	if target_node:
-		action.target_position = target_node.global_position
-		action.target_node = target_node
+	action.target_node = node
 	return action

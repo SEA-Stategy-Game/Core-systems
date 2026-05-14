@@ -195,7 +195,7 @@ func _physics_process(delta) -> void:
 	if command_queue and not command_queue.is_idle():
 		if is_idle:
 			is_idle = false
-		command_queue.process_tick(delta)
+		command_queue.process_tick(self, delta)
 		return  # AI commands take priority -- skip manual logic
 	
 	# 2. Otherwise, fall back to manual right-click movement.

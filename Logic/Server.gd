@@ -1,156 +1,152 @@
 extends Node
 
-## Authoritative server gateway. Manages the multiplayer peer, serialises world
-## state, and distributes it to connected clients via RPC.
+const PORT := 24567
+const MAX_CLIENTS := 16
 
-@onready var units = get_node("/root/World/Units")     
-@onready var objects = get_node("/root/World/NavigationRegion2D/TileMapLayer/Objects")  
-@onready var buildings = get_node("/root/World/NavigationRegion2D/TileMapLayer/Houses") 
-@onready var map_manager = get_node("/root/World/NavigationRegion2D/TileMapLayer") 
+signal client_connected(peer_id: int)
+signal client_disconnected(peer_id: int)
 
-var queued_objects: Array[Dictionary] = []
+var last_full_state: Dictionary = {}
+var connected_peers: Array[int] = []
 
-## Initialises the ENet server on port 12345 with a maximum of 32 clients.
-## Connects the peer_connected signal to track incoming connections.
-func _ready():
-	var peer = ENetMultiplayerPeer.new()
-	peer.create_server(12345, 32)
+@export var auto_start_server := true
+
+func _ready() -> void:
+	if OS.has_feature("dedicated_server"):
+		_start_server()
+		return
+
+	if auto_start_server and "--server" in OS.get_cmdline_args():
+		_start_server()
+
+func _start_server() -> void:
+	if multiplayer.multiplayer_peer != null:
+		return
+
+	var peer := ENetMultiplayerPeer.new()
+	var err := peer.create_server(PORT, MAX_CLIENTS)
+
+	if err != OK:
+		push_error("[NET_ERR] Failed to create ENet server. Error: %s" % err)
+		return
+
 	multiplayer.multiplayer_peer = peer
+
 	multiplayer.peer_connected.connect(_on_peer_connected)
-	for ip in IP.get_local_addresses():
-		if ip.begins_with("192.") or ip.begins_with("10."):
-			print("Server started, hosting on: ", ip)
-	print("My node path: ", get_path())
+	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 
-## Called when a new client connects. Logs the peer ID.
-func _on_peer_connected(id: int):
-	print("Client connected: ", id)
-	
-	
-# -----------------------------------------------------------------------
-# Client RPC stubs
-# These functions are never executed on the server. They exist solely so
-# Godot can compute a matching RPC checksum between client and server.
-# -----------------------------------------------------------------------
+	var tick_manager = get_node_or_null("/root/TickManager")
 
-## Stub: called by the client to request the full static world state.
-@rpc("any_peer", "call_remote", "reliable")
-func request_static_state() -> void:
-	pass
+	if tick_manager:
+		tick_manager.authoritative_state_ready.connect(
+			_on_authoritative_state_ready
+		)
 
-## Stub: receives a dynamic state delta broadcast from the server.
-@rpc("any_peer", "call_remote", "unreliable")
-func receive_state(state: Dictionary):
-	pass
+	print("[NET_LOG] Dedicated multiplayer server started on port ", PORT)
 
-## Stub: receives the compressed static world state from the server.
-@rpc("any_peer", "call_remote", "unreliable")
-func receive_static_state(state: Dictionary):
-	pass
+func connect_to_server(address: String = "127.0.0.1") -> void:
+	if multiplayer.multiplayer_peer != null:
+		return
 
-# -----------------------------------------------------------------------
-# Server functions
-# -----------------------------------------------------------------------
+	var peer := ENetMultiplayerPeer.new()
+	var err := peer.create_client(address, PORT)
 
-## Broadcasts a dynamic state update to all connected peers.
-## [param state] A dictionary containing the current dynamic world state.
-func broadcast_state(tick: int) -> void:
-	var peers = multiplayer.get_peers()
-	print("Broadcasting to peers: ", peers)
-	
-	# TODO:
-	# Expand the state to also include map-data
-	# Create unit paths:
-	var state = {
-		"current_tick" : tick,
-		# Always send all units since the majority are likely to be dynamic 
-		"units" : units.get_children().map(func(x): return build_dynamic_unit(x)),
-		# For objects, we only send objects that are modified since there are a lot of these and they are likely to be mostly static 
-		"modified_objects" : queued_objects
-	}
-	queued_objects = []
-	#print("Dynamic state: ", state)
-	var bytes = JSON.stringify(state).to_utf8_buffer()
-	var compressed = bytes.compress(FileAccess.COMPRESSION_GZIP)
-	rpc("receive_state", compressed)
+	if err != OK:
+		push_error("[NET_ERR] Failed to connect to server. Error: %s" % err)
+		return
 
-func build_dynamic_unit(unit):
-	return {
-		"meta_values" : serialize_core_state_variables(unit),
-		"path" : unit.get_navigation_path_segment(4),
-		"speed" : unit.speed #.get_local_movement_speed()
-	} 
+	multiplayer.multiplayer_peer = peer
 
-# Signal called from objects when they are modified
-# Should maybe add TTL in object to broadcast a few times. This requires idempotency from Interface
-func _on_ressource_modified(object):
-	queued_objects.append({
-		"meta_values" : serialize_core_state_variables(object),
-		"destroyed" : object.amount == 0,
-		"amount_left" : object.amount
-	})
+	print("[NET_LOG] Connecting to multiplayer server at ", address)
 
-## Handles a client request for the full static world state.
-## Serialises, compresses, and sends the state only to the requesting peer.
-## RPC is reliable to ensure the full state arrives intact.
-@rpc("any_peer", "call_remote", "reliable")
-func on_static_state_requested() -> void:
-	print("Static state requested")
-	var requesting_peer = multiplayer.get_remote_sender_id()
-	var state = build_entire_state()
-	var bytes = JSON.stringify(state).to_utf8_buffer()
-	var compressed = bytes.compress(FileAccess.COMPRESSION_GZIP)
-	print("Pushing compressed static state to peer: ", requesting_peer)
-	rpc_id(requesting_peer, "receive_static_state", compressed)
+func _on_peer_connected(id: int) -> void:
+	connected_peers.append(id)
+	client_connected.emit(id)
 
-## Builds a dictionary representing the full current world state
-func build_entire_state() -> Dictionary:
-	return {
-		"units"   : units.get_children().map(func(x): return serialize_unit(x)),
-		"objects" : objects.get_children().map(func(x): return serialize_object(x)),
-		"map"	  : map_manager.game_map.get_all_tiles().map(func(x): return serialize_map_tile(x))
-	}
+	print("[NET_LOG] Peer connected: ", id)
 
-## Serialises the core properties shared by all entities.
-func serialize_core_state_variables(entity: Node) -> Dictionary:
-	return {
-		"entity_id"  : entity.entity_id,
-		"max_health" : entity.max_health,
-		"player_id"  : entity.player_id,
-		"position"   : entity.global_position
-	}
+	if not last_full_state.is_empty():
+		rpc_id(id, "receive_full_state", last_full_state)
 
-## Serialises a map-tile
-func serialize_map_tile(tile) -> Dictionary:
-	return {
-		"x" : tile.x,
-		"y" : tile.y,
-		"terrain_type" : tile.terrain
+func _on_peer_disconnected(id: int) -> void:
+	connected_peers.erase(id)
+	client_disconnected.emit(id)
+
+	print("[NET_LOG] Peer disconnected: ", id)
+
+func _on_authoritative_state_ready(state: Dictionary) -> void:
+	last_full_state = state.duplicate(true)
+
+	if connected_peers.is_empty():
+		return
+
+	rpc("receive_tick_state", state)
+
+@rpc("authority", "call_remote", "reliable")
+func receive_full_state(state: Dictionary) -> void:
+	print("[NET_SYNC] Received full synchronization state.")
+	_apply_state(state)
+
+@rpc("authority", "call_remote", "unreliable")
+func receive_tick_state(state: Dictionary) -> void:
+	_apply_state(state)
+
+func _apply_state(state: Dictionary) -> void:
+	if not state.has("tick"):
+		push_error("[NET_SYNC_ERR] Incoming state missing tick field.")
+		return
+
+	print("[NET_SYNC] Applying tick ", state["tick"])
+
+	_sync_units(state.get("units", []))
+
+func _sync_units(units: Array) -> void:
+	var unit_nodes = get_tree().get_nodes_in_group("units")
+
+	for incoming in units:
+		var target = null
+
+		for unit in unit_nodes:
+			if unit.entity_id == incoming["entity_id"]:
+				target = unit
+				break
+
+		if target == null:
+			print(
+				"[NET_SYNC_WARN] Missing local unit for entity_id ",
+				incoming["entity_id"]
+			)
+			continue
+
+		target.global_position = Vector2(
+			incoming["position"]["x"],
+			incoming["position"]["y"]
+		)
+
+		target.current_health = incoming["health"]
+
+func _on_ressource_modified(resource) -> void:
+	if resource == null:
+		return
+
+	print(
+		"[NET_SYNC] Resource modified: ",
+		resource.entity_id
+	)
+
+	if connected_peers.is_empty():
+		return
+
+	var payload := {
+		"entity_id": resource.entity_id,
+		"amount": resource.amount
 	}
 
-## Serialises a unit node into a transmittable dictionary
-func serialize_unit(unit: Node) -> Dictionary:
-	return {
-		"meta_values"      : serialize_core_state_variables(unit),
-		"attack_damage"    : unit.attack_damage,
-		"attack_cooldown"  : unit.attack_cooldown,
-		"current_health"   : unit.current_health
-	}
+	rpc("receive_resource_update", payload)
 
-
-## Serialises a world object node into a transmittable dictionary
-func serialize_object(object: Node) -> Dictionary:
-	return {
-		"meta_values"   : serialize_core_state_variables(object),
-		"resource_name" : object.resource_name,
-		"amount"        : object.amount
-	}
-
-## Serialises a building node into a transmittable dictionary.
-func serialize_buildings(building: Node) -> Dictionary:
-	return {
-		"meta_values"   : serialize_core_state_variables(building),
-		"resource_name" : building.resource_name,
-		"amount"        : building.amount,
-		"current_health": building.current_health
-	}
+@rpc("authority", "call_remote", "reliable")
+func receive_resource_update(payload: Dictionary) -> void:
+	for resource in get_tree().get_nodes_in_group("resources"):
+		if resource.entity_id == payload["entity_id"]:
+			resource.amount = payload["amount"]
+			return
