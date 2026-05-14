@@ -62,6 +62,7 @@ _data = {
 radius = 60.0
 
 [node name="Unit" type="CharacterBody2D" unique_id=1684801707 groups=["Unit"]]
+collision_layer = 2
 script = ExtResource("1_ij6vw")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=186835737 groups=["Unit"]]
@@ -106,6 +107,7 @@ neighbor_distance = 40.0
 time_horizon_agents = 0.5
 time_horizon_obstacles = 1.0
 max_speed = 50.0
+avoidance_layers = 2
 
 [connection signal="input_event" from="." to="." method="_on_input_event"]
 [connection signal="velocity_computed" from="NavigationAgent2D" to="." method="_on_navigation_agent_2d_velocity_computed"]
