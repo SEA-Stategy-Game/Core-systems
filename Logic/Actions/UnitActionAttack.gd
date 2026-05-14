@@ -16,9 +16,7 @@ var _attack_damage: int = 10
 var _attack_cooldown: float = 1.0
 var _cooldown_timer: float = 0.0
 var _attacker_player_id: int = -1
-
-## Optional: specific target to focus on. If null, auto-acquires closest.
-var _target_node: Node2D = null
+var _target_node: Node
 
 # -----------------------------------------------------------------
 # IUnitAction contract
@@ -143,5 +141,5 @@ static func create_auto() -> UnitActionAttack:
 ## Create an attack action focused on a specific target node.
 static func create_focused(target: Node2D) -> UnitActionAttack:
 	var action = UnitActionAttack.new()
-	action.target_node = target
+	action._target_node = target
 	return action

@@ -1,4 +1,3 @@
-## TaskSerializer.gd
 ## -----------------------------------------------------------------------
 ## Handles saving and loading of AI-triggered task state between sessions.
 ## Uses Godot's FileAccess to write JSON to user:// directory.

@@ -19,6 +19,8 @@ var auto_save_interval: int = 60  # Every 30 seconds at 2 tps
 @onready var server = get_node("/root/World/ClientGateway")
 
 func _process(delta: float) -> void:
+	if not multiplayer.is_server() or multiplayer.multiplayer_peer == null:
+		return
 	time_passed += delta
 	if time_passed >= tick_interval:
 		tick_count += 1
