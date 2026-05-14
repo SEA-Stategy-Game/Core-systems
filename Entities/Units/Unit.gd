@@ -42,7 +42,7 @@ var is_idle: bool = true
 ## Combat state -- tracked bodies inside the Range Area2D
 ## -----------------------------------------------------------------------
 var _bodies_in_range: Array = []       ## All bodies currently inside Range
-var _attack_timer: float = 0.0
+# var _attack_timer: float = 0.0w
 
 signal ai_action_completed(unit_id: int, action_data: Dictionary)
 signal ai_action_failed(unit_id: int, action_data: Dictionary)

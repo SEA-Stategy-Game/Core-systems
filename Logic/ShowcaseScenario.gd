@@ -1,6 +1,4 @@
 extends Node
-
-## Drag the ClientGateway node into this slot in the Inspector
 @export var server_gateway: Node 
 
 func _ready():

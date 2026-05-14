@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Core"
-run/main_scene="uid://ckavqb25bdaul"
+run/main_scene="res://world.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -21,7 +21,7 @@ Game="*res://Logic/Game.gd"
 ActionGateway="*res://Logic/ActionGateway.gd"
 TickManager="*res://Logic/TickManager.gd"
 DebugWindow="*res://UI/DebugWindow.tscn"
-ResourceSpawner="*uid://c8fqnjqri604"
+ResourceSpawner="*res://Entities/Map/Resource_spawner.gd"
 
 [editor_plugins]
 
@@ -51,8 +51,6 @@ WheelDown={
 }
 
 [physics]
-
-3d/physics_engine="Jolt Physics"
 
 [rendering]
 
