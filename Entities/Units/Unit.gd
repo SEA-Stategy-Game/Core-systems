@@ -233,6 +233,8 @@ func _physics_process(delta) -> void:
 	var nav_point_direction = to_local($NavigationAgent2D.get_next_path_position()).normalized()
 	velocity = nav_point_direction * speed * delta #* get_local_movement_speed()
 	move_and_slide()
+	global_position = NavigationServer2D.map_get_closest_point(
+		$NavigationAgent2D.get_navigation_map(), global_position)
 	#$NavigationAgent2D.set_velocity(desired_velocity)
 	
 	var nav_point_direction = to_local($NavigationAgent2D.get_next_path_position()).normalized()
@@ -349,7 +351,6 @@ func _on_navigation_agent_2d_velocity_computed(safe_velocity: Vector2) -> void:
 	velocity = safe_velocity
 	if not $NavigationAgent2D.is_navigation_finished():
 		set_anim(safe_velocity.length_squared() > 100)
-		move_and_slide()
 		# Snap back to navmesh
 		global_position = NavigationServer2D.map_get_closest_point(
 			$NavigationAgent2D.get_navigation_map(), global_position)
