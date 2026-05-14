@@ -22,10 +22,15 @@ ActionGateway="*res://Logic/ActionGateway.gd"
 TickManager="*res://Logic/TickManager.gd"
 PlanReceiver="*res://Logic/PlanReceiver.gd"
 DebugWindow="*res://UI/DebugWindow.tscn"
+ResourceSpawner="*uid://lsojvp4uldv7"
+
+[dotnet]
+
+project/assembly_name="New Game Project"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/gut/plugin.cfg")
+enabled=PackedStringArray()
 
 [input]
 
