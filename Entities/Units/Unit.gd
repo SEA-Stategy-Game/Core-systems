@@ -32,7 +32,7 @@ var current_health: int
 ## Movement (manual player control -- right-click)
 ## -----------------------------------------------------------------------
 var follow_cursor: bool = false
-var speed: int = 70
+var speed: int = 3000
 var is_animated: bool = false
 var current_path_index: int = 0
 @onready var sprite = $Arthax # For shader, could be removed
@@ -193,8 +193,6 @@ func _input(event) -> void:
 			$NavigationAgent2D.target_position = get_global_mouse_position()
 			current_path_index = 0;
 			set_anim(velocity.length_squared() > 100)
-			# Makes units use the Godot RVO avoidance mechanism
-			# $NavigationAgent2D.avoidance_enabled = true
 			
 			goal = get_global_mouse_position()
 			$NavigationAgent2D.target_position = goal
@@ -233,8 +231,9 @@ func _physics_process(delta) -> void:
 	if $NavigationAgent2D.is_navigation_finished():
 		return
 	var nav_point_direction = to_local($NavigationAgent2D.get_next_path_position()).normalized()
-	var desired_velocity = nav_point_direction * speed * delta * get_local_movement_speed()
-	$NavigationAgent2D.set_velocity(desired_velocity)
+	velocity = nav_point_direction * speed * delta #* get_local_movement_speed()
+	move_and_slide()
+	#$NavigationAgent2D.set_velocity(desired_velocity)
 	
 	var nav_point_direction = to_local($NavigationAgent2D.get_next_path_position()).normalized()
 	var desired_velocity = nav_point_direction * speed * delta
@@ -339,12 +338,12 @@ func trigger_white_flash() -> void:
 
 func get_navigation_path_segment(amount_of_segments: int) -> PackedVector2Array:
 	var path = $NavigationAgent2D.get_current_navigation_path()
-	if path.is_empty() or current_path_index >= path.size():
+	if $NavigationAgent2D.is_navigation_finished() or current_path_index >= path.size():
 		return PackedVector2Array()
 	var end_index = min(current_path_index + amount_of_segments, path.size())
 	return path.slice(current_path_index, end_index)
 	
-## Used-to-be deprecated function, used for setting avoidance navigation (using Godots RVO)
+## Deprecated function, used for setting avoidance navigation (using Godots RVO)
 # Called when avoidance on the navigation agaent is set and NavigationAgent2D.set_velocity(desired_velocity) is called
 func _on_navigation_agent_2d_velocity_computed(safe_velocity: Vector2) -> void:
 	velocity = safe_velocity
