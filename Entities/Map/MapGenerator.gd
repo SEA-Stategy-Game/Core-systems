@@ -9,7 +9,9 @@ var rng = RandomNumberGenerator.new()
 func initialize_tiles():
 	generate();
 
-func _init(seed: int = -1) -> void:
+func _init(seed: int = -1, map_width: int = 64, map_height: int = 64) -> void:
+	width = map_width
+	height = map_height
 	if seed < 0:
 		rng.randomize()
 	else:
