@@ -1,15 +1,17 @@
 class_name TreeResource
 extends MapResource
 
-# Init
 func _ready() -> void:
-	# Parent Init
 	super()
+	
 	amount = 1 
-	totalTime = 5.0
-	currentTime = totalTime
-	bar.max_value = totalTime
-	bar.value = currentTime
+	total_time = 5.0
+	current_time = total_time
+	
+	if bar:
+		bar.max_value = total_time
+		bar.value = current_time
+		
 	resource_name = "ressource_tree"
 
 func on_finished_harvesting():

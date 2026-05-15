@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://c5ee63xefwvh6"]
 
 [ext_resource type="Texture2D" uid="uid://bmx026ol75xsu" path="res://Assets/MiniWorldSprites/Buildings/Wood/Barracks.png" id="1_126bj"]
-[ext_resource type="Script" uid="uid://b8etve00t3js4" path="res://Houses/barracks.gd" id="1_uneb2"]
+[ext_resource type="Script" uid="uid://b21xlr3sdfc0i" path="res://Houses/barracks.gd" id="1_uneb2"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_eq0pw"]
 

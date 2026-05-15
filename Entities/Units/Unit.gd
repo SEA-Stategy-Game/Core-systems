@@ -42,7 +42,7 @@ var is_idle: bool = true
 ## Combat state -- tracked bodies inside the Range Area2D
 ## -----------------------------------------------------------------------
 var _bodies_in_range: Array = []       ## All bodies currently inside Range
-var _attack_timer: float = 0.0
+# var _attack_timer: float = 0.0w
 
 signal ai_action_completed(unit_id: int, action_data: Dictionary)
 signal ai_action_failed(unit_id: int, action_data: Dictionary)
@@ -195,7 +195,7 @@ func _physics_process(delta) -> void:
 	if command_queue and not command_queue.is_idle():
 		if is_idle:
 			is_idle = false
-		command_queue.process_tick(delta)
+		command_queue.process_tick(self, delta)
 		return  # AI commands take priority -- skip manual logic
 	
 	# 2. Otherwise, fall back to manual right-click movement.

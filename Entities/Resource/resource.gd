@@ -10,7 +10,7 @@ class_name MapResource
 
 # Init
 @export var resource_name: String = "Resource"
-@export var totalTime: float = 5.0
+@export var total_time: float = 5.0
 
 @onready var bar = $ProgressBar
 @onready var timer = $ProgressBar/Timer
@@ -20,8 +20,8 @@ class_name MapResource
 @onready var server = get_node("/root/World/ClientGateway")     
 
 var amount: int = 1
-var maxAmount: int = 1 
-var currentTime: float
+var max_amount: int = 1 
+var current_time: float
 var units_harvesting: int = 0
 
 # Signal for notifying the server when the object must be queued for broadcast 
@@ -30,15 +30,16 @@ signal modified
 func _ready() -> void:
 	player_id = -1  # Neutral / environment object
 	current_health = max_health
-	currentTime = totalTime
+	current_time = total_time
 	if bar:
-		bar.max_value = totalTime
-		bar.value = currentTime
+		bar.max_value = total_time
+		bar.value = current_time
 	# Resources should not be in the "units" group -- remove if Entity added it
 	if is_in_group("units"):
 		remove_from_group("units")
 	add_to_group("resources")
-	self.modified.connect(server._on_ressource_modified)
+	if multiplayer.is_server():
+		self.modified.connect(server._on_ressource_modified)
 	
 func harvest():
 	if amount > 0:
@@ -61,13 +62,13 @@ func _on_harvest_area_body_exited(body: Node2D) -> void:
 			timer.stop()
 
 func _on_timer_timeout() -> void:
-	currentTime -= 1 * units_harvesting
+	current_time -= 1 * units_harvesting
 	
 	if bar:
 		var tween = get_tree().create_tween()
-		tween.tween_property(bar, "value", currentTime, 0.5)
+		tween.tween_property(bar, "value", current_time, 0.5)
 	
-	if currentTime <= 0:
+	if current_time <= 0:
 		harvest()
 
 		

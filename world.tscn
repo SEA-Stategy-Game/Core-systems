@@ -3,11 +3,13 @@
 [ext_resource type="Script" uid="uid://boa5scnw8xkf7" path="res://UI/camera_2d.gd" id="1_f3sb7"]
 [ext_resource type="Script" uid="uid://d0nhl0c06ortq" path="res://world.gd" id="1_tlwt5"]
 [ext_resource type="PackedScene" uid="uid://djf7keuxeyyoh" path="res://UI/ui.tscn" id="3_036b0"]
-[ext_resource type="Texture2D" uid="uid://rfmjt4xqtei2" path="res://Assets/Interface/MapTiles.png" id="3_k3n1d"]
-[ext_resource type="Script" uid="uid://cdh1ehimmosb3" path="res://Entities/Map/MapManager.gd" id="4_2o6r5"]
+[ext_resource type="Texture2D" uid="uid://b1ny3rgjvrwkr" path="res://Assets/Interface/MapTiles.png" id="3_k3n1d"]
+[ext_resource type="Script" uid="uid://4yvjvw0fcxyr" path="res://Entities/Map/MapManager.gd" id="4_2o6r5"]
 [ext_resource type="PackedScene" uid="uid://b1wdh83xgdlb3" path="res://Entities/Units/unit.tscn" id="5_gbfbk"]
-[ext_resource type="Script" uid="uid://dqrrn4ao37rfj" path="res://navigation_region_2d.gd" id="6_ioo17"]
-[ext_resource type="Script" uid="uid://dti53y7pj2v6a" path="res://Logic/Server.gd" id="9_ioo17"]
+[ext_resource type="Script" uid="uid://cx7sdwpomg3qv" path="res://navigation_region_2d.gd" id="6_ioo17"]
+[ext_resource type="Script" uid="uid://b6wh3e1gnn6xo" path="res://Logic/Server.gd" id="9_ioo17"]
+[ext_resource type="Script" uid="uid://q07jgex1eif8" path="res://Logic/ShowcaseScenario.gd" id="10_wse8f"]
+[ext_resource type="Script" uid="uid://b8htru4vm38cp" path="res://Showcase/Launcher/MultiplayerLauncher.gd" id="11_ic0uy"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_k3n1d"]
 
@@ -80,6 +82,7 @@ navigation_enabled = false
 script = ExtResource("4_2o6r5")
 
 [node name="Objects" type="Node2D" parent="NavigationRegion2D/TileMapLayer" unique_id=64952163]
+unique_name_in_owner = true
 position = Vector2(557, 492)
 
 [node name="Houses" type="Node2D" parent="NavigationRegion2D/TileMapLayer" unique_id=350287105]
@@ -99,3 +102,9 @@ position = Vector2(433, 499)
 [node name="ClientGateway" type="Node2D" parent="." unique_id=334622980]
 position = Vector2(3, -10)
 script = ExtResource("9_ioo17")
+
+[node name="ScenarioController" type="Node" parent="." unique_id=954685040]
+script = ExtResource("10_wse8f")
+
+[node name="ClientLauncher" type="Node" parent="." unique_id=1857361142]
+script = ExtResource("11_ic0uy")
