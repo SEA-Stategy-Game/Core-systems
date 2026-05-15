@@ -1,8 +1,3 @@
-## -----------------------------------------------------------------------
-## Concrete IUnitAction -- moves a unit to a target position.
-## The action is RUNNING while the unit travels and transitions to
-## COMPLETED once it arrives within `arrival_radius`.
-## -----------------------------------------------------------------------
 extends RefCounted
 class_name UnitActionMove
 
@@ -11,19 +6,17 @@ const ACTION_STATE = IUnitAction.ActionState
 var _target_position: Vector2 = Vector2.ZERO
 var _arrival_radius: float = 12.0
 var _state: int = ACTION_STATE.PENDING
-var target_position: Vector2
 var _target_node: Node2D = null
-
-# -----------------------------------------------------------------
-# IUnitAction contract
-# -----------------------------------------------------------------
 
 func start(unit: CharacterBody2D, target: Node2D) -> void:
 	_state = ACTION_STATE.RUNNING
-	_target_node = target
-	if target:
-		_target_position = target.global_position
-	# Play walk animation if available
+	if target != null:
+		_target_node = target
+	if is_instance_valid(_target_node):
+		_target_position = _target_node.global_position
+	elif _target_position == Vector2.ZERO and unit != null:
+		_target_position = unit.global_position
+
 	if unit.has_node("AnimationPlayer"):
 		unit.get_node("AnimationPlayer").play("Walk Down")
 
@@ -31,20 +24,12 @@ func tick(unit: CharacterBody2D, _delta: float) -> int:
 	if _state != ACTION_STATE.RUNNING:
 		return _state
 
-	# If following a live node, update destination every tick
 	if is_instance_valid(_target_node):
 		_target_position = _target_node.global_position
 
 	var direction = unit.global_position.direction_to(_target_position)
-	var base_speed = unit.Speed if "Speed" in unit else 50
-	var multiplier: float = 1.0
-	if Engine.has_singleton("MapManager"):
-		var mm = Engine.get_singleton("MapManager")
-		if mm and mm.has_method("get_tile_at_world_pos"):
-			var tile = mm.get_tile_at_world_pos(unit.global_position)
-			if tile and tile.has_method("get_movement_multiplier"):
-				multiplier = tile.get_movement_multiplier()
-	var speed = base_speed * multiplier
+	var base_speed = int(unit.get("Speed")) if unit.get("Speed") != null else 50
+	var speed = float(base_speed)
 	unit.velocity = direction * speed
 
 	if unit.global_position.distance_to(_target_position) > _arrival_radius:
@@ -70,15 +55,14 @@ func serialize() -> Dictionary:
 		"state": _state
 	}
 
-# -----------------------------------------------------------------
-# Convenience factory
-# -----------------------------------------------------------------
 static func create(position: Vector2) -> UnitActionMove:
 	var action = UnitActionMove.new()
-	action.target_position = position
+	action._target_position = position
 	return action
 
 static func create_to_node(node: Node2D) -> UnitActionMove:
 	var action = UnitActionMove.new()
-	action.target_node = node
+	action._target_node = node
+	if is_instance_valid(node):
+		action._target_position = node.global_position
 	return action

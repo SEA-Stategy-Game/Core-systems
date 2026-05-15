@@ -1,12 +1,3 @@
-## UnitActionHarvest.gd
-## -----------------------------------------------------------------------
-## Concrete IUnitAction -- harvests a MapResource (tree, stone, etc.).
-## Pre-condition: the unit must already be adjacent to the resource
-## (a preceding MOVE action should handle pathfinding).
-##
-## The action registers the unit with the resource's harvesting count
-## and waits until the resource signals depletion or a timer expires.
-## -----------------------------------------------------------------------
 extends RefCounted
 class_name UnitActionHarvest
 
@@ -15,41 +6,34 @@ const ACTION_STATE = IUnitAction.ActionState
 var _state: int = ACTION_STATE.PENDING
 var _target_node: Node2D = null
 var _elapsed: float = 0.0
-var _harvest_duration: float = 5.0  # Overridden from resource's totalTime
-
-# -----------------------------------------------------------------
-# IUnitAction contract
-# -----------------------------------------------------------------
+var _harvest_duration: float = 5.0
 
 func start(unit: CharacterBody2D, target: Node2D) -> void:
 	_state = ACTION_STATE.RUNNING
-	_target_node = target
+	if target != null:
+		_target_node = target
 
-	if not is_instance_valid(target):
+	if not is_instance_valid(_target_node):
 		_state = ACTION_STATE.FAILED
 		return
 
-	# Read harvest time from the resource if available
-	if "totalTime" in target:
-		_harvest_duration = target.totalTime
+	if "total_time" in _target_node:
+		_harvest_duration = float(_target_node.total_time)
+	elif "totalTime" in _target_node:
+		_harvest_duration = float(_target_node.totalTime)
 
-	# Play chop / mine animation
 	if unit.has_node("AnimationPlayer"):
-		# Try resource-specific animation, fall back to idle
 		var anim: AnimationPlayer = unit.get_node("AnimationPlayer")
 		if anim.has_animation("Chop"):
 			anim.play("Chop")
 		elif anim.has_animation("Work"):
 			anim.play("Work")
 
-	# Increment the resource's harvesting counter so the resource
-	# timer logic (already in resource.gd) does its job.
-	if target.has_method("_on_harvest_area_body_entered"):
-		if "units_harvesting" in target:
-			target.units_harvesting += 1
-			# Start the resource timer if it is stopped
-			if target.has_node("ProgressBar/Timer"):
-				var timer = target.get_node("ProgressBar/Timer")
+	if _target_node.has_method("_on_harvest_area_body_entered"):
+		if "units_harvesting" in _target_node:
+			_target_node.units_harvesting += 1
+			if _target_node.has_node("ProgressBar/Timer"):
+				var timer = _target_node.get_node("ProgressBar/Timer")
 				if timer.is_stopped():
 					timer.start()
 
@@ -57,7 +41,6 @@ func tick(unit: CharacterBody2D, delta: float) -> int:
 	if _state != ACTION_STATE.RUNNING:
 		return _state
 
-	# Resource was depleted or removed
 	if not is_instance_valid(_target_node):
 		_state = ACTION_STATE.COMPLETED
 		if unit.has_node("AnimationPlayer"):
@@ -66,8 +49,6 @@ func tick(unit: CharacterBody2D, delta: float) -> int:
 
 	_elapsed += delta
 
-	# Safety timeout -- if the resource is still alive but the harvest
-	# duration has far exceeded expectations, mark as completed.
 	if _elapsed > _harvest_duration * 3.0:
 		_state = ACTION_STATE.COMPLETED
 		_cleanup(unit)
@@ -89,26 +70,18 @@ func serialize() -> Dictionary:
 		"state": _state
 	}
 
-# -----------------------------------------------------------------
-# Internal helpers
-# -----------------------------------------------------------------
-
 func _cleanup(unit: CharacterBody2D) -> void:
 	if is_instance_valid(_target_node):
 		if "units_harvesting" in _target_node:
 			_target_node.units_harvesting = maxi(0, _target_node.units_harvesting - 1)
-			if _target_node.units_harvesting <= 0:
-				if _target_node.has_node("ProgressBar/Timer"):
-					_target_node.get_node("ProgressBar/Timer").stop()
+			if _target_node.units_harvesting <= 0 and _target_node.has_node("ProgressBar/Timer"):
+				_target_node.get_node("ProgressBar/Timer").stop()
 	if unit.has_node("AnimationPlayer"):
 		unit.get_node("AnimationPlayer").stop()
 
-# -----------------------------------------------------------------
-# Factory
-# -----------------------------------------------------------------
 static func create(resource_node: Node2D) -> UnitActionHarvest:
 	var action = UnitActionHarvest.new()
-	action.target_node = resource_node
-	if resource_node and "totalTime" in resource_node:
-		action.harvest_duration = resource_node.totalTime
+	action._target_node = resource_node
+	if resource_node and ("total_time" in resource_node or "totalTime" in resource_node):
+		action._harvest_duration = float(resource_node.get("total_time") if resource_node.get("total_time") != null else resource_node.get("totalTime"))
 	return action
