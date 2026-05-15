@@ -9,7 +9,7 @@
 [ext_resource type="Script" uid="uid://cx7sdwpomg3qv" path="res://navigation_region_2d.gd" id="6_ioo17"]
 [ext_resource type="Script" uid="uid://b6wh3e1gnn6xo" path="res://Logic/Server.gd" id="9_ioo17"]
 [ext_resource type="Script" uid="uid://q07jgex1eif8" path="res://Logic/ShowcaseScenario.gd" id="10_wse8f"]
-[ext_resource type="Script" uid="uid://d0re7bmqctgv6" path="res://Showcase/Launcher/MultiplayerLauncher.gd" id="11_ic0uy"]
+[ext_resource type="Script" uid="uid://b8htru4vm38cp" path="res://Showcase/Launcher/MultiplayerLauncher.gd" id="11_ic0uy"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_k3n1d"]
 
@@ -82,6 +82,7 @@ navigation_enabled = false
 script = ExtResource("4_2o6r5")
 
 [node name="Objects" type="Node2D" parent="NavigationRegion2D/TileMapLayer" unique_id=64952163]
+unique_name_in_owner = true
 position = Vector2(557, 492)
 
 [node name="Houses" type="Node2D" parent="NavigationRegion2D/TileMapLayer" unique_id=350287105]

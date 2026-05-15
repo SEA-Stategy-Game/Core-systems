@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Core"
-run/main_scene="res://Showcase/Launcher/MultiplayerLauncher.tscn"
+run/main_scene="uid://ckavqb25bdaul"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
