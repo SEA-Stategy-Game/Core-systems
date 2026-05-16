@@ -1,8 +1,0 @@
-[gd_scene format=3]
-
-[ext_resource type="Script" path="res://Showcase/Instance/ShowcaseInstance.gd" id="1_instance"]
-
-[node name="ShowcaseInstance" type="PanelContainer"]
-layout_mode = 3
-anchors_preset = 0
-script = ExtResource("1_instance")
