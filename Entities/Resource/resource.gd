@@ -38,7 +38,7 @@ func _ready() -> void:
 	if is_in_group("units"):
 		remove_from_group("units")
 	add_to_group("resources")
-	if multiplayer.is_server():
+	if multiplayer.is_server() and server != null and server.has_method("_on_ressource_modified"):
 		self.modified.connect(server._on_ressource_modified)
 	
 func harvest():

@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Showcase/Launcher/MultiplayerLauncher.gd" id="1_uw9hl"]
+
+[node name="ClientLauncher" type="Node"]
+script = ExtResource("1_uw9hl")

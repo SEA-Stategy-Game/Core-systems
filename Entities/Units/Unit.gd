@@ -182,7 +182,6 @@ func _input(event) -> void:
 # -----------------------------------------------------------------
 
 func _physics_process(delta) -> void:
-	
 	# Clean up stale references from _bodies_in_range
 	_bodies_in_range = _bodies_in_range.filter(func(b): return is_instance_valid(b))
 
@@ -191,22 +190,23 @@ func _physics_process(delta) -> void:
 		var closest = get_closest_hostile()
 		if closest != null:
 			command_queue.enqueue(UnitActionAttack.create_focused(closest))
+
 	# 1. If the AI command queue has work, let it drive the unit.
 	if command_queue and not command_queue.is_idle():
 		if is_idle:
 			is_idle = false
 		command_queue.process_tick(self, delta)
 		return  # AI commands take priority -- skip manual logic
-	
+
 	# 2. Otherwise, fall back to manual right-click movement.
 	if $NavigationAgent2D.is_navigation_finished():
 		return
+
 	var nav_point_direction = to_local($NavigationAgent2D.get_next_path_position()).normalized()
-	velocity = nav_point_direction * speed * delta #* get_local_movement_speed()
+	velocity = nav_point_direction * speed * delta
 	move_and_slide()
 	global_position = NavigationServer2D.map_get_closest_point(
 		$NavigationAgent2D.get_navigation_map(), global_position)
-	#$NavigationAgent2D.set_velocity(desired_velocity)
 	
 # -----------------------------------------------------------------
 # Signal relays

@@ -7,8 +7,8 @@ extends TileMapLayer
 @onready var game_map = TestMap.new()
 @onready var nav_region = $"/root/World/NavigationRegion2D"
 @onready var objects_node = $Objects
-const tree_scene = preload("res://Entities/Resource/Tree.tscn")
-const rock_scene = preload("res://Entities/Resource/Stone.tscn")
+const TreeScene = preload("res://Entities/Resource/Tree.tscn")
+const RockScene = preload("res://Entities/Resource/Stone.tscn")
 
 func draw_tile(tile):
 	set_cell(Vector2i(tile.x, tile.y), 0, tile.get_atlas_coordinates())
@@ -16,21 +16,23 @@ func draw_tile(tile):
 func _ready() -> void:
 	if game_map.tiles.is_empty():
 		game_map.initialize_tiles()
-		for y in range(game_map.height):
-			for x in range(game_map.width):
-				var tile = game_map.tiles[_index(x, y)]
-				draw_tile(tile)
-				if tile.terrain == MapTile.TerrainType.FOREST:
-					spawn_tree(tile)
-				elif tile.terrain == MapTile.TerrainType.HILLS:
-					spawn_rock(tile)
+
+	for y in range(game_map.height):
+		for x in range(game_map.width):
+			var tile = game_map.tiles[_index(x, y)]
+			draw_tile(tile)
+			if tile.terrain == MapTile.TerrainType.FOREST:
+				spawn_tree(tile)
+			elif tile.terrain == MapTile.TerrainType.HILLS:
+				spawn_rock(tile)
+
 	nav_region.rebuild_nav()
 	
 func spawn_tree(tile: MapTile) -> void:
 	var spawn_chance = pos_to_deterministic_float(tile.x, tile.y, 123)
 	if spawn_chance > 0.25:
 		return
-	var tree = tree_scene.instantiate()
+	var tree = TreeScene.instantiate()
 	tree.position = map_to_local(Vector2i(tile.x, tile.y))
 	tree.z_index = 1
 	objects_node.call_deferred("add_child", tree)
@@ -40,7 +42,7 @@ func spawn_rock(tile: MapTile) -> void:
 	var spawn_chance = pos_to_deterministic_float(tile.x, tile.y, 456)
 	if spawn_chance > 0.25:
 		return
-	var rock = rock_scene.instantiate()
+	var rock = RockScene.instantiate()
 	rock.position = map_to_local(Vector2i(tile.x, tile.y))
 	rock.z_index = 1
 	objects_node.call_deferred("add_child", rock)

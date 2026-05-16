@@ -13,9 +13,9 @@ var _chop_return_state: Dictionary = {}
 var _tick_manager: TickManager = null
 
 func _ready() -> void:
-	var tick_manager := get_node_or_null("/root/TickManager")
-	if tick_manager != null and not tick_manager.tick.is_connected(_on_tick):
-		tick_manager.tick.connect(_on_tick)
+	_tick_manager = get_node_or_null("/root/TickManager") as TickManager
+	if _tick_manager != null and not _tick_manager.tick.is_connected(_on_tick):
+		_tick_manager.tick.connect(_on_tick)
 
 func set_active_player(player_id: int) -> void:
 	_active_player_id = player_id
@@ -136,6 +136,8 @@ func execute_plan(plan: Dictionary) -> bool:
 	return ok
 
 func _on_tick(_tick: int) -> void:
+	if _tick_manager == null:
+		return
 	for unit in get_tree().get_nodes_in_group("units"):
 		if not is_instance_valid(unit):
 			continue
