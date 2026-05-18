@@ -49,3 +49,7 @@ show_percentage = false
 [connection signal="body_entered" from="Mine Stone" to="." method="_on_harvest_area_body_entered"]
 [connection signal="body_exited" from="Mine Stone" to="." method="_on_harvest_area_body_exited"]
 [connection signal="timeout" from="ProgressBar/Timer" to="." method="_on_timer_timeout"]
+
+[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="."]
+avoidance_enabled = true
+radius = 14.0

@@ -178,6 +178,10 @@ func _build_local_snapshot() -> Dictionary:
         "units": [],
         "resources": [],
         "buildings": [],
+        "stockpile": {
+            "wood": Game.Wood,
+            "stone": Game.Stone
+        },
         "scenario": serialize_state()
     }
 

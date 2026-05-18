@@ -12,5 +12,6 @@ func _ready() -> void:
     resource_name = "ressource_tree"
 
 func on_finished_harvesting() -> void:
-    Game.Wood += 1
+    if multiplayer.multiplayer_peer == null:
+        Game.Wood += 1
     super.on_finished_harvesting()

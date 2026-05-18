@@ -12,5 +12,6 @@ func _ready() -> void:
     resource_name = "ressource_stone"
 
 func on_finished_harvesting() -> void:
-    Game.Stone += 1
+    if multiplayer.multiplayer_peer == null:
+        Game.Stone += 1
     super.on_finished_harvesting()

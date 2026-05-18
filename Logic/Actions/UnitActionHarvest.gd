@@ -19,9 +19,6 @@ func start(unit: CharacterBody2D, target: Node2D) -> void:
 	if _target_node.has_method("is_alive") and not _target_node.is_alive():
 		_state = ACTION_STATE.FAILED
 		return
-	if unit.multiplayer.multiplayer_peer != null and not unit.multiplayer.is_server():
-		_state = ACTION_STATE.FAILED
-		return
 
 	if "total_time" in _target_node:
 		_harvest_duration = float(_target_node.total_time)

@@ -256,19 +256,6 @@ func set_anim(flag) -> void:
         anim.stop()
         is_animated = false
 
-func point_to_line_dist(line_start: Vector2, line_end: Vector2, point_position: Vector2) -> float:
-    var segment: Vector2 = line_end - line_start
-    var length_sq: float = segment.length_squared()
-    if length_sq <= 0.0001:
-        return point_position.distance_to(line_start)
-
-    var t: float = clampf((point_position - line_start).dot(segment) / length_sq, 0.0, 1.0)
-    var closest_point: Vector2 = line_start + segment * t
-    return point_position.distance_to(closest_point)
-
-func recalculate_path() -> void:
-    $NavigationAgent2D.target_position = $NavigationAgent2D.target_position
-
 func _on_waypoint_reached(details: Dictionary) -> void:
     current_path_index += 1
 
@@ -277,13 +264,6 @@ func trigger_white_flash() -> void:
     mat.set_shader_parameter("active", true)
     await get_tree().create_timer(0.4).timeout
     mat.set_shader_parameter("active", false)
-
-func get_navigation_path_segment(amount_of_segments: int) -> PackedVector2Array:
-    var path = $NavigationAgent2D.get_current_navigation_path()
-    if $NavigationAgent2D.is_navigation_finished() or current_path_index >= path.size():
-        return PackedVector2Array()
-    var end_index = min(current_path_index + amount_of_segments, path.size())
-    return path.slice(current_path_index, end_index)
 
 func _on_navigation_agent_2d_velocity_computed(safe_velocity: Vector2) -> void:
     # Only the authoritative simulation should compute/apply navigation velocity.

@@ -46,3 +46,15 @@ func get_tile_at_world_pos(world_pos: Vector2) -> Variant:
 
 func _index(x: int, y: int) -> int:
     return y * game_map.width + x
+
+func clear_map_object_at_world_pos(world_pos: Vector2) -> void:
+    var grid_pos := world_to_grid(world_pos)
+    var tile: MapTile = game_map.get_tile(grid_pos.x, grid_pos.y)
+    if tile != null:
+        tile.clear_map_object()
+
+func set_map_object_at_world_pos(world_pos: Vector2, map_object: Variant) -> void:
+    var grid_pos := world_to_grid(world_pos)
+    var tile: MapTile = game_map.get_tile(grid_pos.x, grid_pos.y)
+    if tile != null:
+        tile.set_map_object(map_object)

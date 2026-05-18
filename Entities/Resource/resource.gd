@@ -8,6 +8,7 @@ class_name MapResource
 @onready var timer = $ProgressBar/Timer
 @onready var nav_region = get_node_or_null("/root/World/NavigationRegion2D")
 @onready var server = get_node_or_null("/root/World/ClientGateway")
+@onready var map_manager = get_node_or_null("/root/World/NavigationRegion2D/TileMapLayer")
 
 var amount: int = 1
 var max_amount: int = 1

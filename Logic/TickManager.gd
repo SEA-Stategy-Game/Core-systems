@@ -50,6 +50,10 @@ func _build_authoritative_snapshot() -> Dictionary:
         "units": [],
         "resources": [],
         "buildings": [],
+        "stockpile": {
+            "wood": Game.Wood,
+            "stone": Game.Stone
+        },
         "scenario": {}
     }
 

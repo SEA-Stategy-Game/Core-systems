@@ -330,7 +330,7 @@ func _on_authoritative_state_ready(state: Dictionary) -> void:
     last_state_signature = String(state.get("state_signature", ""))
     authoritative_state_applied.emit(last_full_state)
     if debug_log_unit_positions or debug_log_unit_positions_once:
-        _debug_log_unit_positions()
+        # _debug_log_unit_positions()
         if debug_log_unit_positions_once:
             debug_log_unit_positions_once = false
     if connected_peers.is_empty():
@@ -356,6 +356,7 @@ func _apply_state(state: Dictionary) -> void:
         return
 
     _merge_last_full_state(state)
+    _apply_stockpile_state(last_full_state)
     last_state_signature = String(last_full_state.get("state_signature", state.get("state_signature", "")))
     print("[NET_SYNC] Applying tick ", state["tick"])
     _sync_units(state.get("units", []))
@@ -407,7 +408,8 @@ func _build_tick_state(state: Dictionary) -> Dictionary:
         "scenario": state.get("scenario", {}),
         "units": [],
         "resources": [],
-        "buildings": []
+        "buildings": [],
+        "stockpile": state.get("stockpile", {"wood": 0, "stone": 0}),
     }
 
     for unit in state.get("units", []):
@@ -622,14 +624,36 @@ func _get_spawn_position(player_slot: int) -> Vector2:
     var offset_slot := player_slot - DEFAULT_UNIT_SPAWN_POSITIONS.size()
     return DEFAULT_UNIT_SPAWN_POSITIONS.back() + Vector2(80 * float(offset_slot + 1), 0.0)
 
-# DEBUG: Log all unit positions to server log (safe to delete)
-func _debug_log_unit_positions() -> void:
-    print("[DEBUG_UNIT_POS] --- Unit positions snapshot ---")
-    for unit in get_tree().get_nodes_in_group("units"):
-        if not is_instance_valid(unit):
-            continue
-        var uid: int = int(unit.get("entity_id")) if unit.get("entity_id") != null else int(unit.get_instance_id())
-        var pid: int = int(unit.get("player_id")) if unit.get("player_id") != null else -1
-        var pos: Vector2 = unit.global_position
-        print("[DEBUG_UNIT_POS] Unit %d (player %d) -> pos: (%.2f, %.2f)" % [uid, pid, pos.x, pos.y])
-    print("[DEBUG_UNIT_POS] ------------------------------")
+# # DEBUG: Log all unit positions to server log (safe to delete)
+# func _debug_log_unit_positions() -> void:
+#     print("[DEBUG_UNIT_POS] --- Unit positions snapshot ---")
+#     for unit in get_tree().get_nodes_in_group("units"):
+#         if not is_instance_valid(unit):
+#             continue
+#         var uid: int = int(unit.get("entity_id")) if unit.get("entity_id") != null else int(unit.get_instance_id())
+#         var pid: int = int(unit.get("player_id")) if unit.get("player_id") != null else -1
+#         var pos: Vector2 = unit.global_position
+#         print("[DEBUG_UNIT_POS] Unit %d (player %d) -> pos: (%.2f, %.2f)" % [uid, pid, pos.x, pos.y])
+#     print("[DEBUG_UNIT_POS] ------------------------------")
+
+func _on_ressource_modified(resource_node: Node) -> void:
+    if resource_node == null:
+        return
+
+    if resource_node is TreeResource:
+        Game.Wood += 1
+    elif resource_node is StoneResource:
+        Game.Stone += 1
+
+    print("[RESOURCE_MOD] Resource modified: ", resource_node.get("entity_id"))
+    _refresh_last_full_state()
+    authoritative_state_applied.emit(last_full_state)
+
+    if multiplayer.multiplayer_peer != null and multiplayer.is_server():
+        rpc("receive_full_state", last_full_state)
+
+func _apply_stockpile_state(state: Dictionary) -> void:
+    var stockpile: Variant = state.get("stockpile", {})
+    if stockpile is Dictionary:
+        Game.Wood = int((stockpile as Dictionary).get("wood", Game.Wood))
+        Game.Stone = int((stockpile as Dictionary).get("stone", Game.Stone))
