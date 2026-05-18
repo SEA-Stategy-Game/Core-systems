@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://biio3e1hn22ty"]
 
-[ext_resource type="Script" uid="uid://brdufmt7pabf2" path="res://Entities/Resource/tree.gd" id="1_2cgd5"]
+[ext_resource type="Script" uid="uid://b3bkg8lf01k0f" path="res://Entities/Resource/tree.gd" id="1_2cgd5"]
+[ext_resource type="Script" uid="uid://c7f7ux8qnxpte" path="res://Entities/Resource/damage_entity.gd" id="2_6qyk8"]
 [ext_resource type="Texture2D" uid="uid://bddjglotcr720" path="res://Assets/MiniWorldSprites/Nature/PineTrees.png" id="2_v6iir"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_qpyuj"]
@@ -18,6 +19,7 @@ radius = 5.0
 script = ExtResource("1_2cgd5")
 
 [node name="Chop Tree" type="Area2D" parent="." unique_id=1272582681 groups=["Tree"]]
+script = ExtResource("2_6qyk8")
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="Chop Tree" unique_id=1101035522 groups=["Tree"]]
 position = Vector2(1, -8)

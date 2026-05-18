@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="New Game Project"
+config/name="Core"
 run/main_scene="uid://ckavqb25bdaul"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
@@ -22,7 +22,7 @@ ActionGateway="*res://Logic/ActionGateway.gd"
 TickManager="*res://Logic/TickManager.gd"
 PlanReceiver="*res://Logic/PlanReceiver.gd"
 DebugWindow="*res://UI/DebugWindow.tscn"
-ResourceSpawner="*uid://lsojvp4uldv7"
+ResourceSpawner="*res://Entities/Map/Resource_spawner.gd"
 
 [dotnet]
 

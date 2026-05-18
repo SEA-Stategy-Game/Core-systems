@@ -77,7 +77,7 @@ func broadcast_state(tick: int) -> void:
 func build_dynamic_unit(unit):
 	return {
 		"meta_values" : serialize_core_state_variables(unit),
-		"path" : unit.get_navigation_path_segment(4),
+		"path" : unit.get_navigation_path_segment(8),
 		"speed" : unit.speed #.get_local_movement_speed()
 	} 
 
@@ -117,7 +117,7 @@ func serialize_core_state_variables(entity: Node) -> Dictionary:
 		"entity_id"  : entity.entity_id,
 		"max_health" : entity.max_health,
 		"player_id"  : entity.player_id,
-		"position"   : entity.position
+		"position"   : entity.global_position
 	}
 
 ## Serialises a map-tile
