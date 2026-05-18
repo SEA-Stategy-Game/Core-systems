@@ -1,9 +1,48 @@
-class_name TestMap extends GameMap
+extends RefCounted
+class_name TestMap
+
+var tiles: Array[MapTile] = []
+var width: int = 32
+var height: int = 32
+
+func _init() -> void:
+	initialize_tiles()
+
+func _index(x: int, y: int) -> int:
+	return y * width + x
+
+func in_bounds(x: int, y: int) -> bool:
+	return x >= 0 and y >= 0 and x < width and y < height
+
+func set_tile(x: int, y: int, terrain: int) -> void:
+	if not in_bounds(x, y):
+		return
+	var tile: MapTile = get_tile(x, y)
+	if tile == null:
+		tile = MapTile.new(x, y, MapTile.TerrainType.PLAINS, null)
+		tiles[_index(x, y)] = tile
+	tile.terrain = terrain
+
+func get_tile(x: int, y: int) -> MapTile:
+	if not in_bounds(x, y):
+		return null
+	return tiles[_index(x, y)]
+
+func get_all_tiles() -> Array[MapTile]:
+	return tiles
+
+func populate_tiles(spawner: Node = null, tile_size: int = 32) -> void:
+	for y in range(height):
+		for x in range(width):
+			var tile: MapTile = get_tile(x, y)
+			if tile != null:
+				tile.try_spawn_resource(tile_size)
 
 func initialize_tiles() -> void:
-	width = 32 
-	height = 32
-	super.initialize_tiles()
+	tiles.resize(width * height)
+	for y in range(height):
+		for x in range(width):
+			tiles[_index(x, y)] = MapTile.new(x, y, MapTile.TerrainType.PLAINS, null)
 	
 	var noise = FastNoiseLite.new()
 	noise.seed = 42 

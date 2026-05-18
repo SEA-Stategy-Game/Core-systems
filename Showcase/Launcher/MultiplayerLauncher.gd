@@ -26,9 +26,13 @@ var _host_button: Button
 var _join_button: Button
 var _disconnect_button: Button
 var _demo_button: Button
+var _attack_button: Button
 var _refresh_button: Button
+var _minimize_button: Button
+var _restore_button: Button
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build_ui()
 	_bind_from_tree()
 	_refresh_defaults()
@@ -75,6 +79,7 @@ func _bind_from_tree() -> void:
 
 func _build_ui() -> void:
 	_ui_layer = CanvasLayer.new()
+	_ui_layer.process_mode = Node.PROCESS_MODE_ALWAYS
 	_ui_layer.layer = 200
 	add_child(_ui_layer)
 
@@ -134,8 +139,8 @@ func _build_ui() -> void:
 	_unit_spin = _spin(1000, 0, 10000, 1)
 	grid.add_child(_unit_spin)
 
-	grid.add_child(_label("Target Resource ID"))
-	_target_spin = _spin(2000, 0, 10000, 1)
+	grid.add_child(_label("Target Entity ID"))
+	_target_spin = _spin(0, 0, 100000, 1)
 	grid.add_child(_target_spin)
 
 	vbox.add_child(HSeparator.new())
@@ -153,9 +158,24 @@ func _build_ui() -> void:
 	button_row.add_child(_disconnect_button)
 	_demo_button = _button("Run Sync Demo", _demo_pressed)
 	button_row.add_child(_demo_button)
+	_attack_button = _button("Attack Target", _attack_pressed)
+	button_row.add_child(_attack_button)
 	_refresh_button = _button("Refresh IDs", _refresh_pressed)
 	button_row.add_child(_refresh_button)
 	button_row.add_child(_button("Apply Player ID", _apply_player_pressed))
+	_minimize_button = _button("Minimize Launcher", _minimize_pressed)
+	button_row.add_child(_minimize_button)
+
+	_restore_button = _button("Show Launcher", _restore_pressed)
+	_restore_button.visible = false
+	_restore_button.process_mode = Node.PROCESS_MODE_ALWAYS
+	_restore_button.anchor_left = 0.0
+	_restore_button.anchor_top = 0.0
+	_restore_button.offset_left = 16
+	_restore_button.offset_top = 16
+	_restore_button.offset_right = 150
+	_restore_button.offset_bottom = 48
+	_ui_layer.add_child(_restore_button)
 
 	vbox.add_child(HSeparator.new())
 
@@ -199,14 +219,6 @@ func _bind_from_scenario() -> void:
 
 func _refresh_defaults() -> void:
 	_bind_from_scenario()
-
-	if _scenario != null and _scenario.has_method("get_unit_ids_for_player"):
-		var host_ids: Array[int] = _scenario.get_unit_ids_for_player(0)
-		if not host_ids.is_empty():
-			_unit_spin.value = host_ids[0]
-		var client_ids: Array[int] = _scenario.get_unit_ids_for_player(1)
-		if not client_ids.is_empty():
-			_target_spin.value = _scenario.get_first_resource_id()
 
 func _apply_command_line_defaults() -> void:
 	for arg in OS.get_cmdline_args():
@@ -254,28 +266,56 @@ func _disconnect_pressed() -> void:
 	_update_status()
 
 func _demo_pressed() -> void:
+	if not _can_issue_commands():
+		_log_line("[CMD_DENIED] Commands are disabled on the host.")
+		return
+	var gateway := _gateway_node()
+	if gateway == null:
+		_log_line("[CMD_ERR] Gateway not available.")
+		return
+
+	var ok := false
+	if _scenario != null and _scenario.has_method("run_demo"):
+		ok = bool(_scenario.run_demo(int(_unit_spin.value), int(_player_spin.value)))
+	elif gateway.has_method("submit_showcase_command"):
+		var command := {
+			"action": "ATTACK",
+			"unit_id": int(_unit_spin.value),
+			"target_id": int(_target_spin.value),
+			"player_id": int(_player_spin.value)
+		}
+		ok = bool(gateway.submit_showcase_command(command))
+
+	if ok:
+		_log_line("[CMD_SENT] demo request")
+	else:
+		_log_line("[CMD_DENIED] Demo command was rejected.")
+	_update_status()
+
+func _attack_pressed() -> void:
+	if not _can_issue_commands():
+		_log_line("[CMD_DENIED] Commands are disabled on the host.")
+		return
 	var gateway := _gateway_node()
 	if gateway == null:
 		_log_line("[CMD_ERR] Gateway not available.")
 		return
 
 	var command := {
-		"action": "CHOP_AND_RETURN",
+		"action": "ATTACK",
 		"unit_id": int(_unit_spin.value),
 		"target_id": int(_target_spin.value),
 		"player_id": int(_player_spin.value)
 	}
 
 	var ok := false
-	if gateway.has_method("submit_showcase_command"):
-		ok = bool(gateway.submit_showcase_command(command))
-	elif _scenario != null and _scenario.has_method("run_demo"):
-		ok = bool(_scenario.run_demo(int(_unit_spin.value), int(_player_spin.value), int(_target_spin.value)))
+	if gateway.has_method("submit_player_command"):
+		ok = bool(gateway.submit_player_command(command))
 
 	if ok:
 		_log_line("[CMD_SENT] %s" % str(command))
 	else:
-		_log_line("[CMD_DENIED] Demo command was rejected.")
+		_log_line("[CMD_DENIED] Attack command was rejected.")
 	_update_status()
 
 func _refresh_pressed() -> void:
@@ -288,6 +328,20 @@ func _apply_player_pressed() -> void:
 		gateway.set_active_player(int(_player_spin.value))
 	_log_line("[SHOWCASE] Active player set to %d." % int(_player_spin.value))
 
+func _minimize_pressed() -> void:
+	# This is intentionally only a UI collapse. The launcher node, gateway, and
+	# tick loop stay PROCESS_MODE_ALWAYS so simulation/networking continue running.
+	_panel.visible = false
+	_restore_button.visible = true
+	get_tree().paused = false
+	_log_line("[SHOWCASE] Launcher minimized; networking and simulation remain active.")
+
+func _restore_pressed() -> void:
+	_panel.visible = true
+	_restore_button.visible = false
+	get_tree().paused = false
+	_log_line("[SHOWCASE] Launcher restored.")
+
 func _configure_gateway() -> void:
 	var gateway := _gateway_node()
 	if gateway != null and gateway.has_method("set_port"):
@@ -297,6 +351,9 @@ func _configure_gateway() -> void:
 		action_gateway.set_active_player(int(_player_spin.value))
 
 func _gateway_node() -> Node:
+	var autoload_server := get_node_or_null("/root/Server")
+	if autoload_server != null:
+		return autoload_server
 	if _gateway != null:
 		return _gateway
 	if _world != null:
@@ -328,7 +385,6 @@ func _update_status() -> void:
 	_scenario_label.text = "Scenario: %s" % str(scenario_report.get("demo_phase", "idle"))
 
 func _on_scenario_state_changed(state: Dictionary) -> void:
-	_log_line("[SENSE] %s" % str(state))
 	_update_status()
 
 func _label(text: String) -> Label:
@@ -359,3 +415,10 @@ func _log_line(text: String) -> void:
 		return
 	_log.append_text(text + "\n")
 	_log.scroll_to_line(_log.get_line_count() - 1)
+
+func _can_issue_commands() -> bool:
+	var gateway := _gateway_node()
+	if gateway != null and gateway.has_method("get_peer_summary"):
+		var summary: Dictionary = gateway.get_peer_summary()
+		return String(summary.get("mode", "offline")) != "host"
+	return not multiplayer.is_server()

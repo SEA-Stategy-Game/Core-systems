@@ -5,7 +5,6 @@
 [ext_resource type="PackedScene" uid="uid://djf7keuxeyyoh" path="res://UI/ui.tscn" id="3_036b0"]
 [ext_resource type="Texture2D" uid="uid://b1ny3rgjvrwkr" path="res://Assets/Interface/MapTiles.png" id="3_k3n1d"]
 [ext_resource type="Script" uid="uid://4yvjvw0fcxyr" path="res://Entities/Map/MapManager.gd" id="4_2o6r5"]
-[ext_resource type="PackedScene" uid="uid://b1wdh83xgdlb3" path="res://Entities/Units/unit.tscn" id="5_gbfbk"]
 [ext_resource type="Script" uid="uid://cx7sdwpomg3qv" path="res://navigation_region_2d.gd" id="6_ioo17"]
 [ext_resource type="Script" uid="uid://b6wh3e1gnn6xo" path="res://Logic/Server.gd" id="9_ioo17"]
 [ext_resource type="Script" uid="uid://dkjrrotrbumof" path="res://Logic/ShowcaseScenario.gd" id="10_wse8f"]
@@ -94,10 +93,7 @@ script = ExtResource("1_f3sb7")
 
 [node name="UI" parent="." unique_id=1080200729 instance=ExtResource("3_036b0")]
 
-[node name="Units" type="Node2D" parent="." unique_id=1851347236 groups=["units"]]
-
-[node name="Unit" parent="Units" unique_id=1684801707 instance=ExtResource("5_gbfbk")]
-position = Vector2(433, 499)
+[node name="Units" type="Node2D" parent="." unique_id=1851347236]
 
 [node name="ClientGateway" type="Node2D" parent="." unique_id=334622980]
 position = Vector2(3, -10)

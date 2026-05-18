@@ -5,7 +5,7 @@ signal scenario_state_changed(state: Dictionary)
 
 @export var auto_demo_on_ready: bool = false
 @export var demo_player_id: int = 0
-@export var demo_mode_name: String = "CHOP_AND_RETURN"
+@export var demo_mode_name: String = "ATTACK"
 
 var _world: Node = null
 var _gateway: Node = null
@@ -109,7 +109,10 @@ func run_demo(unit_id: int = -1, player_id: int = -1, target_id: int = -1) -> bo
 		player_id = int(_lookup_unit(unit_id).get("player_id", demo_player_id))
 
 	if target_id < 0:
-		target_id = get_first_resource_id()
+		target_id = _get_nearest_resource_id(unit_id)
+	if target_id < 0:
+		push_warning("[SHOWCASE] No resource available for demo.")
+		return false
 
 	_demo_unit_id = unit_id
 	_demo_target_id = target_id
@@ -189,6 +192,7 @@ func _update_local_signature() -> void:
 
 func _build_local_snapshot() -> Dictionary:
 	var snapshot := {
+		"payload_type": "full",
 		"tick": get_node_or_null("/root/TickManager").get_tick_count() if get_node_or_null("/root/TickManager") != null else 0,
 		"timestamp": 0,
 		"units": [],
@@ -198,18 +202,24 @@ func _build_local_snapshot() -> Dictionary:
 	}
 
 	for unit in _get_units():
+		if unit.has_method("is_alive") and not unit.is_alive():
+			continue
 		snapshot["units"].append({
 			"entity_id": int(unit.get("entity_id")),
 			"player_id": int(unit.get("player_id")) if unit.get("player_id") != null else 0,
+			"owner_peer_id": int(unit.get("owner_peer_id")) if unit.get("owner_peer_id") != null else -1,
 			"position": {
 				"x": unit.global_position.x,
 				"y": unit.global_position.y
 			},
 			"health": int(unit.get("current_health")) if unit.get("current_health") != null else -1,
-			"idle": bool(unit.get("is_idle")) if unit.get("is_idle") != null else true
+			"idle": bool(unit.get("is_idle")) if unit.get("is_idle") != null else true,
+			"destroyed": false
 		})
 
 	for res in _get_resources():
+		if res.has_method("is_alive") and not res.is_alive():
+			continue
 		snapshot["resources"].append({
 			"entity_id": int(res.get("entity_id")),
 			"resource_name": str(res.get("resource_name")) if res.get("resource_name") != null else res.name,
@@ -217,7 +227,9 @@ func _build_local_snapshot() -> Dictionary:
 				"x": res.global_position.x,
 				"y": res.global_position.y
 			},
-			"amount": int(res.get("amount")) if res.get("amount") != null else -1
+			"amount": int(res.get("amount")) if res.get("amount") != null else -1,
+			"health": int(res.get("current_health")) if res.get("current_health") != null else -1,
+			"destroyed": false
 		})
 
 	for building in _get_buildings():
@@ -268,10 +280,10 @@ func _get_buildings() -> Array:
 
 func _lookup_unit(unit_id: int) -> Dictionary:
 	for unit in _get_units():
-		if int(unit.get("entity_id", -1)) == unit_id:
+		if int(unit.entity_id) == unit_id:
 			return {
-				"player_id": int(unit.get("player_id", 0)),
-				"entity_id": int(unit.get("entity_id", -1))
+				"player_id": int(unit.player_id),
+				"entity_id": int(unit.entity_id)
 			}
 	return {}
 
@@ -283,3 +295,28 @@ func _node_sort_key(node: Node) -> String:
 
 func _emit_state_change() -> void:
 	scenario_state_changed.emit(get_status_report())
+
+func _get_nearest_resource_id(unit_id: int) -> int:
+	var unit_node: Node2D = null
+	for unit in _get_units():
+		if int(unit.entity_id) == unit_id:
+			unit_node = unit
+			break
+
+	if unit_node == null:
+		return -1
+
+	var best_id := -1
+	var best_distance := INF
+	for resource in _get_resources():
+		if not is_instance_valid(resource):
+			continue
+		var resource_id := int(resource.get("entity_id"))
+		if resource_id < 0:
+			continue
+		var distance := unit_node.global_position.distance_to(resource.global_position)
+		if distance < best_distance:
+			best_distance = distance
+			best_id = resource_id
+
+	return best_id

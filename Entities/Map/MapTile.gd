@@ -14,6 +14,13 @@ var terrain: TerrainType = TerrainType.PLAINS
 var map_object: Variant = null
 var is_occupied: bool = false
 
+static func resource_entity_id_for(tile_x: int, tile_y: int, resource_key: String) -> int:
+	var normalized := resource_key.to_lower()
+	var type_code := 1
+	if normalized.contains("stone"):
+		type_code = 2
+	return 1000000 + type_code * 100000 + tile_y * 1000 + tile_x
+
 func _init(	tile_x: int = 0,
 			tile_y: int = 0,
 			tile_terrain: TerrainType = TerrainType.PLAINS,

@@ -2,73 +2,34 @@ extends TileMapLayer
 
 @export var tile_size: int = 32
 
-# Change this instance to change the type of map that is generated
-# E.g. GameMap, TestMap, or MapGenerator
-@onready var game_map = TestMap.new()
-@onready var nav_region = $"/root/World/NavigationRegion2D"
-@onready var objects_node = $Objects
-const TreeScene = preload("res://Entities/Resource/Tree.tscn")
-const RockScene = preload("res://Entities/Resource/Stone.tscn")
+const TestMapScript = preload("res://Entities/Map/TestMap.gd")
+@onready var game_map: TestMap = TestMapScript.new()
+@onready var nav_region = get_node_or_null("/root/World/NavigationRegion2D")
 
-func draw_tile(tile):
-	set_cell(Vector2i(tile.x, tile.y), 0, tile.get_atlas_coordinates())
+func draw_tile(tile) -> void:
+    if tile == null:
+        return
+    set_cell(Vector2i(tile.x, tile.y), 0, tile.get_atlas_coordinates())
 
 func _ready() -> void:
-	if game_map.tiles.is_empty():
-		game_map.initialize_tiles()
+    if game_map.tiles.is_empty():
+        game_map.initialize_tiles()
 
-	for y in range(game_map.height):
-		for x in range(game_map.width):
-			var tile = game_map.tiles[_index(x, y)]
-			draw_tile(tile)
-			if tile.terrain == MapTile.TerrainType.FOREST:
-				spawn_tree(tile)
-			elif tile.terrain == MapTile.TerrainType.HILLS:
-				spawn_rock(tile)
+    for y in range(game_map.height):
+        for x in range(game_map.width):
+            var tile = game_map.get_tile(x, y)
+            if tile == null:
+                continue
+            draw_tile(tile)
 
-	nav_region.rebuild_nav()
-	
-func spawn_tree(tile: MapTile) -> void:
-	var spawn_chance = pos_to_deterministic_float(tile.x, tile.y, 123)
-	if spawn_chance > 0.25:
-		return
-	var tree = TreeScene.instantiate()
-	tree.position = map_to_local(Vector2i(tile.x, tile.y))
-	tree.z_index = 1
-	objects_node.call_deferred("add_child", tree)
-	tile.place_object(tree)
+    if multiplayer.multiplayer_peer != null and not multiplayer.is_server():
+        return
 
-func spawn_rock(tile: MapTile) -> void:
-	var spawn_chance = pos_to_deterministic_float(tile.x, tile.y, 456)
-	if spawn_chance > 0.25:
-		return
-	var rock = RockScene.instantiate()
-	rock.position = map_to_local(Vector2i(tile.x, tile.y))
-	rock.z_index = 1
-	objects_node.call_deferred("add_child", rock)
-	tile.place_object(rock)
+    var resource_spawner = get_node_or_null("/root/ResourceSpawner")
+    game_map.populate_tiles(resource_spawner)
+
+    if nav_region != null and nav_region.has_method("rebuild_nav"):
+        nav_region.rebuild_nav()
 
 func _index(x: int, y: int) -> int:
-	return y * game_map.width + x
-
-# Drawer for testing
-func _input(event):
-	return
-	if event is InputEventMouseButton and event.pressed:
-		var map_pos = local_to_map(
-			to_local(get_global_mouse_position())
-		)
-		set_cell(map_pos, 0, Vector2i(0, 0))
-
-func world_to_grid(world_pos: Vector2) -> Vector2i:
-	return Vector2i(int(floor(world_pos.x / tile_size)), int(floor(world_pos.y / tile_size)))
-
-func get_tile_at_world_pos(world_pos: Vector2) -> Variant:
-	var map_pos = local_to_map(to_local(world_pos))
-	return game_map.get_tile(map_pos.x, map_pos.y)
-
-func pos_to_deterministic_float(x: int, y: int, seed_offset: int) -> float:
-	var combined_seed = x * 73856093 ^ y * 19349663 ^ seed_offset
-	var rng = RandomNumberGenerator.new()
-	rng.seed = combined_seed
-	return rng.randf()
+    return y * game_map.width + x

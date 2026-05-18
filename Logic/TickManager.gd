@@ -4,17 +4,23 @@ signal tick(tick: int)
 signal tick_processed(count: int)
 signal authoritative_state_ready(state: Dictionary)
 
-@export var tick_interval: float = 0.25
+@export var tick_interval: float = 0.1
 @export var run_without_network: bool = true
 
 var time_passed: float = 0.0
 var current_tick: int = 0
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 
 func is_ready() -> bool:
 	return true
 
 func get_tick_count() -> int:
 	return current_tick
+
+func build_authoritative_snapshot() -> Dictionary:
+	return _build_authoritative_snapshot()
 
 func _process(delta: float) -> void:
 	var should_tick := run_without_network
@@ -36,13 +42,14 @@ func _process(delta: float) -> void:
 	_process_tick()
 
 func _process_tick() -> void:
-	var snapshot := _build_authoritative_snapshot()
 	tick.emit(current_tick)
 	tick_processed.emit(current_tick)
+	var snapshot := _build_authoritative_snapshot()
 	authoritative_state_ready.emit(snapshot)
 
 func _build_authoritative_snapshot() -> Dictionary:
 	var snapshot := {
+		"payload_type": "full",
 		"tick": current_tick,
 		"timestamp": Time.get_unix_time_from_system(),
 		"units": [],
@@ -58,22 +65,28 @@ func _build_authoritative_snapshot() -> Dictionary:
 			continue
 		if unit.get("entity_id") == null:
 			continue
+		if unit.is_queued_for_deletion() or _node_is_destroyed(unit):
+			continue
 
 		snapshot["units"].append({
 			"entity_id": int(unit.get("entity_id")),
 			"player_id": int(unit.get("player_id")) if unit.get("player_id") != null else 0,
+			"owner_peer_id": int(unit.get("owner_peer_id")) if unit.get("owner_peer_id") != null else -1,
 			"position": {
 				"x": unit.global_position.x,
 				"y": unit.global_position.y
 			},
 			"health": int(unit.get("current_health")),
-			"idle": bool(unit.get("is_idle"))
+			"idle": bool(unit.get("is_idle")),
+			"destroyed": false
 		})
 
 	for resource in get_tree().get_nodes_in_group("resources"):
 		if not is_instance_valid(resource):
 			continue
 		if resource.get("entity_id") == null:
+			continue
+		if resource.is_queued_for_deletion() or _node_is_destroyed(resource):
 			continue
 
 		snapshot["resources"].append({
@@ -83,7 +96,9 @@ func _build_authoritative_snapshot() -> Dictionary:
 				"x": resource.global_position.x,
 				"y": resource.global_position.y
 			},
-			"amount": int(resource.get("amount")) if resource.get("amount") != null else -1
+			"amount": int(resource.get("amount")) if resource.get("amount") != null else -1,
+			"health": int(resource.get("current_health")) if resource.get("current_health") != null else -1,
+			"destroyed": false
 		})
 
 	for building in get_tree().get_nodes_in_group("buildings"):
@@ -117,3 +132,10 @@ static func _snapshot_sort_by_id(items: Array) -> void:
 	items.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return int(a.get("entity_id", -1)) < int(b.get("entity_id", -1))
 	)
+
+static func _node_is_destroyed(node: Node) -> bool:
+	if node.has_method("is_alive"):
+		return not node.is_alive()
+	if node.has_method("is_destroyed"):
+		return node.is_destroyed()
+	return false

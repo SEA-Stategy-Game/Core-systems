@@ -13,6 +13,7 @@ class_name Entity
 
 var current_health: int
 var is_selected: bool = false
+var _is_destroyed: bool = false
 
 # -----------------------------------------------------------------
 # Lifecycle
@@ -34,8 +35,17 @@ func set_selected(value: bool):
 # -----------------------------------------------------------------
 
 func take_damage(amount: int) -> void:
-	current_health -= amount
+	if _is_destroyed or amount <= 0:
+		return
+	current_health = maxi(0, current_health - amount)
 	print("[COMBAT_LOG] Entity ", entity_id, " (player ", player_id, ") took ", amount, " damage. HP: ", current_health, "/", max_health)
+
+	var bar := get_node_or_null("ProgressBar")
+	if bar:
+		bar.max_value = max(bar.max_value, max_health)
+		var tween = get_tree().create_tween()
+		tween.tween_property(bar, "value", current_health, 0.15)
+
 	if current_health <= 0:
 		die()
 
@@ -43,7 +53,10 @@ func get_current_health() -> int:
 	return current_health
 
 func is_alive() -> bool:
-	return current_health > 0
+	return not _is_destroyed and current_health > 0
+
+func is_destroyed() -> bool:
+	return _is_destroyed
 
 func get_player_id() -> int:
 	return player_id

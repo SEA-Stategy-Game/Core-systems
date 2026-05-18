@@ -28,7 +28,7 @@ func tick(unit: CharacterBody2D, _delta: float) -> int:
 		_target_position = _target_node.global_position
 
 	var direction = unit.global_position.direction_to(_target_position)
-	var base_speed = int(unit.get("Speed")) if unit.get("Speed") != null else 50
+	var base_speed = int(unit.get("speed")) if unit.get("speed") != null else 50
 	var speed = float(base_speed)
 	unit.velocity = direction * speed
 
@@ -56,13 +56,20 @@ func serialize() -> Dictionary:
 	}
 
 static func create(position: Vector2) -> UnitActionMove:
-	var action = UnitActionMove.new()
-	action._target_position = position
+	var action := UnitActionMove.new()
+	action.setup(position)
 	return action
 
 static func create_to_node(node: Node2D) -> UnitActionMove:
-	var action = UnitActionMove.new()
-	action._target_node = node
-	if is_instance_valid(node):
-		action._target_position = node.global_position
+	var action := UnitActionMove.new()
+	action.setup_to_node(node)
 	return action
+
+func setup(position: Vector2) -> void:
+	_target_position = position
+	_target_node = null
+
+func setup_to_node(node: Node2D) -> void:
+	_target_node = node
+	if is_instance_valid(node):
+		_target_position = node.global_position

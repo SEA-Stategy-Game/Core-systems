@@ -1,3 +1,4 @@
+extends RefCounted
 class_name GameMap
 
 var tiles: Array = []
@@ -8,15 +9,19 @@ func _ready() -> void:
 	pass
 		
 func _init() -> void:
-	if tiles.is_empty():
+	_ensure_tiles_initialized()
+
+func _ensure_tiles_initialized() -> void:
+	if tiles.size() != width * height or tiles.has(null):
 		initialize_tiles()
-	# This call happens after special map-constructors have painted the map
-	populate_tiles()
 
 func populate_tiles():
+	_ensure_tiles_initialized()
 	for y in range(height):
 		for x in range(width):
-			tiles[_index(x, y)].try_spawn_resource()
+			var tile = get_tile(x, y)
+			if tile != null:
+				tile.try_spawn_resource()
 
 func initialize_tiles() -> void:
 	tiles.resize(width * height)
@@ -31,15 +36,21 @@ func in_bounds(x: int, y: int) -> bool:
 	return x >= 0 and y >= 0 and x < width and y < height
 
 func set_tile(x: int, y: int, terrain: int) -> void:
-	#if tiles.size() != width * height:
-		##initialize_tiles()
 	if not in_bounds(x, y):
 		return
-	tiles[_index(x, y)].terrain = terrain
+	if tiles.size() != width * height:
+		initialize_tiles()
+	var tile := tiles[_index(x, y)]
+	if tile == null:
+		tile = MapTile.new(x, y, MapTile.TerrainType.PLAINS, null)
+		tiles[_index(x, y)] = tile
+	tile.terrain = terrain
 
 func get_tile(x: int, y: int):
 	if not in_bounds(x, y):
 		return null
+	if tiles.size() != width * height:
+		initialize_tiles()
 	return tiles[_index(x, y)]
 
 func get_all_tiles():

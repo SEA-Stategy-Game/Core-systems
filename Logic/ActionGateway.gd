@@ -13,6 +13,7 @@ var _chop_return_state: Dictionary = {}
 var _tick_manager: TickManager = null
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_tick_manager = get_node_or_null("/root/TickManager") as TickManager
 	if _tick_manager != null and not _tick_manager.tick.is_connected(_on_tick):
 		_tick_manager.tick.connect(_on_tick)
@@ -25,12 +26,19 @@ func sense() -> SenseAPI:
 		_sense = SenseAPI.new(get_tree())
 	return _sense
 
-func move_unit(unit_id: int, destination: Vector2, requesting_player_id: int = -1) -> bool:
+func move_unit(unit_id: int, destination: Vector2, requesting_player_id: int = -1, requesting_peer_id: int = -1) -> bool:
 	var unit = _find_unit(unit_id)
 	if unit == null:
 		return false
-	if not _validate_ownership(unit, requesting_player_id):
+	if not _validate_ownership(unit, requesting_player_id, requesting_peer_id):
 		return false
+
+	var tile_map = get_node_or_null("/root/World/NavigationRegion2D/TileMapLayer")
+	if tile_map != null and tile_map.has_method("get_tile_at_world_pos"):
+		var tile = tile_map.get_tile_at_world_pos(destination)
+		if tile == null or int(tile.terrain) == MapTile.TerrainType.WATER:
+			push_warning("[MOVE_DENIED] Destination is not walkable (water/outside map): %s" % str(destination))
+			return false
 
 	var action = UnitActionMove.create(destination)
 	var cq: CommandQueue = _get_or_create_queue(unit)
@@ -42,13 +50,16 @@ func move_unit(unit_id: int, destination: Vector2, requesting_player_id: int = -
 	})
 	return true
 
-func go_chop_tree_and_return(unit_id: int, tree_id: int, requesting_player_id: int = -1) -> bool:
+func go_chop_tree_and_return(unit_id: int, tree_id: int, requesting_player_id: int = -1, requesting_peer_id: int = -1) -> bool:
 	var unit = _find_unit(unit_id)
 	var tree_node = _find_resource(tree_id)
 	if unit == null or tree_node == null:
 		push_warning("ActionGateway.go_chop_tree_and_return: unit or tree not found.")
 		return false
-	if not _validate_ownership(unit, requesting_player_id):
+	if not _validate_ownership(unit, requesting_player_id, requesting_peer_id):
+		return false
+	if tree_node.has_method("is_alive") and not tree_node.is_alive():
+		print("[RESOURCE_LOG] Rejected harvest command against destroyed resource ", tree_id, ".")
 		return false
 
 	var cq: CommandQueue = _get_or_create_queue(unit)
@@ -72,17 +83,17 @@ func go_chop_tree_and_return(unit_id: int, tree_id: int, requesting_player_id: i
 	})
 	return true
 
-func go_chop_tree(unit_id: int, tree_id: int, requesting_player_id: int = -1) -> bool:
-	return go_chop_tree_and_return(unit_id, tree_id, requesting_player_id)
+func go_chop_tree(unit_id: int, tree_id: int, requesting_player_id: int = -1, requesting_peer_id: int = -1) -> bool:
+	return go_chop_tree_and_return(unit_id, tree_id, requesting_player_id, requesting_peer_id)
 
-func go_mine_stone(unit_id: int, stone_id: int, requesting_player_id: int = -1) -> bool:
-	return go_chop_tree_and_return(unit_id, stone_id, requesting_player_id)
+func go_mine_stone(unit_id: int, stone_id: int, requesting_player_id: int = -1, requesting_peer_id: int = -1) -> bool:
+	return go_chop_tree_and_return(unit_id, stone_id, requesting_player_id, requesting_peer_id)
 
-func go_construct(unit_id: int, building_scene: String, build_pos: Vector2, duration: float = 10.0, requesting_player_id: int = -1) -> bool:
+func go_construct(unit_id: int, building_scene: String, build_pos: Vector2, duration: float = 10.0, requesting_player_id: int = -1, requesting_peer_id: int = -1) -> bool:
 	var unit = _find_unit(unit_id)
 	if unit == null:
 		return false
-	if not _validate_ownership(unit, requesting_player_id):
+	if not _validate_ownership(unit, requesting_player_id, requesting_peer_id):
 		return false
 
 	var cq: CommandQueue = _get_or_create_queue(unit)
@@ -98,12 +109,15 @@ func go_construct(unit_id: int, building_scene: String, build_pos: Vector2, dura
 	})
 	return true
 
-func attack_target(unit_id: int, target_id: int, requesting_player_id: int = -1) -> bool:
+func attack_target(unit_id: int, target_id: int, requesting_player_id: int = -1, requesting_peer_id: int = -1) -> bool:
 	var unit = _find_unit(unit_id)
 	var target_node = _find_entity(target_id)
 	if unit == null or target_node == null:
 		return false
-	if not _validate_ownership(unit, requesting_player_id):
+	if not _validate_ownership(unit, requesting_player_id, requesting_peer_id):
+		return false
+	if target_node.has_method("is_alive") and not target_node.is_alive():
+		print("[COMBAT_LOG] Rejected ATTACK from unit ", unit_id, " against destroyed target ", target_id, ".")
 		return false
 
 	var cq: CommandQueue = _get_or_create_queue(unit)
@@ -138,30 +152,41 @@ func execute_plan(plan: Dictionary) -> bool:
 func _on_tick(_tick: int) -> void:
 	if _tick_manager == null:
 		return
+	# Command queues are advanced only from the authoritative server tick.
 	for unit in get_tree().get_nodes_in_group("units"):
 		if not is_instance_valid(unit):
 			continue
+		if not (unit is CharacterBody2D):
+			continue
 		if "command_queue" not in unit or unit.command_queue == null:
 			continue
+		if unit.has_method("get_closest_hostile") and unit.command_queue.is_idle():
+			var hostile = unit.get_closest_hostile()
+			if hostile != null:
+				unit.command_queue.enqueue(UnitActionAttack.create_focused(hostile))
+				print("[COMBAT_LOG] Auto-engaging hostile for unit ", _get_uid(unit), ".")
 
 		unit.command_queue.process_tick(unit, _tick_manager.tick_interval)
 
 func _get_or_create_queue(unit: Node) -> CommandQueue:
 	if "command_queue" in unit and unit.command_queue != null:
+		_connect_queue_signals(unit.command_queue)
 		return unit.command_queue
 
 	var cq := CommandQueue.new()
 	cq.setup(unit, _get_uid(unit))
 	unit.command_queue = cq
 
+	_connect_queue_signals(cq)
+	return cq
+
+func _connect_queue_signals(cq: CommandQueue) -> void:
 	if not cq.action_completed.is_connected(_on_action_completed):
 		cq.action_completed.connect(_on_action_completed)
 	if not cq.action_failed.is_connected(_on_action_failed):
 		cq.action_failed.connect(_on_action_failed)
 	if not cq.queue_empty.is_connected(_on_queue_empty):
 		cq.queue_empty.connect(_on_queue_empty)
-
-	return cq
 
 func _on_action_completed(unit_id: int, action_data: Dictionary) -> void:
 	task_completed.emit(unit_id, action_data)
@@ -179,10 +204,14 @@ func _on_queue_empty(unit_id: int) -> void:
 	if _chop_return_state.has(unit_id):
 		_chop_return_state.erase(unit_id)
 
-func _validate_ownership(unit: Node, requesting_player_id: int) -> bool:
+func _validate_ownership(unit: Node, requesting_player_id: int, requesting_peer_id: int = -1) -> bool:
 	var owner := int(unit.get("player_id")) if unit.get("player_id") != null else 0
 	if requesting_player_id >= 0 and requesting_player_id != owner:
 		push_warning("[OWNERSHIP_ERR] Unit %d belongs to player %d, rejected request from player %d" % [_get_uid(unit), owner, requesting_player_id])
+		return false
+	var owner_peer := int(unit.get("owner_peer_id")) if unit.get("owner_peer_id") != null else -1
+	if requesting_peer_id >= 0 and owner_peer >= 0 and requesting_peer_id != owner_peer:
+		push_warning("[OWNERSHIP_ERR] Unit %d belongs to peer %d, rejected request from peer %d" % [_get_uid(unit), owner_peer, requesting_peer_id])
 		return false
 	return true
 
