@@ -32,393 +32,394 @@ var _minimize_button: Button
 var _restore_button: Button
 
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
-	_build_ui()
-	_bind_from_tree()
-	_refresh_defaults()
-	_apply_command_line_defaults()
-	_log_line("[SHOWCASE] Local multiplayer launcher ready.")
+    process_mode = Node.PROCESS_MODE_ALWAYS
+    _build_ui()
+    _bind_from_tree()
+    _refresh_defaults()
+    _apply_command_line_defaults()
+    _log_line("[SHOWCASE] Local multiplayer launcher ready.")
 
 func bind_world(world: Node) -> void:
-	_world = world
-	_gateway = _world.get_node_or_null("ClientGateway") if _world != null else null
-	_scenario = _world.get_node_or_null("ScenarioController") if _world != null else null
-	if _scenario != null and _scenario.has_signal("scenario_state_changed"):
-		if not _scenario.scenario_state_changed.is_connected(_on_scenario_state_changed):
-			_scenario.scenario_state_changed.connect(_on_scenario_state_changed)
-	_refresh_defaults()
-	_update_status()
+    _world = world
+    _gateway = _world.get_node_or_null("ClientGateway") if _world != null else null
+    _scenario = _world.get_node_or_null("ScenarioController") if _world != null else null
+    if _scenario != null and _scenario.has_signal("scenario_state_changed"):
+        if not _scenario.scenario_state_changed.is_connected(_on_scenario_state_changed):
+            _scenario.scenario_state_changed.connect(_on_scenario_state_changed)
+    _refresh_defaults()
+    _update_status()
 
 func _process(_delta: float) -> void:
-	if _world == null:
-		_bind_from_tree()
-	_update_status()
+    if _world == null:
+        _bind_from_tree()
+    _update_status()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not event is InputEventKey or not event.pressed or event.echo:
-		return
-	match event.keycode:
-		KEY_F6:
-			_host_pressed()
-		KEY_F7:
-			_join_pressed()
-		KEY_F8:
-			_demo_pressed()
-		KEY_F9:
-			_disconnect_pressed()
+    if not event is InputEventKey or not event.pressed or event.echo:
+        return
+    match event.keycode:
+        KEY_F6:
+            _host_pressed()
+        KEY_F7:
+            _join_pressed()
+        KEY_F8:
+            _demo_pressed()
+        KEY_F9:
+            _disconnect_pressed()
 
 func _bind_from_tree() -> void:
-	if _world == null:
-		_world = get_tree().root.get_node_or_null("World")
-	if _world != null:
-		_gateway = _world.get_node_or_null("ClientGateway")
-		_scenario = _world.get_node_or_null("ScenarioController")
-		if _scenario != null and _scenario.has_signal("scenario_state_changed"):
-			if not _scenario.scenario_state_changed.is_connected(_on_scenario_state_changed):
-				_scenario.scenario_state_changed.connect(_on_scenario_state_changed)
+    if _world == null:
+        _world = get_tree().root.get_node_or_null("World")
+    if _world != null:
+        _gateway = _world.get_node_or_null("ClientGateway")
+        _scenario = _world.get_node_or_null("ScenarioController")
+        if _scenario != null and _scenario.has_signal("scenario_state_changed"):
+            if not _scenario.scenario_state_changed.is_connected(_on_scenario_state_changed):
+                _scenario.scenario_state_changed.connect(_on_scenario_state_changed)
 
 func _build_ui() -> void:
-	_ui_layer = CanvasLayer.new()
-	_ui_layer.process_mode = Node.PROCESS_MODE_ALWAYS
-	_ui_layer.layer = 200
-	add_child(_ui_layer)
+    _ui_layer = CanvasLayer.new()
+    _ui_layer.process_mode = Node.PROCESS_MODE_ALWAYS
+    _ui_layer.layer = 200
+    add_child(_ui_layer)
 
-	_panel = PanelContainer.new()
-	_panel.anchor_left = 0.0
-	_panel.anchor_top = 0.0
-	_panel.anchor_right = 0.0
-	_panel.anchor_bottom = 0.0
-	_panel.offset_left = 16
-	_panel.offset_top = 16
-	_panel.offset_right = 550
-	_panel.offset_bottom = 740
-	_ui_layer.add_child(_panel)
+    _panel = PanelContainer.new()
+    _panel.anchor_left = 0.0
+    _panel.anchor_top = 0.0
+    _panel.anchor_right = 0.0
+    _panel.anchor_bottom = 0.0
+    _panel.offset_left = 16
+    _panel.offset_top = 16
+    _panel.offset_right = 550
+    _panel.offset_bottom = 740
+    _ui_layer.add_child(_panel)
 
-	var outer := MarginContainer.new()
-	outer.add_theme_constant_override("margin_left", 14)
-	outer.add_theme_constant_override("margin_top", 14)
-	outer.add_theme_constant_override("margin_right", 14)
-	outer.add_theme_constant_override("margin_bottom", 14)
-	_panel.add_child(outer)
+    var outer := MarginContainer.new()
+    outer.add_theme_constant_override("margin_left", 14)
+    outer.add_theme_constant_override("margin_top", 14)
+    outer.add_theme_constant_override("margin_right", 14)
+    outer.add_theme_constant_override("margin_bottom", 14)
+    _panel.add_child(outer)
 
-	var vbox := VBoxContainer.new()
-	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	outer.add_child(vbox)
+    var vbox := VBoxContainer.new()
+    vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    outer.add_child(vbox)
 
-	var title := Label.new()
-	title.text = "Local Multiplayer Showcase"
-	vbox.add_child(title)
+    var title := Label.new()
+    title.text = "Local Multiplayer Showcase"
+    vbox.add_child(title)
 
-	var subtitle := Label.new()
-	subtitle.text = "Host in one instance, join from another, and watch the deterministic state hash stay aligned."
-	subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	vbox.add_child(subtitle)
+    var subtitle := Label.new()
+    subtitle.text = "Host in one instance, join from another, and watch the deterministic state hash stay aligned."
+    subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    vbox.add_child(subtitle)
 
-	vbox.add_child(HSeparator.new())
+    vbox.add_child(HSeparator.new())
 
-	var grid := GridContainer.new()
-	grid.columns = 2
-	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	vbox.add_child(grid)
+    var grid := GridContainer.new()
+    grid.columns = 2
+    grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    vbox.add_child(grid)
 
-	grid.add_child(_label("Address"))
-	_address_edit = LineEdit.new()
-	_address_edit.text = DEFAULT_ADDRESS
-	grid.add_child(_address_edit)
+    grid.add_child(_label("Address"))
+    _address_edit = LineEdit.new()
+    _address_edit.text = DEFAULT_ADDRESS
+    grid.add_child(_address_edit)
 
-	grid.add_child(_label("Port"))
-	_port_spin = _spin(DEFAULT_PORT, 1, 65535, 1)
-	grid.add_child(_port_spin)
+    grid.add_child(_label("Port"))
+    _port_spin = _spin(DEFAULT_PORT, 1, 65535, 1)
+    grid.add_child(_port_spin)
 
-	grid.add_child(_label("Player ID"))
-	_player_spin = _spin(0, 0, 8, 1)
-	grid.add_child(_player_spin)
+    grid.add_child(_label("Player ID"))
+    _player_spin = _spin(0, 0, 8, 1)
+    grid.add_child(_player_spin)
 
-	grid.add_child(_label("Unit ID"))
-	_unit_spin = _spin(1000, 0, 10000, 1)
-	grid.add_child(_unit_spin)
+    grid.add_child(_label("Unit ID"))
+    _unit_spin = _spin(1000, 0, 10000, 1)
+    grid.add_child(_unit_spin)
 
-	grid.add_child(_label("Target Entity ID"))
-	_target_spin = _spin(0, 0, 100000, 1)
-	grid.add_child(_target_spin)
+    grid.add_child(_label("Target Entity ID"))
+    _target_spin = _spin(0, 0, 100000, 1)
+    grid.add_child(_target_spin)
 
-	vbox.add_child(HSeparator.new())
+    vbox.add_child(HSeparator.new())
 
-	var button_row := GridContainer.new()
-	button_row.columns = 2
-	button_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	vbox.add_child(button_row)
+    var button_row := GridContainer.new()
+    button_row.columns = 2
+    button_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    vbox.add_child(button_row)
 
-	_host_button = _button("Host Local", _host_pressed)
-	button_row.add_child(_host_button)
-	_join_button = _button("Join Local", _join_pressed)
-	button_row.add_child(_join_button)
-	_disconnect_button = _button("Disconnect", _disconnect_pressed)
-	button_row.add_child(_disconnect_button)
-	_demo_button = _button("Run Sync Demo", _demo_pressed)
-	button_row.add_child(_demo_button)
-	_attack_button = _button("Attack Target", _attack_pressed)
-	button_row.add_child(_attack_button)
-	_refresh_button = _button("Refresh IDs", _refresh_pressed)
-	button_row.add_child(_refresh_button)
-	button_row.add_child(_button("Apply Player ID", _apply_player_pressed))
-	_minimize_button = _button("Minimize Launcher", _minimize_pressed)
-	button_row.add_child(_minimize_button)
+    _host_button = _button("Host Local", _host_pressed)
+    button_row.add_child(_host_button)
+    _join_button = _button("Join Local", _join_pressed)
+    button_row.add_child(_join_button)
+    _disconnect_button = _button("Disconnect", _disconnect_pressed)
+    button_row.add_child(_disconnect_button)
+    _demo_button = _button("Run Sync Demo", _demo_pressed)
+    button_row.add_child(_demo_button)
+    _attack_button = _button("Attack Target", _attack_pressed)
+    button_row.add_child(_attack_button)
+    _refresh_button = _button("Refresh IDs", _refresh_pressed)
+    button_row.add_child(_refresh_button)
+    button_row.add_child(_button("Apply Player ID", _apply_player_pressed))
+    _minimize_button = _button("Minimize Launcher", _minimize_pressed)
+    button_row.add_child(_minimize_button)
 
-	_restore_button = _button("Show Launcher", _restore_pressed)
-	_restore_button.visible = false
-	_restore_button.process_mode = Node.PROCESS_MODE_ALWAYS
-	_restore_button.anchor_left = 0.0
-	_restore_button.anchor_top = 0.0
-	_restore_button.offset_left = 16
-	_restore_button.offset_top = 16
-	_restore_button.offset_right = 150
-	_restore_button.offset_bottom = 48
-	_ui_layer.add_child(_restore_button)
+    _restore_button = _button("Show Launcher", _restore_pressed)
+    _restore_button.visible = false
+    _restore_button.process_mode = Node.PROCESS_MODE_ALWAYS
+    _restore_button.anchor_left = 0.0
+    _restore_button.anchor_top = 0.0
+    _restore_button.offset_left = 16
+    _restore_button.offset_top = 16
+    _restore_button.offset_right = 150
+    _restore_button.offset_bottom = 48
+    _ui_layer.add_child(_restore_button)
 
-	vbox.add_child(HSeparator.new())
+    vbox.add_child(HSeparator.new())
 
-	_mode_label = _label("Mode: offline")
-	_peer_label = _label("Peer: n/a")
-	_tick_label = _label("Tick: n/a")
-	_hash_label = _label("Hash: n/a")
-	_sync_label = _label("Sync: n/a")
-	_scenario_label = _label("Scenario: idle")
+    _mode_label = _label("Mode: offline")
+    _peer_label = _label("Peer: n/a")
+    _tick_label = _label("Tick: n/a")
+    _hash_label = _label("Hash: n/a")
+    _sync_label = _label("Sync: n/a")
+    _scenario_label = _label("Scenario: idle")
 
-	vbox.add_child(_mode_label)
-	vbox.add_child(_peer_label)
-	vbox.add_child(_tick_label)
-	vbox.add_child(_hash_label)
-	vbox.add_child(_sync_label)
-	vbox.add_child(_scenario_label)
+    vbox.add_child(_mode_label)
+    vbox.add_child(_peer_label)
+    vbox.add_child(_tick_label)
+    vbox.add_child(_hash_label)
+    vbox.add_child(_sync_label)
+    vbox.add_child(_scenario_label)
 
-	vbox.add_child(HSeparator.new())
+    vbox.add_child(HSeparator.new())
 
-	var log_title := Label.new()
-	log_title.text = "Console"
-	vbox.add_child(log_title)
+    var log_title := Label.new()
+    log_title.text = "Console"
+    vbox.add_child(log_title)
 
-	_log = RichTextLabel.new()
-	_log.fit_content = true
-	_log.scroll_following = true
-	_log.custom_minimum_size = Vector2(0, 220)
-	vbox.add_child(_log)
+    _log = RichTextLabel.new()
+    _log.fit_content = true
+    _log.scroll_following = true
+    _log.custom_minimum_size = Vector2(0, 220)
+    vbox.add_child(_log)
 
 func _bind_from_scenario() -> void:
-	if _scenario == null:
-		return
-	if _unit_spin != null and _scenario.has_method("get_first_unit_id_for_player"):
-		var uid := int(_scenario.get_first_unit_id_for_player(int(_player_spin.value)))
-		if uid >= 0:
-			_unit_spin.value = uid
-	if _target_spin != null and _scenario.has_method("get_first_resource_id"):
-		var rid := int(_scenario.get_first_resource_id())
-		if rid >= 0:
-			_target_spin.value = rid
+    if _scenario == null:
+        return
+    if _unit_spin != null and _scenario.has_method("get_first_unit_id_for_player"):
+        var uid := int(_scenario.get_first_unit_id_for_player(int(_player_spin.value)))
+        if uid >= 0:
+            _unit_spin.value = uid
+    if _target_spin != null and _scenario.has_method("get_first_resource_id"):
+        var rid := int(_scenario.get_first_resource_id())
+        if rid >= 0:
+            _target_spin.value = rid
 
 func _refresh_defaults() -> void:
-	_bind_from_scenario()
+    _bind_from_scenario()
 
 func _apply_command_line_defaults() -> void:
-	for arg in OS.get_cmdline_args():
-		if arg.begins_with("--showcase-port="):
-			_port_spin.value = int(arg.get_slice("=", 1))
-		elif arg.begins_with("--showcase-address="):
-			_address_edit.text = arg.get_slice("=", 1)
-		elif arg.begins_with("--showcase-player="):
-			_player_spin.value = int(arg.get_slice("=", 1))
-		elif arg.begins_with("--showcase-unit="):
-			_unit_spin.value = int(arg.get_slice("=", 1))
-		elif arg.begins_with("--showcase-target="):
-			_target_spin.value = int(arg.get_slice("=", 1))
-		elif arg == "--showcase-host":
-			call_deferred("_host_pressed")
-		elif arg.begins_with("--showcase-join="):
-			_address_edit.text = arg.get_slice("=", 1)
-			call_deferred("_join_pressed")
+    for arg in OS.get_cmdline_args():
+        if arg.begins_with("--showcase-port="):
+            _port_spin.value = int(arg.get_slice("=", 1))
+        elif arg.begins_with("--showcase-address="):
+            _address_edit.text = arg.get_slice("=", 1)
+        elif arg.begins_with("--showcase-player="):
+            _player_spin.value = int(arg.get_slice("=", 1))
+        elif arg.begins_with("--showcase-unit="):
+            _unit_spin.value = int(arg.get_slice("=", 1))
+        elif arg.begins_with("--showcase-target="):
+            _target_spin.value = int(arg.get_slice("=", 1))
+        elif arg == "--showcase-host":
+            call_deferred("_host_pressed")
+        elif arg.begins_with("--showcase-join="):
+            _address_edit.text = arg.get_slice("=", 1)
+            call_deferred("_join_pressed")
 
 func _host_pressed() -> void:
-	_configure_gateway()
-	var gateway := _gateway_node()
-	if gateway == null:
-		_log_line("[NET_ERR] Gateway not available.")
-		return
-	gateway.start_server(int(_port_spin.value))
-	_log_line("[NET_LOG] Host requested on port %d." % int(_port_spin.value))
+    _configure_gateway()
+    var gateway := _gateway_node()
+    if gateway == null:
+        _log_line("[NET_ERR] Gateway not available.")
+        return
+    gateway.start_server(int(_port_spin.value))
+    _log_line("[NET_LOG] Host requested on port %d." % int(_port_spin.value))
 
 func _join_pressed() -> void:
-	_configure_gateway()
-	var gateway := _gateway_node()
-	if gateway == null:
-		_log_line("[NET_ERR] Gateway not available.")
-		return
-	gateway.connect_to_server(_address_edit.text, int(_port_spin.value))
-	_log_line("[NET_LOG] Join requested for %s:%d." % [_address_edit.text, int(_port_spin.value)])
+    _configure_gateway()
+    var gateway := _gateway_node()
+    if gateway == null:
+        _log_line("[NET_ERR] Gateway not available.")
+        return
+    gateway.connect_to_server(_address_edit.text, int(_port_spin.value))
+    _log_line("[NET_LOG] Join requested for %s:%d." % [_address_edit.text, int(_port_spin.value)])
 
 func _disconnect_pressed() -> void:
-	var gateway := _gateway_node()
-	if gateway != null and gateway.has_method("disconnect_network"):
-		gateway.disconnect_network()
-	if multiplayer.multiplayer_peer != null:
-		multiplayer.multiplayer_peer = null
-	_log_line("[NET_LOG] Local peer disconnected.")
-	_update_status()
+    var gateway := _gateway_node()
+    if gateway != null and gateway.has_method("disconnect_network"):
+        gateway.disconnect_network()
+    if multiplayer.multiplayer_peer != null:
+        multiplayer.multiplayer_peer = null
+    _log_line("[NET_LOG] Local peer disconnected.")
+    _update_status()
 
 func _demo_pressed() -> void:
-	if not _can_issue_commands():
-		_log_line("[CMD_DENIED] Commands are disabled on the host.")
-		return
-	var gateway := _gateway_node()
-	if gateway == null:
-		_log_line("[CMD_ERR] Gateway not available.")
-		return
+    if not _can_issue_commands():
+        _log_line("[CMD_DENIED] Commands are disabled on the host.")
+        return
+    var gateway := _gateway_node()
+    if gateway == null:
+        _log_line("[CMD_ERR] Gateway not available.")
+        return
 
-	var ok := false
-	if _scenario != null and _scenario.has_method("run_demo"):
-		ok = bool(_scenario.run_demo(int(_unit_spin.value), int(_player_spin.value)))
-	elif gateway.has_method("submit_showcase_command"):
-		var command := {
-			"action": "ATTACK",
-			"unit_id": int(_unit_spin.value),
-			"target_id": int(_target_spin.value),
-			"player_id": int(_player_spin.value)
-		}
-		ok = bool(gateway.submit_showcase_command(command))
+    var ok := false
+    if _scenario != null and _scenario.has_method("run_demo"):
+        ok = bool(_scenario.run_demo(
+            int(_unit_spin.value),
+            int(_player_spin.value),
+            int(_target_spin.value)
+        ))
+    elif gateway.has_method("submit_showcase_command"):
+        ok = bool(gateway.submit_showcase_command({
+            "action": "ATTACK",
+            "unit_id": int(_unit_spin.value),
+            "target_id": int(_target_spin.value),
+            "player_id": int(_player_spin.value)
+        }))
 
-	if ok:
-		_log_line("[CMD_SENT] demo request")
-	else:
-		_log_line("[CMD_DENIED] Demo command was rejected.")
-	_update_status()
+    if ok:
+        _log_line("[CMD_SENT] demo request")
+    else:
+        _log_line("[CMD_DENIED] Demo command was rejected.")
+    _update_status()
 
 func _attack_pressed() -> void:
-	if not _can_issue_commands():
-		_log_line("[CMD_DENIED] Commands are disabled on the host.")
-		return
-	var gateway := _gateway_node()
-	if gateway == null:
-		_log_line("[CMD_ERR] Gateway not available.")
-		return
+    if not _can_issue_commands():
+        _log_line("[CMD_DENIED] Commands are disabled on the host.")
+        return
+    var gateway := _gateway_node()
+    if gateway == null:
+        _log_line("[CMD_ERR] Gateway not available.")
+        return
 
-	var command := {
-		"action": "ATTACK",
-		"unit_id": int(_unit_spin.value),
-		"target_id": int(_target_spin.value),
-		"player_id": int(_player_spin.value)
-	}
+    var command := {
+        "action": "ATTACK",
+        "unit_id": int(_unit_spin.value),
+        "target_id": int(_target_spin.value),
+        "player_id": int(_player_spin.value)
+    }
 
-	var ok := false
-	if gateway.has_method("submit_player_command"):
-		ok = bool(gateway.submit_player_command(command))
+    var ok := false
+    if gateway.has_method("submit_player_command"):
+        ok = bool(gateway.submit_player_command(command))
 
-	if ok:
-		_log_line("[CMD_SENT] %s" % str(command))
-	else:
-		_log_line("[CMD_DENIED] Attack command was rejected.")
-	_update_status()
+    if ok:
+        _log_line("[CMD_SENT] %s" % str(command))
+    else:
+        _log_line("[CMD_DENIED] Attack command was rejected.")
+    _update_status()
 
 func _refresh_pressed() -> void:
-	_refresh_defaults()
-	_log_line("[SHOWCASE] Refreshed unit and target IDs from world state.")
+    _refresh_defaults()
+    _log_line("[SHOWCASE] Refreshed unit and target IDs from world state.")
 
 func _apply_player_pressed() -> void:
-	var gateway = get_node_or_null("/root/ActionGateway")
-	if gateway != null and gateway.has_method("set_active_player"):
-		gateway.set_active_player(int(_player_spin.value))
-	_log_line("[SHOWCASE] Active player set to %d." % int(_player_spin.value))
+    var gateway = get_node_or_null("/root/ActionGateway")
+    if gateway != null and gateway.has_method("set_active_player"):
+        gateway.set_active_player(int(_player_spin.value))
+    _log_line("[SHOWCASE] Active player set to %d." % int(_player_spin.value))
 
 func _minimize_pressed() -> void:
-	# This is intentionally only a UI collapse. The launcher node, gateway, and
-	# tick loop stay PROCESS_MODE_ALWAYS so simulation/networking continue running.
-	_panel.visible = false
-	_restore_button.visible = true
-	get_tree().paused = false
-	_log_line("[SHOWCASE] Launcher minimized; networking and simulation remain active.")
+    _panel.visible = false
+    _restore_button.visible = true
+    get_tree().paused = false
+    _log_line("[SHOWCASE] Launcher minimized; networking and simulation remain active.")
 
 func _restore_pressed() -> void:
-	_panel.visible = true
-	_restore_button.visible = false
-	get_tree().paused = false
-	_log_line("[SHOWCASE] Launcher restored.")
+    _panel.visible = true
+    _restore_button.visible = false
+    get_tree().paused = false
+    _log_line("[SHOWCASE] Launcher restored.")
 
 func _configure_gateway() -> void:
-	var gateway := _gateway_node()
-	if gateway != null and gateway.has_method("set_port"):
-		gateway.set_port(int(_port_spin.value))
-	var action_gateway = get_node_or_null("/root/ActionGateway")
-	if action_gateway != null and action_gateway.has_method("set_active_player"):
-		action_gateway.set_active_player(int(_player_spin.value))
+    var gateway := _gateway_node()
+    if gateway != null and gateway.has_method("set_port"):
+        gateway.set_port(int(_port_spin.value))
+    var action_gateway = get_node_or_null("/root/ActionGateway")
+    if action_gateway != null and action_gateway.has_method("set_active_player"):
+        action_gateway.set_active_player(int(_player_spin.value))
 
 func _gateway_node() -> Node:
-	var autoload_server := get_node_or_null("/root/Server")
-	if autoload_server != null:
-		return autoload_server
-	if _gateway != null:
-		return _gateway
-	if _world != null:
-		_gateway = _world.get_node_or_null("ClientGateway")
-	return _gateway
+    var autoload_server := get_node_or_null("/root/Server")
+    if autoload_server != null:
+        return autoload_server
+    if _gateway != null:
+        return _gateway
+    if _world != null:
+        _gateway = _world.get_node_or_null("ClientGateway")
+    return _gateway
 
 func _update_status() -> void:
-	var gateway := _gateway_node()
-	var server_tick := -1
-	var signature := ""
-	var mode := "offline"
-	var peer_summary := {}
+    var gateway := _gateway_node()
+    var server_tick := -1
+    var signature := ""
+    var mode := "offline"
+    var peer_summary := {}
 
-	if gateway != null and gateway.has_method("get_peer_summary"):
-		peer_summary = gateway.get_peer_summary()
-		mode = String(peer_summary.get("mode", "offline"))
-		server_tick = int(gateway.get_last_tick()) if gateway.has_method("get_last_tick") else -1
-		signature = String(gateway.get_last_state_signature()) if gateway.has_method("get_last_state_signature") else ""
+    if gateway != null and gateway.has_method("get_peer_summary"):
+        peer_summary = gateway.get_peer_summary()
+        mode = String(peer_summary.get("mode", "offline"))
+        server_tick = int(gateway.get_last_tick()) if gateway.has_method("get_last_tick") else -1
+        signature = String(gateway.get_last_state_signature()) if gateway.has_method("get_last_state_signature") else ""
 
-	var tick_manager = get_node_or_null("/root/TickManager")
-	var local_tick = int(tick_manager.get_tick_count()) if tick_manager != null and tick_manager.has_method("get_tick_count") else -1
-	var scenario_report := _scenario.get_status_report() if _scenario != null and _scenario.has_method("get_status_report") else {}
+    var tick_manager = get_node_or_null("/root/TickManager")
+    var local_tick = int(tick_manager.get_tick_count()) if tick_manager != null and tick_manager.has_method("get_tick_count") else -1
+    var scenario_report := _scenario.get_status_report() if _scenario != null and _scenario.has_method("get_status_report") else {}
 
-	_mode_label.text = "Mode: %s" % mode
-	_peer_label.text = "Peer: %s" % str(peer_summary)
-	_tick_label.text = "Tick: local=%d authoritative=%d" % [local_tick, server_tick]
-	_hash_label.text = "Hash: %s" % (signature if not signature.is_empty() else "n/a")
-	_sync_label.text = "Sync: %s" % ("OK" if bool(scenario_report.get("in_sync", false)) else "DESYNC")
-	_scenario_label.text = "Scenario: %s" % str(scenario_report.get("demo_phase", "idle"))
+    _mode_label.text = "Mode: %s" % mode
+    _peer_label.text = "Peer: %s" % str(peer_summary)
+    _tick_label.text = "Tick: local=%d authoritative=%d" % [local_tick, server_tick]
+    _hash_label.text = "Hash: %s" % (signature if not signature.is_empty() else "n/a")
+    _sync_label.text = "Sync: %s" % ("OK" if bool(scenario_report.get("in_sync", false)) else "DESYNC")
+    _scenario_label.text = "Scenario: %s" % str(scenario_report.get("demo_phase", "idle"))
 
 func _on_scenario_state_changed(state: Dictionary) -> void:
-	_update_status()
+    _update_status()
 
 func _label(text: String) -> Label:
-	var lbl := Label.new()
-	lbl.text = text
-	return lbl
+    var lbl := Label.new()
+    lbl.text = text
+    return lbl
 
 func _spin(default_value: float, min_value: float, max_value: float, step: float) -> SpinBox:
-	var sb := SpinBox.new()
-	sb.min_value = min_value
-	sb.max_value = max_value
-	sb.step = step
-	sb.value = default_value
-	sb.allow_greater = true
-	sb.allow_lesser = true
-	sb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	return sb
+    var sb := SpinBox.new()
+    sb.min_value = min_value
+    sb.max_value = max_value
+    sb.step = step
+    sb.value = default_value
+    sb.allow_greater = true
+    sb.allow_lesser = true
+    sb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    return sb
 
 func _button(text: String, callback: Callable) -> Button:
-	var btn := Button.new()
-	btn.text = text
-	btn.pressed.connect(callback)
-	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	return btn
+    var btn := Button.new()
+    btn.text = text
+    btn.pressed.connect(callback)
+    btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    return btn
 
 func _log_line(text: String) -> void:
-	if _log == null:
-		return
-	_log.append_text(text + "\n")
-	_log.scroll_to_line(_log.get_line_count() - 1)
+    if _log == null:
+        return
+    _log.append_text(text + "\n")
+    _log.scroll_to_line(_log.get_line_count() - 1)
 
 func _can_issue_commands() -> bool:
-	var gateway := _gateway_node()
-	if gateway != null and gateway.has_method("get_peer_summary"):
-		var summary: Dictionary = gateway.get_peer_summary()
-		return String(summary.get("mode", "offline")) != "host"
-	return not multiplayer.is_server()
+    var gateway := _gateway_node()
+    if gateway != null and gateway.has_method("get_peer_summary"):
+        var summary: Dictionary = gateway.get_peer_summary()
+        return String(summary.get("mode", "offline")) != "host"
+    return not multiplayer.is_server()

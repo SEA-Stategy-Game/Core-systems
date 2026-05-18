@@ -11,7 +11,7 @@ class_name MapResource
 
 var amount: int = 1
 var max_amount: int = 1
-var current_time: float
+var current_time: float = 0.0
 var units_harvesting: int = 0
 
 signal modified
@@ -27,17 +27,16 @@ func _ready() -> void:
         remove_from_group("units")
     add_to_group("resources")
     if multiplayer.is_server() and server != null and server.has_method("_on_ressource_modified"):
-        self.modified.connect(server._on_ressource_modified)
+        modified.connect(server._on_ressource_modified)
 
 func _has_server_authority() -> bool:
-    var peer := multiplayer.multiplayer_peer
-    if peer == null:
+    if multiplayer.multiplayer_peer == null:
         return true
-    if peer.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
+    if multiplayer.multiplayer_peer.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
         return false
     return multiplayer.is_server()
 
-func harvest():
+func harvest() -> void:
     if _is_destroyed:
         return
     if amount > 0:
@@ -65,11 +64,9 @@ func _on_timer_timeout() -> void:
     if _is_destroyed or not _has_server_authority():
         return
     current_time -= 1 * units_harvesting
-
     if bar:
         var tween = get_tree().create_tween()
         tween.tween_property(bar, "value", current_time, 0.5)
-
     if current_time <= 0:
         harvest()
 
@@ -87,7 +84,7 @@ func sync_from_snapshot(snapshot: Dictionary) -> void:
     if amount <= 0 or current_health <= 0:
         _mark_destroyed_from_network()
 
-func on_finished_harvesting():
+func on_finished_harvesting() -> void:
     _finalize_destruction("harvested")
 
 func _finalize_destruction(reason: String) -> void:

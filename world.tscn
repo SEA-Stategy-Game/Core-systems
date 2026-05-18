@@ -95,7 +95,7 @@ script = ExtResource("1_f3sb7")
 
 [node name="Units" type="Node2D" parent="." unique_id=1851347236]
 
-[node name="ClientGateway" type="Node2D" parent="." unique_id=334622980]
+[node name="Gateway" type="Node2D" parent="." unique_id=334622980]
 position = Vector2(3, -10)
 script = ExtResource("9_ioo17")
 

@@ -1,10 +1,6 @@
 extends CharacterBody2D
-
 class_name Unit
 
-## -----------------------------------------------------------------------
-## Exported / inspector properties
-## -----------------------------------------------------------------------
 @export var selected: bool = false
 @export var entity_id: int = -1
 @export var player_id: int = 0
@@ -22,31 +18,25 @@ var _needs_initial_position: bool = true
 @onready var attack_range_area: Area2D = get_node_or_null("Range")
 @onready var tile_map: TileMapLayer = get_node("/root/World/NavigationRegion2D/TileMapLayer")
 
-## Movement / pathfinding / AI queue
 var follow_cursor: bool = false
-var speed: int = 3000
+var speed: int = 300
 var is_animated: bool = false
 var current_path_index: int = 0
 @onready var sprite = $Arthax
 
 var command_queue: CommandQueue = null
 var is_idle: bool = true
-
 var _bodies_in_range: Array = []
 
 signal ai_action_completed(unit_id: int, action_data: Dictionary)
 signal ai_action_failed(unit_id: int, action_data: Dictionary)
 signal unit_idled(unit_id: int)
 
-# -----------------------------------------------------------------
-# Lifecycle
-# -----------------------------------------------------------------
 func _ready() -> void:
     current_health = max_health
     add_to_group("units", true)
     set_selected(selected)
 
-    # Initialise the command queue
     command_queue = CommandQueue.new()
     var uid: int = entity_id if entity_id >= 0 else get_instance_id()
     command_queue.setup(self, uid)
@@ -54,7 +44,6 @@ func _ready() -> void:
     command_queue.action_failed.connect(_on_cq_action_failed)
     command_queue.queue_empty.connect(_on_cq_queue_empty)
 
-    # Wire up the Range Area2D signals for combat detection
     if attack_range_area:
         attack_range_area.body_entered.connect(_on_range_body_entered)
         attack_range_area.body_exited.connect(_on_range_body_exited)
@@ -78,20 +67,12 @@ func sync_from_snapshot(snapshot: Dictionary) -> void:
         _mark_destroyed_from_network()
         return
 
-    # Do not continuously apply authoritative position for locally-owned units
-    # (prevents snapping/flicker). However, apply a one-time initial authoritative
-    # position when the unit is first materialized so locally-owned units appear
-    # in the right place on the client at spawn.
-    var apply_position := true
-    if has_method("is_locally_owned") and is_locally_owned():
-        if _needs_initial_position:
-            apply_position = true
-            _needs_initial_position = false
-        else:
-            apply_position = false
-
-    if snapshot.has("position") and apply_position:
+    # Apply authoritative server position (clients consume this).
+    if snapshot.has("position"):
         global_position = Vector2(snapshot["position"]["x"], snapshot["position"]["y"])
+        velocity = Vector2.ZERO
+
+    _needs_initial_position = false
 
     if owner_peer_id > 0:
         set_multiplayer_authority(owner_peer_id, false)
@@ -112,9 +93,6 @@ func set_selected(value: bool) -> void:
     if box:
         box.visible = value
 
-# -----------------------------------------------------------------
-# Range Area2D signal handlers
-# -----------------------------------------------------------------
 func _on_range_body_entered(body: Node2D) -> void:
     if body == self:
         return
@@ -180,16 +158,11 @@ func get_local_movement_speed() -> float:
             return speed * tile.get_movement_multiplier()
     return speed
 
-# -----------------------------------------------------------------
-# IDamageable contract
-# -----------------------------------------------------------------
 func take_damage(amount: int) -> void:
     if _is_destroyed or amount <= 0:
         return
     current_health = maxi(0, current_health - amount)
     print("[COMBAT_LOG] Unit ", entity_id, " (player ", player_id, ") took ", amount, " damage. HP: ", current_health, "/", max_health)
-
-    # Visual feedback: flash red!
     var sprite = get_node_or_null("Arthax")
     if not sprite:
         sprite = get_node_or_null("Sprite2D")
@@ -199,7 +172,6 @@ func take_damage(amount: int) -> void:
         var tween = get_tree().create_tween()
         sprite.modulate = Color(1, 0, 0)
         tween.tween_property(sprite, "modulate", Color(1, 1, 1), 0.2)
-
     if current_health <= 0:
         die()
 
@@ -233,9 +205,6 @@ func _mark_destroyed_from_network() -> void:
     print("[DESTROY_LOG] Replicated destruction for unit ", entity_id, ".")
     queue_free()
 
-# -----------------------------------------------------------------
-# Player input
-# -----------------------------------------------------------------
 func _input(event) -> void:
     if not can_accept_local_input():
         return
@@ -255,15 +224,19 @@ func _input(event) -> void:
         if ok:
             print("[INPUT_LOG] Local peer ", owner_peer_id, " requested MOVE for unit ", entity_id, " to ", target, ".")
 
-# -----------------------------------------------------------------
-# Physics / tick processing
-# -----------------------------------------------------------------
 func _physics_process(_delta) -> void:
     _bodies_in_range = _bodies_in_range.filter(func(b): return is_instance_valid(b))
 
-# -----------------------------------------------------------------
-# Signal relays
-# -----------------------------------------------------------------
+    var peer := multiplayer.multiplayer_peer
+    var should_advance_physics := false
+    if peer == null:
+        should_advance_physics = true
+    elif peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED and multiplayer.is_server():
+        should_advance_physics = true
+
+    if should_advance_physics:
+        move_and_slide()
+
 func _on_cq_action_completed(uid: int, data: Dictionary) -> void:
     ai_action_completed.emit(uid, data)
 
@@ -283,11 +256,15 @@ func set_anim(flag) -> void:
         anim.stop()
         is_animated = false
 
-func point_to_line_dist(line_start : Vector2, line_end : Vector2, point_position : Vector2) -> float:
-    var line_direction = (line_start - line_end).normalized()
-    var vector_to_object = point_position - line_start
-    var distance = line_direction.dot(vector_to_object)
-    return distance
+func point_to_line_dist(line_start: Vector2, line_end: Vector2, point_position: Vector2) -> float:
+    var segment: Vector2 = line_end - line_start
+    var length_sq: float = segment.length_squared()
+    if length_sq <= 0.0001:
+        return point_position.distance_to(line_start)
+
+    var t: float = clampf((point_position - line_start).dot(segment) / length_sq, 0.0, 1.0)
+    var closest_point: Vector2 = line_start + segment * t
+    return point_position.distance_to(closest_point)
 
 func recalculate_path() -> void:
     $NavigationAgent2D.target_position = $NavigationAgent2D.target_position
@@ -309,16 +286,14 @@ func get_navigation_path_segment(amount_of_segments: int) -> PackedVector2Array:
     return path.slice(current_path_index, end_index)
 
 func _on_navigation_agent_2d_velocity_computed(safe_velocity: Vector2) -> void:
+    # Only the authoritative simulation should compute/apply navigation velocity.
+    var peer := multiplayer.multiplayer_peer
+    if peer != null and not multiplayer.is_server():
+        return
+
     velocity = safe_velocity
     if not $NavigationAgent2D.is_navigation_finished():
         set_anim(safe_velocity.length_squared() > 100)
-        global_position = NavigationServer2D.map_get_closest_point($NavigationAgent2D.get_navigation_map(), global_position)
-        if (current_path_index < $NavigationAgent2D.get_current_navigation_path().size()-1 and
-            point_to_line_dist($NavigationAgent2D.get_current_navigation_path()[current_path_index-1],
-                $NavigationAgent2D.get_current_navigation_path()[current_path_index],
-                global_position) > 40):
-            recalculate_path()
     else:
         set_anim(false)
         velocity = Vector2.ZERO
-        move_and_slide()

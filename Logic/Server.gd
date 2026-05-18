@@ -18,6 +18,8 @@ const DEFAULT_UNIT_SPAWN_POSITIONS := [
 @export var default_port: int = 24567
 @export var max_clients: int = 16
 @export var full_state_sync_interval_ticks: int = 20
+@export var debug_log_unit_positions: bool = true
+@export var debug_log_unit_positions_once: bool = false
 
 var port: int = 24567
 var last_full_state: Dictionary = {}
@@ -30,11 +32,9 @@ var _next_dynamic_entity_id: int = 10000
 func _ready() -> void:
     process_mode = Node.PROCESS_MODE_ALWAYS
     port = default_port
-
     if OS.has_feature("dedicated_server"):
         start_server()
         return
-
     if auto_start_server and "--server" in OS.get_cmdline_args():
         start_server()
 
@@ -73,7 +73,6 @@ func _start_server() -> void:
 func connect_to_server(address: String = "127.0.0.1", port_override: int = -1) -> void:
     if port_override > 0:
         set_port(port_override)
-
     if multiplayer.multiplayer_peer != null:
         return
 
@@ -140,7 +139,6 @@ func submit_player_command(command: Dictionary) -> bool:
     if command.is_empty():
         return false
 
-    # Clients submit intent to the host; the host validates ownership before mutating gameplay state.
     if multiplayer.multiplayer_peer == null or multiplayer.is_server():
         var local_peer_id := -1
         if multiplayer.multiplayer_peer != null:
@@ -179,12 +177,7 @@ func _execute_player_command(command: Dictionary, source_peer_id: int = -1) -> b
     match action_type:
         "MOVE":
             var pos_dict: Dictionary = authorized_command.get("target", {})
-            return gateway.move_unit(
-                unit_id,
-                Vector2(float(pos_dict.get("x", 0.0)), float(pos_dict.get("y", 0.0))),
-                player_id,
-                source_peer_id
-            )
+            return gateway.move_unit(unit_id, Vector2(float(pos_dict.get("x", 0.0)), float(pos_dict.get("y", 0.0))), player_id, source_peer_id)
         "CHOP_AND_RETURN":
             return gateway.go_chop_tree_and_return(unit_id, int(authorized_command.get("target_id", -1)), player_id, source_peer_id)
         "ATTACK":
@@ -197,26 +190,30 @@ func _execute_player_command(command: Dictionary, source_peer_id: int = -1) -> b
 
 func _authorize_player_command(command: Dictionary, source_peer_id: int) -> Dictionary:
     var authorized := command.duplicate(true)
-    var peer := multiplayer.multiplayer_peer
-    if peer == null:
+    if multiplayer.multiplayer_peer == null:
         return authorized
 
     if source_peer_id < 0:
         push_warning("[OWNERSHIP_ERR] Rejected command without an authenticated peer: %s" % str(command))
         return {}
-
     if not _player_slots_by_peer.has(source_peer_id):
         push_warning("[OWNERSHIP_ERR] Rejected command from unregistered peer %d: %s" % [source_peer_id, str(command)])
         return {}
 
     var requested_unit_id := int(command.get("unit_id", -1))
     var owned_unit_id := int(_unit_ids_by_peer.get(source_peer_id, -1))
-    if requested_unit_id != owned_unit_id:
-        push_warning("[OWNERSHIP_ERR] Peer %d attempted to control unit %d, but owns unit %d." % [source_peer_id, requested_unit_id, owned_unit_id])
-        return {}
 
-    # The packet's player_id is advisory only. The server derives the player slot from
-    # the authenticated sender peer so clients cannot spoof ownership.
+    # Allow empty/missing unit_id by mapping to the peer's owned unit.
+    if requested_unit_id < 0:
+        if owned_unit_id < 0:
+            push_warning("[OWNERSHIP_ERR] Peer %d has no assigned unit; rejecting command: %s" % [source_peer_id, str(command)])
+            return {}
+        authorized["unit_id"] = owned_unit_id
+    else:
+        if requested_unit_id != owned_unit_id:
+            push_warning("[OWNERSHIP_ERR] Peer %d attempted to control unit %d, but owns unit %d." % [source_peer_id, requested_unit_id, owned_unit_id])
+            return {}
+
     authorized["player_id"] = int(_player_slots_by_peer[source_peer_id])
     print("[OWNERSHIP_LOG] Accepted command from peer ", source_peer_id, " for owned unit ", owned_unit_id, ".")
     return authorized
@@ -332,15 +329,16 @@ func _on_authoritative_state_ready(state: Dictionary) -> void:
     last_full_state = state.duplicate(true)
     last_state_signature = String(state.get("state_signature", ""))
     authoritative_state_applied.emit(last_full_state)
-
+    if debug_log_unit_positions or debug_log_unit_positions_once:
+        _debug_log_unit_positions()
+        if debug_log_unit_positions_once:
+            debug_log_unit_positions_once = false
     if connected_peers.is_empty():
         return
-
     var tick := int(state.get("tick", 0))
     if full_state_sync_interval_ticks > 0 and tick % full_state_sync_interval_ticks == 0:
         rpc("receive_full_state", state)
         return
-
     rpc("receive_tick_state", _build_tick_state(state))
 
 @rpc("authority", "call_remote", "reliable")
@@ -360,11 +358,9 @@ func _apply_state(state: Dictionary) -> void:
     _merge_last_full_state(state)
     last_state_signature = String(last_full_state.get("state_signature", state.get("state_signature", "")))
     print("[NET_SYNC] Applying tick ", state["tick"])
-
     _sync_units(state.get("units", []))
     _sync_resources(state.get("resources", []))
     _sync_buildings(state.get("buildings", []))
-
     authoritative_state_applied.emit(last_full_state)
 
 func _refresh_last_full_state() -> void:
@@ -383,7 +379,6 @@ func _merge_last_full_state(state: Dictionary) -> void:
     if last_full_state.is_empty() or _is_full_state_payload(state):
         last_full_state = state.duplicate(true)
         return
-
     last_full_state["tick"] = int(state.get("tick", last_full_state.get("tick", -1)))
     last_full_state["timestamp"] = state.get("timestamp", last_full_state.get("timestamp", 0))
     last_full_state["state_signature"] = String(state.get("state_signature", last_full_state.get("state_signature", "")))
@@ -473,7 +468,6 @@ func _sync_units(units: Array) -> void:
     for incoming in units:
         var incoming_snapshot: Dictionary = incoming
         var incoming_id := int(incoming_snapshot.get("entity_id", -1))
-
         if bool(incoming_snapshot.get("destroyed", false)):
             var destroyed_unit = known_units.get(incoming_id, null)
             if destroyed_unit != null:
@@ -483,13 +477,10 @@ func _sync_units(units: Array) -> void:
 
         incoming_ids[incoming_id] = true
         var target = known_units.get(incoming_id, null)
-
-        # Late joiners and newly connected peers materialize units from authoritative snapshots.
         if target == null and _can_spawn_unit_from_snapshot(incoming_snapshot):
             target = _spawn_replicated_unit(incoming_snapshot)
             if target != null:
                 known_units[incoming_id] = target
-
         if target == null:
             continue
 
@@ -530,16 +521,11 @@ func _spawn_replicated_unit(snapshot: Dictionary) -> Node:
     var unit = UNIT_SCENE.instantiate()
     var entity_id := int(snapshot.get("entity_id", -1))
     unit.name = "ReplicatedUnit_%d" % entity_id
-
-    # Assign identifiers before _ready() so the unit can bootstrap correctly.
     unit.entity_id = entity_id
     unit.player_id = int(snapshot.get("player_id", 0))
     unit.owner_peer_id = int(snapshot.get("owner_peer_id", -1))
     if snapshot.has("position"):
-        unit.global_position = Vector2(
-            float(snapshot["position"].get("x", 0.0)),
-            float(snapshot["position"].get("y", 0.0))
-        )
+        unit.global_position = Vector2(float(snapshot["position"].get("x", 0.0)), float(snapshot["position"].get("y", 0.0)))
 
     unit_parent.add_child(unit)
 
@@ -551,10 +537,7 @@ func _spawn_replicated_unit(snapshot: Dictionary) -> Node:
         unit.owner_peer_id = int(snapshot.get("owner_peer_id", -1))
         unit.current_health = int(snapshot.get("health", unit.max_health))
         if snapshot.has("position"):
-            unit.global_position = Vector2(
-                float(snapshot["position"].get("x", 0.0)),
-                float(snapshot["position"].get("y", 0.0))
-            )
+            unit.global_position = Vector2(float(snapshot["position"].get("x", 0.0)), float(snapshot["position"].get("y", 0.0)))
 
     print("[SPAWN_LOG] Created replicated remote unit ", unit.entity_id, " owned by peer ", unit.owner_peer_id, ".")
     return unit
@@ -588,10 +571,7 @@ func _sync_resources(resources: Array) -> void:
                     if resource.get("current_health") != null:
                         resource.current_health = int(incoming_snapshot.get("health", resource.current_health))
                 if incoming_snapshot.has("position") and not resource.has_method("sync_from_snapshot"):
-                    resource.global_position = Vector2(
-                        float(incoming_snapshot["position"].get("x", 0.0)),
-                        float(incoming_snapshot["position"].get("y", 0.0))
-                    )
+                    resource.global_position = Vector2(float(incoming_snapshot["position"].get("x", 0.0)), float(incoming_snapshot["position"].get("y", 0.0)))
                 break
 
     for resource in get_tree().get_nodes_in_group("resources"):
@@ -612,10 +592,7 @@ func _sync_buildings(buildings: Array) -> void:
                 continue
             if building.get("entity_id") == incoming_snapshot["entity_id"]:
                 if incoming_snapshot.has("position"):
-                    building.global_position = Vector2(
-                        float(incoming_snapshot["position"].get("x", 0.0)),
-                        float(incoming_snapshot["position"].get("y", 0.0))
-                    )
+                    building.global_position = Vector2(float(incoming_snapshot["position"].get("x", 0.0)), float(incoming_snapshot["position"].get("y", 0.0)))
                 building.current_health = int(incoming_snapshot.get("health", building.current_health))
                 break
 
@@ -644,3 +621,15 @@ func _get_spawn_position(player_slot: int) -> Vector2:
         return DEFAULT_UNIT_SPAWN_POSITIONS[player_slot]
     var offset_slot := player_slot - DEFAULT_UNIT_SPAWN_POSITIONS.size()
     return DEFAULT_UNIT_SPAWN_POSITIONS.back() + Vector2(80 * float(offset_slot + 1), 0.0)
+
+# DEBUG: Log all unit positions to server log (safe to delete)
+func _debug_log_unit_positions() -> void:
+    print("[DEBUG_UNIT_POS] --- Unit positions snapshot ---")
+    for unit in get_tree().get_nodes_in_group("units"):
+        if not is_instance_valid(unit):
+            continue
+        var uid: int = int(unit.get("entity_id")) if unit.get("entity_id") != null else int(unit.get_instance_id())
+        var pid: int = int(unit.get("player_id")) if unit.get("player_id") != null else -1
+        var pos: Vector2 = unit.global_position
+        print("[DEBUG_UNIT_POS] Unit %d (player %d) -> pos: (%.2f, %.2f)" % [uid, pid, pos.x, pos.y])
+    print("[DEBUG_UNIT_POS] ------------------------------")

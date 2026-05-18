@@ -26,10 +26,23 @@ func _ready() -> void:
         return
 
     var resource_spawner = get_node_or_null("/root/ResourceSpawner")
-    game_map.populate_tiles(resource_spawner)
+    if resource_spawner != null and resource_spawner.has_method("set_rng"):
+        var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+        rng.seed = 42
+        resource_spawner.set_rng(rng)
+    game_map.populate_tiles(resource_spawner, tile_size)
 
     if nav_region != null and nav_region.has_method("rebuild_nav"):
         nav_region.rebuild_nav()
+
+func world_to_grid(world_pos: Vector2) -> Vector2i:
+    return Vector2i(int(floor(world_pos.x / tile_size)), int(floor(world_pos.y / tile_size)))
+
+func get_tile_at_world_pos(world_pos: Vector2) -> Variant:
+    var gpos = world_to_grid(world_pos)
+    if game_map != null:
+        return game_map.get_tile(gpos.x, gpos.y)
+    return null
 
 func _index(x: int, y: int) -> int:
     return y * game_map.width + x

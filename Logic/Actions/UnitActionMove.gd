@@ -28,12 +28,14 @@ func tick(unit: CharacterBody2D, _delta: float) -> int:
 		_target_position = _target_node.global_position
 
 	var direction = unit.global_position.direction_to(_target_position)
-	var base_speed = int(unit.get("speed")) if unit.get("speed") != null else 50
-	var speed = float(base_speed)
-	unit.velocity = direction * speed
+	var chase_speed := 50.0
+	if unit.has_method("get_local_movement_speed"):
+		chase_speed = float(unit.get_local_movement_speed())
+	unit.velocity = direction * chase_speed
 
 	if unit.global_position.distance_to(_target_position) > _arrival_radius:
-		unit.move_and_slide()
+		# physics step happens in the authoritative Unit._physics_process()
+		pass
 	else:
 		unit.velocity = Vector2.ZERO
 		_state = ACTION_STATE.COMPLETED
