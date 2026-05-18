@@ -17,16 +17,16 @@ var _server: TCPServer = TCPServer.new()
 
 func _ready() -> void:
 	if _server.listen(LISTEN_PORT, "127.0.0.1") != OK:
-		push_error("PlanReceiver: Kan ikke lytte på port %d" % LISTEN_PORT)
+		push_error("PlanReceiver: failed to listen on port %d" % LISTEN_PORT)
 		return
-	print("PlanReceiver: Lytter på port %d" % LISTEN_PORT)
+	print("PlanReceiver: listening on port %d" % LISTEN_PORT)
 
 	var gateway = get_node_or_null("/root/ActionGateway")
 	if gateway:
 		gateway.unit_idled.connect(_on_unit_idled)
-		print("PlanReceiver: Tilsluttet ActionGateway.unit_idled signal")
+		print("PlanReceiver: connected to ActionGateway.unit_idled signal")
 	else:
-		push_error("PlanReceiver: ActionGateway ikke fundet ved opstart")
+		push_error("PlanReceiver: ActionGateway not found at startup")
 
 func _process(_delta: float) -> void:
 	if _server.is_connection_available():
@@ -37,7 +37,7 @@ func _process(_delta: float) -> void:
 # ----------------------------------------------------------------
 
 func _handle_connection(peer: StreamPeerTCP) -> void:
-	print("PlanReceiver: Indkommende forbindelse modtaget")
+	print("PlanReceiver: incoming connection")
 	var raw = ""
 	var deadline = Time.get_ticks_msec() + 2000
 
@@ -51,7 +51,7 @@ func _handle_connection(peer: StreamPeerTCP) -> void:
 		OS.delay_msec(1)
 
 	if not "\r\n\r\n" in raw:
-		push_warning("PlanReceiver: Timeout — ingen headers modtaget")
+		push_warning("PlanReceiver: timeout — no headers received")
 		_respond(peer, 400)
 		return
 
@@ -73,11 +73,11 @@ func _handle_connection(peer: StreamPeerTCP) -> void:
 		OS.delay_msec(1)
 
 	var body_text = raw.substr(header_end)
-	print("PlanReceiver: Body modtaget: %s" % body_text)
+	print("PlanReceiver: body received: %s" % body_text)
 
 	var json = JSON.new()
 	if json.parse(body_text) != OK:
-		push_warning("PlanReceiver: JSON parse fejl i body: '%s'" % body_text)
+		push_warning("PlanReceiver: JSON parse error in body: '%s'" % body_text)
 		_respond(peer, 400)
 		return
 
@@ -86,10 +86,10 @@ func _handle_connection(peer: StreamPeerTCP) -> void:
 	var player_id: String = body.get("player_id", "")
 	var unit_ids: Array   = body.get("unit_ids", [])
 
-	print("PlanReceiver: Notifikation — game=%s player=%s units=%s" % [game_id, player_id, str(unit_ids)])
+	print("PlanReceiver: notification — game=%s player=%s units=%s" % [game_id, player_id, str(unit_ids)])
 
 	if game_id.is_empty() or player_id.is_empty() or unit_ids.is_empty():
-		push_warning("PlanReceiver: Manglende felter i notifikation")
+		push_warning("PlanReceiver: missing fields in notification")
 		_respond(peer, 422)
 		return
 
@@ -111,49 +111,49 @@ func _respond(peer: StreamPeerTCP, code: int) -> void:
 func _fetch_and_store(game_id: String, player_id: String, unit_ids: Array) -> void:
 	var ids_param = ",".join(unit_ids)
 	var url = "%s/plan/%s/%s?unitIds=%s" % [PLANNING_URL, game_id, player_id, ids_param]
-	print("PlanReceiver: Henter UnitPlans fra %s" % url)
+	print("PlanReceiver: fetching UnitPlans from %s" % url)
 
 	var http = HTTPRequest.new()
 	add_child(http)
 	if http.request(url) != OK:
-		push_error("PlanReceiver: HTTP request fejlede")
+		push_error("PlanReceiver: HTTP request failed")
 		http.queue_free()
 		return
 
 	var res = await http.request_completed
 	http.queue_free()
 
-	print("PlanReceiver: Planning svarede med HTTP %d" % res[1])
+	print("PlanReceiver: Planning responded with HTTP %d" % res[1])
 
 	if res[1] != 200:
-		push_warning("PlanReceiver: Planning svarede %d — ingen planer tildelt" % res[1])
+		push_warning("PlanReceiver: Planning returned %d — no plans assigned" % res[1])
 		return
 
 	var raw_body = res[3].get_string_from_utf8()
-	print("PlanReceiver: Svar body: %s" % raw_body)
+	print("PlanReceiver: response body: %s" % raw_body)
 
 	var j = JSON.new()
 	if j.parse(raw_body) != OK:
-		push_error("PlanReceiver: Kan ikke parse svar fra Planning")
+		push_error("PlanReceiver: failed to parse response from Planning")
 		return
 
 	var resp_body: Dictionary = j.get_data()
 	var unit_plans: Array = resp_body.get("unit_plans", [])
-	print("PlanReceiver: Modtog %d UnitPlan(s)" % unit_plans.size())
+	print("PlanReceiver: received %d UnitPlan(s)" % unit_plans.size())
 
 	# Debug: vis alle unit entity_ids i scenen
 	var gateway = get_node_or_null("/root/ActionGateway")
 	if gateway:
 		var all_units = gateway.get_all_units()
-		print("PlanReceiver: Units i scenen: %s" % str(all_units.map(func(u): return u.get("id", "?"))))
+		print("PlanReceiver: units in scene: %s" % str(all_units.map(func(u): return u.get("id", "?"))))
 
 	for up in unit_plans:
 		var uid_str: String = str(up.get("unit_id", ""))
 		var steps: Array    = up.get("steps", [])
-		print("PlanReceiver: Behandler UnitPlan for unit_id='%s', %d steps" % [uid_str, steps.size()])
+		print("PlanReceiver: processing UnitPlan for unit_id='%s', %d steps" % [uid_str, steps.size()])
 
 		if uid_str.is_empty() or steps.is_empty():
-			push_warning("PlanReceiver: Tom UnitPlan — springes over")
+			push_warning("PlanReceiver: empty UnitPlan — skipping")
 			continue
 
 		_store[uid_str] = { "steps": steps, "index": 0 }
@@ -162,7 +162,7 @@ func _fetch_and_store(game_id: String, player_id: String, unit_ids: Array) -> vo
 		if gateway:
 			var unit = gateway._find_unit(uid_int)
 			if unit == null:
-				push_warning("PlanReceiver: Ingen unit med entity_id=%d fundet i scenen" % uid_int)
+				push_warning("PlanReceiver: no unit with entity_id=%d found in scene" % uid_int)
 				continue
 			if unit.command_queue:
 				unit.command_queue.clear()
@@ -178,7 +178,7 @@ func _on_unit_idled(unit_id: int) -> void:
 		return
 	var entry = _store[uid_str]
 	entry["index"] = (entry["index"] + 1) % entry["steps"].size()
-	print("PlanReceiver: Unit %d idle — avancerer til step %d" % [unit_id, entry["index"]])
+	print("PlanReceiver: unit %d idle — advancing to step %d" % [unit_id, entry["index"]])
 	_execute_current_step(unit_id)
 
 func _execute_current_step(unit_id: int) -> void:
@@ -192,20 +192,35 @@ func _execute_current_step(unit_id: int) -> void:
 func _dispatch_step(unit_id: int, step: Dictionary) -> void:
 	var gateway = get_node_or_null("/root/ActionGateway")
 	if not gateway:
-		push_error("PlanReceiver: ActionGateway ikke fundet")
+		push_error("PlanReceiver: ActionGateway not found")
 		return
 
 	var action_type: String  = step.get("action_type", "")
 	var params: Dictionary   = step.get("parameters", {})
-	print("PlanReceiver: Dispatcher step til unit %d: action_type=%s params=%s" % [unit_id, action_type, str(params)])
+	print("PlanReceiver: dispatching step for unit %d: action_type=%s params=%s" % [unit_id, action_type, str(params)])
 
 	match action_type:
 		"MoveTo":
 			var pos = Vector2(float(params.get("x", 0)), float(params.get("y", 0)))
 			gateway.move_unit(unit_id, pos)
 		"Harvest":
-			var tid = int(params.get("target_id", -1))
-			gateway.go_chop_tree(unit_id, tid)
+			var resource_type: String = params.get("resource_type", "")
+			if resource_type != "":
+				var unit_node = gateway._find_unit(unit_id)
+				if unit_node == null:
+					return
+				var nearest = _find_nearest_resource_by_type(resource_type, unit_node.global_position)
+				if nearest == null:
+					push_warning("PlanReceiver: no %s found near unit %d" % [resource_type, unit_id])
+					return
+				print("PlanReceiver: found nearest %s, enqueuing move+harvest" % resource_type)
+				var cq = unit_node.get("command_queue")
+				if cq:
+					cq.enqueue(UnitActionMove.create_to_node(nearest))
+					cq.enqueue(UnitActionHarvest.create(nearest))
+			else:
+				var tid = int(params.get("target_id", -1))
+				gateway.go_chop_tree(unit_id, tid)
 		"Construct":
 			gateway.go_construct(
 				unit_id,
@@ -214,4 +229,16 @@ func _dispatch_step(unit_id: int, step: Dictionary) -> void:
 				float(params.get("duration", 10.0))
 			)
 		_:
-			push_warning("PlanReceiver: Ukendt action_type '%s'" % action_type)
+			push_warning("PlanReceiver: unknown action_type '%s'" % action_type)
+
+func _find_nearest_resource_by_type(resource_type: String, origin: Vector2) -> Node:
+	var target_name = "ressource_" + resource_type.to_lower()
+	var best: Node = null
+	var best_dist := INF
+	for node in get_tree().get_nodes_in_group("resources"):
+		if "resource_name" in node and node.resource_name == target_name:
+			var d = origin.distance_squared_to(node.global_position)
+			if d < best_dist:
+				best_dist = d
+				best = node
+	return best
