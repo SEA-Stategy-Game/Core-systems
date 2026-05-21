@@ -8,24 +8,36 @@ extends Node
 @onready var buildings = get_node("/root/World/NavigationRegion2D/TileMapLayer/Houses") 
 @onready var map_manager = get_node("/root/World/NavigationRegion2D/TileMapLayer") 
 
+var MAX_PLAYERS: int = 32
+var DEFAULT_PORT: int = 12345
 var queued_objects: Array[Dictionary] = []
 
-## Initialises the ENet server on port 12345 with a maximum of 32 clients.
-## Connects the peer_connected signal to track incoming connections.
 func _ready():
+	# Get the port from command line or use default
+	var port = _get_port_from_args(DEFAULT_PORT)
+	_start_server(port)
+	return
+
+## Initialises the ENet server on the received port with a maximum of 32 clients.
+## Connects the peer_connected signal to track incoming connections.
+func _start_server(port: int): 
 	var peer = ENetMultiplayerPeer.new()
-	peer.create_server(12345, 32)
+	var error = peer.create_server(port, MAX_PLAYERS)
+	if error != OK:
+		var error_msg = error_string(error)
+		printerr("FATAL ERROR: Could not create server. Err: ", error_string(error))
+		get_tree().quit() # Closes the game if server can't be created
+		return # Prevents the rest of the function from running
+
 	multiplayer.multiplayer_peer = peer
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	for ip in IP.get_local_addresses():
 		if ip.begins_with("192.") or ip.begins_with("10."):
 			print("Server started, hosting on: ", ip)
-	print("My node path: ", get_path())
 
 ## Called when a new client connects. Logs the peer ID.
 func _on_peer_connected(id: int):
 	print("Client connected: ", id)
-	
 	
 # -----------------------------------------------------------------------
 # Client RPC stubs
@@ -154,3 +166,14 @@ func serialize_buildings(building: Node) -> Dictionary:
 		"amount"        : building.amount,
 		"current_health": building.current_health
 	}
+
+
+## Helper function to parse command line arguments
+func _get_port_from_args(default_port: int) -> int:
+	var args = OS.get_cmdline_args()
+	for arg in args:
+		if arg.begins_with("--port="):
+			var value = arg.split("=")[1]
+			if value.is_valid_int():
+				return value.to_int()
+	return default_port

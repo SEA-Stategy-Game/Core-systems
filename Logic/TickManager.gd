@@ -16,8 +16,6 @@ var tick_count: int = 0
 ## Auto-save interval (in ticks).  0 = disabled.
 var auto_save_interval: int = 60  # Every 30 seconds at 2 tps
 
-@onready var server = get_node("/root/World/ClientGateway")
-
 func _process(delta: float) -> void:
 	time_passed += delta
 	if time_passed >= tick_interval:
@@ -49,5 +47,5 @@ func _process_simulation() -> void:
 			gateway.save_task_state()
 	
 	# 4. Broadcast the state in the server
-	server.broadcast_state(tick_count)
+	Networking.broadcast_state(tick_count)
 	
