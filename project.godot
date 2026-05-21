@@ -22,6 +22,7 @@ ActionGateway="*res://Logic/ActionGateway.gd"
 TickManager="*res://Logic/TickManager.gd"
 DebugWindow="*res://UI/DebugWindow.tscn"
 ResourceSpawner="*res://Entities/Map/Resource_spawner.gd"
+Networking="*uid://dj5s0t1qunpx1"
 
 [dotnet]
 
@@ -29,7 +30,7 @@ project/assembly_name="New Game Project"
 
 [editor_plugins]
 
-enabled=PackedStringArray()
+enabled=PackedStringArray("res://addons/gemini_godot/plugin.cfg")
 
 [input]
 
@@ -62,3 +63,4 @@ WheelDown={
 
 textures/canvas_textures/default_texture_filter=0
 rendering_device/driver.windows="d3d12"
+textures/vram_compression/import_etc2_astc=true
