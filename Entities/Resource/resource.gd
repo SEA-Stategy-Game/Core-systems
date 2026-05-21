@@ -17,8 +17,6 @@ class_name MapResource
 
 @onready var nav_region = $"/root/World/NavigationRegion2D"
 
-@onready var server = get_node("/root/World/ClientGateway")     
-
 var amount: int = 1
 var maxAmount: int = 1 
 var currentTime: float
@@ -38,7 +36,7 @@ func _ready() -> void:
 	if is_in_group("units"):
 		remove_from_group("units")
 	add_to_group("resources")
-	self.modified.connect(server._on_ressource_modified)
+	self.modified.connect(Networking._on_ressource_modified)
 	
 func harvest():
 	if amount > 0:

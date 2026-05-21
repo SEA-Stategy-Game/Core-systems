@@ -1,13 +1,18 @@
 extends Node2D
 
-
 var units = []
+var headless: bool = false
 
+func _init() -> void:
+	if is_headless():
+		headless = true
+		
 func _ready():
 	get_units()
-	Game.spawnUnit(position)
-	if has_node("Camera2D"):
-		$Camera2D.area_selected.connect(_on_area_selected)
+	if not headless:
+		Game.spawnUnit(position)
+		if has_node("Camera2D"):
+			$Camera2D.area_selected.connect(_on_area_selected)
 	add_child(StoneResource.new())
 	#if Engine.has_singleton("MapManager"):
 	#	var mm = Engine.get_singleton("MapManager")
@@ -43,3 +48,8 @@ func get_units_in_area(area):
 				u.append(unit)
 				
 	return u
+
+	
+func is_headless() -> bool:
+	return  (DisplayServer.get_name() == "headless") or (OS.has_feature("dedicated_server")) or ("--server" in OS.get_cmdline_args())
+	
