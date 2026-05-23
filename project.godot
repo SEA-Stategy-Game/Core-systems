@@ -22,15 +22,11 @@ ActionGateway="*res://Logic/ActionGateway.gd"
 TickManager="*res://Logic/TickManager.gd"
 DebugWindow="*res://UI/DebugWindow.tscn"
 ResourceSpawner="*res://Entities/Map/Resource_spawner.gd"
-Networking="*uid://dj5s0t1qunpx1"
+Networking="*uid://by6yt8nfl7hty"
 
 [dotnet]
 
 project/assembly_name="New Game Project"
-
-[editor_plugins]
-
-enabled=PackedStringArray("res://addons/gemini_godot/plugin.cfg")
 
 [input]
 

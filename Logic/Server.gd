@@ -23,6 +23,8 @@ func _ready():
 func _start_server(port: int): 
 	var peer = ENetMultiplayerPeer.new()
 	var error = peer.create_server(port, MAX_PLAYERS)
+	print("Creating server on port:", port)
+
 	if error != OK:
 		var error_msg = error_string(error)
 		printerr("FATAL ERROR: Could not create server. Err: ", error_string(error))
@@ -170,7 +172,7 @@ func serialize_buildings(building: Node) -> Dictionary:
 
 ## Helper function to parse command line arguments
 func _get_port_from_args(default_port: int) -> int:
-	var args = OS.get_cmdline_args()
+	var args = OS.get_cmdline_user_args()
 	for arg in args:
 		if arg.begins_with("--port="):
 			var value = arg.split("=")[1]
