@@ -26,7 +26,7 @@ Networking="*res://Logic/Server.gd"
 
 [dotnet]
 
-project/assembly_name=Core"
+project/assembly_name="Core"
 
 [input]
 
