@@ -1,5 +1,5 @@
 extends RefCounted
-class_name MapTile
+class_name MapTile   
 
 enum TerrainType {
 	PLAINS,
@@ -14,17 +14,31 @@ var terrain: TerrainType = TerrainType.PLAINS
 var map_object: Variant = null
 var is_occupied: bool = false
 
-func _init(tile_x: int = 0, tile_y: int = 0, tile_terrain: TerrainType = TerrainType.PLAINS, tile_object: Variant = null) -> void:
+func _init(	tile_x: int = 0,
+			tile_y: int = 0,
+			tile_terrain: TerrainType = TerrainType.PLAINS,
+			tile_object: Variant = null
+			) -> void:
+			
 	x = tile_x
 	y = tile_y
 	terrain = tile_terrain
 	set_map_object(tile_object)
+	
+	#node.position = housePos + Vector2(randomPosX, randomPosY)
+
 
 func get_grid_position() -> Vector2i:
 	return Vector2i(x, y)
 
 func get_world_position(tile_size: int = 32) -> Vector2:
 	return Vector2(x * tile_size, y * tile_size)
+
+func try_spawn_resource(tile_size: int = 32) -> void:
+	set_map_object(ResourceSpawner.spawn_resource(terrain))
+	if map_object != null:
+		# Have to use a specific calculation for the objects since they are offset into the world
+		map_object.global_position = get_world_position() + Vector2(tile_size/2, tile_size/2)
 
 func set_map_object(new_object: Variant) -> void:
 	map_object = new_object
@@ -37,6 +51,7 @@ func clear_map_object() -> void:
 func has_map_object() -> bool:
 	return map_object != null
 
+## Deprecated for a more dynamic NavigationRegion2D
 func is_walkable() -> bool:
 	if is_occupied:
 		return false

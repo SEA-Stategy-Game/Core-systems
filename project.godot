@@ -21,10 +21,15 @@ Game="*res://Logic/Game.gd"
 ActionGateway="*res://Logic/ActionGateway.gd"
 TickManager="*res://Logic/TickManager.gd"
 DebugWindow="*res://UI/DebugWindow.tscn"
+ResourceSpawner="*res://Entities/Map/Resource_spawner.gd"
+
+[dotnet]
+
+project/assembly_name="New Game Project"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/gut/plugin.cfg")
+enabled=PackedStringArray()
 
 [input]
 

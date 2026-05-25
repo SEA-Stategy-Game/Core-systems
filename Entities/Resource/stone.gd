@@ -1,16 +1,15 @@
+class_name StoneResource
 extends MapResource
 
+# Init
 func _ready() -> void:
+	# Parent Init
 	super()
-
 	amount = 3
-	total_time = 10.0
-	current_time = total_time
-
-	if bar:
-		bar.max_value = total_time
-		bar.value = current_time
-		
+	totalTime = 10.0
+	currentTime = totalTime
+	#bar.max_value = totalTime
+	#bar.value = currentTime
 	resource_name = "ressource_stone"
 
 func on_finished_harvesting():

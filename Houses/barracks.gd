@@ -12,27 +12,24 @@ var current_health: int
 
 var mouseEntered = false
 @onready var select = get_node("Selected")
-var selected = false
+var Selected = false
 
 func _ready() -> void:
 	current_health = max_health
 	add_to_group("buildings")
 	add_to_group("barracks")
 
-func _process(delta) -> void:
-	select.visible = selected
+func _process(delta: float) -> void:
+	select.visible = Selected
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("LeftClick"):
-		print("click! mouseEntered=", mouseEntered, " allow=", _allow_spawn_ui())
-		if mouseEntered == true and _allow_spawn_ui():
-			selected = !selected
-			if selected == true:
-				Game.spawn_unit(global_position)
-
+		if mouseEntered == true:
+			Selected = !Selected
+			if Selected == true:
+				Game.spawnUnit(global_position)
 
 func _on_mouse_entered() -> void:
-	print(mouseEntered)
 	mouseEntered = true
 
 func _on_mouse_exited():
@@ -60,10 +57,3 @@ func get_player_id() -> int:
 func die() -> void:
 	print("[COMBAT_LOG] Barracks ", entity_id, " (player ", player_id, ") destroyed.")
 	queue_free()
-
-func _allow_spawn_ui() -> bool:
-	var session = get_node_or_null("/root/NetSession")
-	if session and session.is_scenario_active():
-		return false
-
-	return true

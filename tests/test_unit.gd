@@ -11,7 +11,7 @@ class RunningAction extends RefCounted:
 
 	func tick(_unit: CharacterBody2D, _delta: float) -> int:
 		ticked = true
-		return IUnitAction.ACTION_STATE.RUNNING
+		return IUnitAction.ActionState.RUNNING
 
 	func cancel(_unit: CharacterBody2D) -> void:
 		pass

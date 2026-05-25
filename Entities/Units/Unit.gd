@@ -23,7 +23,7 @@ var current_health: int
 ## Movement (manual player control -- right-click)
 ## -----------------------------------------------------------------------
 var follow_cursor: bool = false
-var speed: int = 70
+var speed: int = 3000
 var is_animated: bool = false
 
 ## -----------------------------------------------------------------------
@@ -173,11 +173,8 @@ func _input(event) -> void:
 			# Manual move clears any AI queue so the player takes over
 			if command_queue:
 				command_queue.clear()
-			$NavigationAgent2D.target_position = get_global_mouse_position()
-			current_path_index = 0;
+			set_target(get_global_mouse_position())
 			set_anim(velocity.length_squared() > 100)
-			# Makes units use the Godot RVO avoidance mechanism
-			# $NavigationAgent2D.avoidance_enabled = true
 			
 # -----------------------------------------------------------------
 # Physics / tick processing
@@ -199,14 +196,27 @@ func _physics_process(delta) -> void:
 			is_idle = false
 		command_queue.process_tick(delta)
 		return  # AI commands take priority -- skip manual logic
-	
+
 	# 2. Otherwise, fall back to manual right-click movement.
 	if $NavigationAgent2D.is_navigation_finished():
 		return
+	pathfind_and_move(delta)
+	# Below is used for Godto RVO avoidance but this data is not caught by the server so it is commented out
+	#$NavigationAgent2D.set_velocity(desired_velocity)
+
+## Sets the target on the unit for pathfinding and resets the current_path_index
+func set_target(target) -> void:
+	$NavigationAgent2D.target_position = target
+	current_path_index = 0;
+
+## Moves the unit based on the pathfinding algorithm. Snaps the unit back into a navigateble area if it is out-of-bounds
+func pathfind_and_move(delta) -> void:
 	var nav_point_direction = to_local($NavigationAgent2D.get_next_path_position()).normalized()
-	var desired_velocity = nav_point_direction * speed * delta * get_local_movement_speed()
-	$NavigationAgent2D.set_velocity(desired_velocity)
-	
+	velocity = nav_point_direction * speed * delta #* get_local_movement_speed()
+	move_and_slide()
+	global_position = NavigationServer2D.map_get_closest_point(
+		$NavigationAgent2D.get_navigation_map(), global_position)
+
 # -----------------------------------------------------------------
 # Signal relays
 # -----------------------------------------------------------------
@@ -252,18 +262,17 @@ func trigger_white_flash() -> void:
 
 func get_navigation_path_segment(amount_of_segments: int) -> PackedVector2Array:
 	var path = $NavigationAgent2D.get_current_navigation_path()
-	if path.is_empty() or current_path_index >= path.size():
+	if $NavigationAgent2D.is_navigation_finished() or current_path_index >= path.size():
 		return PackedVector2Array()
 	var end_index = min(current_path_index + amount_of_segments, path.size())
 	return path.slice(current_path_index, end_index)
 	
-## Used-to-be deprecated function, used for setting avoidance navigation (using Godots RVO)
+## Deprecated function, used for setting avoidance navigation (using Godots RVO)
 # Called when avoidance on the navigation agaent is set and NavigationAgent2D.set_velocity(desired_velocity) is called
 func _on_navigation_agent_2d_velocity_computed(safe_velocity: Vector2) -> void:
 	velocity = safe_velocity
 	if not $NavigationAgent2D.is_navigation_finished():
 		set_anim(safe_velocity.length_squared() > 100)
-		move_and_slide()
 		# Snap back to navmesh
 		global_position = NavigationServer2D.map_get_closest_point(
 			$NavigationAgent2D.get_navigation_map(), global_position)

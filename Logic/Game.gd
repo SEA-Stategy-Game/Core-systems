@@ -5,14 +5,13 @@ extends Node
 var Wood = 0
 var Stone = 0
 
-func spawn_unit(position):
+func spawnUnit(position):
 	var path = get_tree().get_root().get_node("World/UI")
-	var has_spawn = false
+	var hasSpawn = false
 	for i in path.get_child_count():
 		if "spawnUnit" in path.get_child(i).name:
-			has_spawn = true
-			
-	if has_spawn == false:
-		var spawn_unit_instance = spawn.instantiate()
-		spawn_unit_instance.housePos = position
-		path.add_child(spawn_unit_instance)
+			hasSpawn = true
+	if hasSpawn == false:
+		var spawnUnit = spawn.instantiate()
+		spawnUnit.housePos = position
+		path.add_child(spawnUnit)
