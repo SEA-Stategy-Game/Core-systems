@@ -22,11 +22,11 @@ ActionGateway="*res://Logic/ActionGateway.gd"
 TickManager="*res://Logic/TickManager.gd"
 DebugWindow="*res://UI/DebugWindow.tscn"
 ResourceSpawner="*res://Entities/Map/Resource_spawner.gd"
-Networking="*uid://dti53y7pj2v6a"
+Networking="*res://Logic/Server.gd"
 
 [dotnet]
 
-project/assembly_name="New Game Project"
+project/assembly_name=Core"
 
 [input]
 
