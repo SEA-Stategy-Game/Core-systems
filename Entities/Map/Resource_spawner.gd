@@ -1,7 +1,7 @@
 extends Node
 
-@onready var stone_scene = preload("res://Entities/Resource/Stone.tscn")
-@onready var tree_scene = preload("res://Entities/Resource/Tree.tscn")
+@onready var stone_scene = preload("res://Entities/Resource/stone.tscn")
+@onready var tree_scene = preload("res://Entities/Resource/tree.tscn")
 @onready var objects = get_tree().get_root().get_node("World/NavigationRegion2D/TileMapLayer/Objects")
 
 var rng = RandomNumberGenerator.new();

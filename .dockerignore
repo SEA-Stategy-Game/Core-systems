@@ -1,0 +1,12 @@
+].git/
+
+# Ignore testing frameworks and test scripts for the production build
+tests/
+addons/gut/
+
+# Ignore editor-only plugins
+addons/gemini_godot/
+
+
+docs/
+*.tex

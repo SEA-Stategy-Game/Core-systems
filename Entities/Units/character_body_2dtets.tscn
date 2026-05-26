@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dj8otlm2x128f"]
 
-[ext_resource type="Script" uid="uid://dweqb87bqh6d3" path="res://Entities/Units/Unit.gd" id="1_j7ad1"]
+[ext_resource type="Script" uid="uid://dweqb87bqh6d3" path="res://Entities/Units/unit.gd" id="1_j7ad1"]
 [ext_resource type="Texture2D" uid="uid://b68isfnk756nx" path="res://Assets/MiniWorldSprites/Characters/Champions/Arthax.png" id="2_aq6li"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_owuc0"]

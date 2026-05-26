@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://b18by0m44eqa2"]
 
-[ext_resource type="Script" uid="uid://b5rmwpf2h0div" path="res://Entities/Interfaces/spawn_unit.gd" id="1_6ibif"]
+[ext_resource type="Script" path="res://Entities/Interfaces/spawn_unit.gd" id="1_6ibif"]
 [ext_resource type="Texture2D" uid="uid://b68isfnk756nx" path="res://Assets/MiniWorldSprites/Characters/Champions/Arthax.png" id="2_t2rsk"]
 
 [node name="SpawnUnit" type="Node2D" unique_id=1950502887]

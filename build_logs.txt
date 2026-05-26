@@ -1,0 +1,936 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 2.29kB done
+#1 WARN: FromPlatformFlagConstDisallowed: FROM --platform flag should not use constant value "linux/amd64" (line 4)
+#1 WARN: FromPlatformFlagConstDisallowed: FROM --platform flag should not use constant value "linux/amd64" (line 44)
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/ubuntu:22.04
+#2 DONE 0.6s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 211B done
+#3 DONE 0.0s
+
+#4 [builder 1/9] FROM docker.io/library/ubuntu:22.04@sha256:4f838adc7181d9039ac795a7d0aba05a9bd9ecd480d294483169c5def983b64d
+#4 resolve docker.io/library/ubuntu:22.04@sha256:4f838adc7181d9039ac795a7d0aba05a9bd9ecd480d294483169c5def983b64d done
+#4 CACHED
+
+#5 [stage-1 2/3] WORKDIR /app
+#5 CACHED
+
+#6 [internal] load build context
+#6 transferring context: 86.52kB 0.0s done
+#6 DONE 0.0s
+
+#7 [builder 2/9] RUN apt-get update && apt-get install -y --no-install-recommends     ca-certificates     unzip     wget     && rm -rf /var/lib/apt/lists/*
+#7 0.275 Get:1 http://security.ubuntu.com/ubuntu jammy-security InRelease [129 kB]
+#7 0.325 Get:2 http://archive.ubuntu.com/ubuntu jammy InRelease [270 kB]
+#7 0.387 Get:3 http://archive.ubuntu.com/ubuntu jammy-updates InRelease [128 kB]
+#7 0.408 Get:4 http://archive.ubuntu.com/ubuntu jammy-backports InRelease [127 kB]
+#7 0.839 Get:5 http://security.ubuntu.com/ubuntu jammy-security/main amd64 Packages [3945 kB]
+#7 0.939 Get:6 http://security.ubuntu.com/ubuntu jammy-security/universe amd64 Packages [1295 kB]
+#7 0.952 Get:7 http://security.ubuntu.com/ubuntu jammy-security/restricted amd64 Packages [7070 kB]
+#7 1.024 Get:8 http://security.ubuntu.com/ubuntu jammy-security/multiverse amd64 Packages [77.8 kB]
+#7 1.394 Get:9 http://archive.ubuntu.com/ubuntu jammy/universe amd64 Packages [17.5 MB]
+#7 1.583 Get:10 http://archive.ubuntu.com/ubuntu jammy/restricted amd64 Packages [164 kB]
+#7 1.587 Get:11 http://archive.ubuntu.com/ubuntu jammy/multiverse amd64 Packages [266 kB]
+#7 1.591 Get:12 http://archive.ubuntu.com/ubuntu jammy/main amd64 Packages [1792 kB]
+#7 1.919 Get:13 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 Packages [4292 kB]
+#7 1.966 Get:14 http://archive.ubuntu.com/ubuntu jammy-updates/restricted amd64 Packages [7347 kB]
+#7 2.032 Get:15 http://archive.ubuntu.com/ubuntu jammy-updates/universe amd64 Packages [1602 kB]
+#7 2.043 Get:16 http://archive.ubuntu.com/ubuntu jammy-updates/multiverse amd64 Packages [86.4 kB]
+#7 2.435 Get:17 http://archive.ubuntu.com/ubuntu jammy-backports/universe amd64 Packages [35.6 kB]
+#7 2.445 Get:18 http://archive.ubuntu.com/ubuntu jammy-backports/main amd64 Packages [82.8 kB]
+#7 2.813 Fetched 46.2 MB in 3s (17.7 MB/s)
+#7 2.813 Reading package lists...
+#7 3.590 Reading package lists...
+#7 4.256 Building dependency tree...
+#7 4.400 Reading state information...
+#7 4.511 The following additional packages will be installed:
+#7 4.512   libpsl5 openssl
+#7 4.513 Suggested packages:
+#7 4.513   zip
+#7 4.513 Recommended packages:
+#7 4.513   publicsuffix
+#7 4.560 The following NEW packages will be installed:
+#7 4.560   ca-certificates libpsl5 openssl unzip wget
+#7 4.625 0 upgraded, 5 newly installed, 0 to remove and 1 not upgraded.
+#7 4.625 Need to get 1920 kB of archives.
+#7 4.625 After this operation, 3944 kB of additional disk space will be used.
+#7 4.625 Get:1 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 openssl amd64 3.0.2-0ubuntu1.23 [1186 kB]
+#7 4.664 Get:2 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 ca-certificates all 20240203~22.04.1 [162 kB]
+#7 4.671 Get:3 http://archive.ubuntu.com/ubuntu jammy/main amd64 libpsl5 amd64 0.21.0-1.2build2 [58.4 kB]
+#7 4.679 Get:4 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 wget amd64 1.21.2-2ubuntu1.1 [339 kB]
+#7 4.685 Get:5 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 unzip amd64 6.0-26ubuntu3.2 [175 kB]
+#7 4.841 debconf: delaying package configuration, since apt-utils is not installed
+#7 4.882 Fetched 1920 kB in 0s (15.8 MB/s)
+#7 4.940 Selecting previously unselected package openssl.
+#7 4.940 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 4393 files and directories currently installed.)
+#7 4.949 Preparing to unpack .../openssl_3.0.2-0ubuntu1.23_amd64.deb ...
+#7 4.952 Unpacking openssl (3.0.2-0ubuntu1.23) ...
+#7 5.027 Selecting previously unselected package ca-certificates.
+#7 5.028 Preparing to unpack .../ca-certificates_20240203~22.04.1_all.deb ...
+#7 5.029 Unpacking ca-certificates (20240203~22.04.1) ...
+#7 5.097 Selecting previously unselected package libpsl5:amd64.
+#7 5.097 Preparing to unpack .../libpsl5_0.21.0-1.2build2_amd64.deb ...
+#7 5.099 Unpacking libpsl5:amd64 (0.21.0-1.2build2) ...
+#7 5.159 Selecting previously unselected package wget.
+#7 5.160 Preparing to unpack .../wget_1.21.2-2ubuntu1.1_amd64.deb ...
+#7 5.161 Unpacking wget (1.21.2-2ubuntu1.1) ...
+#7 5.224 Selecting previously unselected package unzip.
+#7 5.224 Preparing to unpack .../unzip_6.0-26ubuntu3.2_amd64.deb ...
+#7 5.225 Unpacking unzip (6.0-26ubuntu3.2) ...
+#7 5.273 Setting up libpsl5:amd64 (0.21.0-1.2build2) ...
+#7 5.278 Setting up wget (1.21.2-2ubuntu1.1) ...
+#7 5.281 Setting up unzip (6.0-26ubuntu3.2) ...
+#7 5.306 Setting up openssl (3.0.2-0ubuntu1.23) ...
+#7 5.319 Setting up ca-certificates (20240203~22.04.1) ...
+#7 9.342 Updating certificates in /etc/ssl/certs...
+#7 16.35 146 added, 0 removed; done.
+#7 16.40 Processing triggers for libc-bin (2.35-0ubuntu3.13) ...
+#7 16.43 Processing triggers for ca-certificates (20240203~22.04.1) ...
+#7 16.48 Updating certificates in /etc/ssl/certs...
+#7 22.18 0 added, 0 removed; done.
+#7 22.18 Running hooks in /etc/ca-certificates/update.d...
+#7 22.19 done.
+#7 DONE 22.3s
+
+#8 [builder 3/9] RUN wget -q https://github.com/godotengine/godot-builds/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip     && wget -q https://github.com/godotengine/godot-builds/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz
+#8 DONE 12.5s
+
+#9 [builder 4/9] RUN unzip -q Godot_v4.3-stable_linux.x86_64.zip     && mv Godot_v4.3-stable_linux.x86_64 /usr/local/bin/godot     && chmod +x /usr/local/bin/godot
+#9 DONE 0.9s
+
+#10 [builder 5/9] RUN unzip -q Godot_v4.3-stable_export_templates.tpz     && mkdir -p /root/.local/share/godot/export_templates/4.3.stable     && mv templates/* /root/.local/share/godot/export_templates/4.3.stable/     && rm -rf Godot_v* templates
+#10 DONE 9.9s
+
+#11 [builder 6/9] WORKDIR /src
+#11 DONE 0.0s
+
+#12 [builder 7/9] COPY . .
+#12 DONE 0.4s
+
+#13 [builder 8/9] RUN godot --headless --verbose --editor --quit# ─────────────────────────────────────────────────────────────────────────
+#13 0.137 libfontconfig.so.1: cannot open shared object file: No such file or directory
+#13 0.317 Godot Engine v4.3.stable.official.77dcf97d8 - https://godotengine.org
+#13 0.337 TextServer: Added interface "Dummy"
+#13 0.455 TextServer: Added interface "ICU / HarfBuzz / Graphite (Built-in)"
+#13 0.463 JoypadLinux: udev enabled and loaded successfully.
+#13 0.465 Using "default" pen tablet driver...
+#13 0.474 
+#13 0.494 TextServer: Primary interface set to: "ICU / HarfBuzz / Graphite (Built-in)".
+#13 0.999 CORE API HASH: 966092234
+#13 1.002 EDITOR API HASH: 444927587
+#13 1.031 EditorTheme: Generating new theme for the config '66886095'.
+#13 1.032 EditorTheme: Generating new icons.
+#13 1.093 EditorTheme: Generating new fonts.
+#13 1.098 EditorTheme: Generating new styles.
+#13 6.581 Regenerating editor help cache
+#13 6.586 Class 'AbstractPolygon2DEditor' is not exposed, skipping.
+#13 6.586 Class 'AbstractPolygon2DEditorPlugin' is not exposed, skipping.
+#13 6.592 Class 'ActionMapEditor' is not exposed, skipping.
+#13 6.592 Class 'AnchorPresetPicker' is not exposed, skipping.
+#13 6.609 Class 'AnimationBezierTrackEdit' is not exposed, skipping.
+#13 6.609 Class 'AnimationLibraryEditor' is not exposed, skipping.
+#13 6.614 Class 'AnimationNodeBlendSpace1DEditor' is not exposed, skipping.
+#13 6.614 Class 'AnimationNodeBlendSpace2DEditor' is not exposed, skipping.
+#13 6.615 Class 'AnimationNodeBlendTreeEditor' is not exposed, skipping.
+#13 6.617 Class 'AnimationNodeStateMachineEditor' is not exposed, skipping.
+#13 6.619 Class 'AnimationPlayerEditor' is not exposed, skipping.
+#13 6.619 Class 'AnimationPlayerEditorPlugin' is not exposed, skipping.
+#13 6.619 Class 'AnimationTimelineEdit' is not exposed, skipping.
+#13 6.619 Class 'AnimationTrackEditDefaultPlugin' is not exposed, skipping.
+#13 6.619 Class 'AnimationTrackEditPlugin' is not exposed, skipping.
+#13 6.619 Class 'AnimationTrackEditor' is not exposed, skipping.
+#13 6.619 Class 'AnimationTrackKeyEditEditorPlugin' is not exposed, skipping.
+#13 6.619 Class 'AnimationTreeEditor' is not exposed, skipping.
+#13 6.619 Class 'AnimationTreeEditorPlugin' is not exposed, skipping.
+#13 6.619 Class 'AnimationTreeNodeEditorPlugin' is not exposed, skipping.
+#13 6.628 Class 'AssetLibraryEditorPlugin' is not exposed, skipping.
+#13 6.628 Class 'AtlasMergingDialog' is not exposed, skipping.
+#13 6.629 Class 'AtlasTileProxyObject' is not exposed, skipping.
+#13 6.629 Class 'AudioBusesEditorPlugin' is not exposed, skipping.
+#13 6.637 Class 'AudioStreamEditorPlugin' is not exposed, skipping.
+#13 6.637 Class 'AudioStreamImportSettingsDialog' is not exposed, skipping.
+#13 6.638 Class 'AudioStreamInteractiveEditorPlugin' is not exposed, skipping.
+#13 6.638 Class 'AudioStreamInteractiveTransitionEditor' is not exposed, skipping.
+#13 6.641 Class 'AudioStreamPlayerInternal' is not exposed, skipping.
+#13 6.641 Class 'AudioStreamPreviewGenerator' is not exposed, skipping.
+#13 6.642 Class 'AudioStreamRandomizerEditorPlugin' is not exposed, skipping.
+#13 6.643 Class 'BackgroundProgress' is not exposed, skipping.
+#13 6.657 Class 'BitMapEditorPlugin' is not exposed, skipping.
+#13 6.658 Class 'BoneMapEditorPlugin' is not exposed, skipping.
+#13 6.668 Class 'CPUParticles2DEditorPlugin' is not exposed, skipping.
+#13 6.673 Class 'CPUParticles3DEditor' is not exposed, skipping.
+#13 6.673 Class 'CPUParticles3DEditorPlugin' is not exposed, skipping.
+#13 6.684 Class 'CSGShape3DGizmoPlugin' is not exposed, skipping.
+#13 6.688 Class 'Camera3DEditorPlugin' is not exposed, skipping.
+#13 6.692 Class 'CanvasItemEditor' is not exposed, skipping.
+#13 6.692 Class 'CanvasItemEditorPlugin' is not exposed, skipping.
+#13 6.692 Class 'CanvasItemEditorViewport' is not exposed, skipping.
+#13 6.692 Class 'CanvasItemMaterialConversionPlugin' is not exposed, skipping.
+#13 6.695 Class 'Cast2DEditor' is not exposed, skipping.
+#13 6.695 Class 'Cast2DEditorPlugin' is not exposed, skipping.
+#13 6.708 Class 'CollisionPolygon2DEditor' is not exposed, skipping.
+#13 6.708 Class 'CollisionPolygon2DEditorPlugin' is not exposed, skipping.
+#13 6.709 Class 'CollisionShape2DEditor' is not exposed, skipping.
+#13 6.709 Class 'CollisionShape2DEditorPlugin' is not exposed, skipping.
+#13 6.718 Class 'ConnectDialog' is not exposed, skipping.
+#13 6.718 Class 'ConnectDialogBinds' is not exposed, skipping.
+#13 6.718 Class 'ConnectionsDock' is not exposed, skipping.
+#13 6.719 Class 'ControlEditorPlugin' is not exposed, skipping.
+#13 6.719 Class 'ControlEditorPopupButton' is not exposed, skipping.
+#13 6.719 Class 'ControlEditorPresetPicker' is not exposed, skipping.
+#13 6.719 Class 'ControlEditorToolbar' is not exposed, skipping.
+#13 6.720 Class 'CreateDialog' is not exposed, skipping.
+#13 6.722 Class 'CurveEditorPlugin' is not exposed, skipping.
+#13 6.722 Class 'CurvePreviewGenerator' is not exposed, skipping.
+#13 6.724 Class 'DebugAdapterParser' is not exposed, skipping.
+#13 6.724 Class 'DebugAdapterServer' is not exposed, skipping.
+#13 6.724 Class 'DebuggerEditorPlugin' is not exposed, skipping.
+#13 6.728 Class 'DefaultThemeEditorPreview' is not exposed, skipping.
+#13 6.728 Class 'DependencyEditor' is not exposed, skipping.
+#13 6.728 Class 'DependencyEditorOwners' is not exposed, skipping.
+#13 6.728 Class 'DependencyErrorDialog' is not exposed, skipping.
+#13 6.728 Class 'DependencyRemoveDialog' is not exposed, skipping.
+#13 6.732 Class 'DirectoryCreateDialog' is not exposed, skipping.
+#13 6.733 Class 'DockContextPopup' is not exposed, skipping.
+#13 6.733 Class 'DockSplitContainer' is not exposed, skipping.
+#13 6.733 Class 'DynamicFontImportSettingsData' is not exposed, skipping.
+#13 6.733 Class 'DynamicFontImportSettingsDialog' is not exposed, skipping.
+#13 6.735 Class 'EditorAbout' is not exposed, skipping.
+#13 6.735 Class 'EditorAssetLibrary' is not exposed, skipping.
+#13 6.735 Class 'EditorAudioBuses' is not exposed, skipping.
+#13 6.735 Class 'EditorAudioStreamPreviewPlugin' is not exposed, skipping.
+#13 6.735 Class 'EditorAudioStreamTooltipPlugin' is not exposed, skipping.
+#13 6.735 Class 'EditorAutoloadSettings' is not exposed, skipping.
+#13 6.735 Class 'EditorBitmapPreviewPlugin' is not exposed, skipping.
+#13 6.735 Class 'EditorBottomPanel' is not exposed, skipping.
+#13 6.735 Class 'EditorBuildProfileManager' is not exposed, skipping.
+#13 6.736 Class 'EditorDebuggerInspector' is not exposed, skipping.
+#13 6.736 Class 'EditorDebuggerNode' is not exposed, skipping.
+#13 6.736 Class 'EditorDebuggerRemoteObject' is not exposed, skipping.
+#13 6.736 Class 'EditorDebuggerTree' is not exposed, skipping.
+#13 6.736 Class 'EditorDirDialog' is not exposed, skipping.
+#13 6.736 Class 'EditorDockManager' is not exposed, skipping.
+#13 6.736 Class 'EditorExport' is not exposed, skipping.
+#13 6.736 Class 'EditorExportGDScript' is not exposed, skipping.
+#13 6.984 Class 'EditorFeatureProfileManager' is not exposed, skipping.
+#13 7.006 Class 'EditorFileServer' is not exposed, skipping.
+#13 7.007 Class 'EditorFileSystemImportFormatSupportQueryBlend' is not exposed, skipping.
+#13 7.007 Class 'EditorFontPreviewPlugin' is not exposed, skipping.
+#13 7.007 Class 'EditorGradientPreviewPlugin' is not exposed, skipping.
+#13 7.007 Class 'EditorHelpBit' is not exposed, skipping.
+#13 7.007 Class 'EditorHelpSearch' is not exposed, skipping.
+#13 7.007 Class 'EditorImagePreviewPlugin' is not exposed, skipping.
+#13 7.007 Class 'EditorImportBlendRunner' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorDefaultPlugin' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorParticleProcessMaterialPlugin' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPlugin3DTexture' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginAnimationTrackKeyEdit' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginAudioStream' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginAudioStreamInteractive' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginBitMap' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginBoneMap' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginControl' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginCurve' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginFontPreview' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginFontVariation' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginGradient' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginGradientTexture2D' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginInputEvent' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginLayeredTexture' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginMaterial' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginMesh' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginPackedScene' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginSkeleton' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginStyleBox' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginSubViewportPreview' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginSystemFont' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginTexture' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginTextureRegion' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorPluginTileData' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorRootMotionPlugin' is not exposed, skipping.
+#13 7.008 Class 'EditorInspectorVisualShaderModePlugin' is not exposed, skipping.
+#13 7.008 Class 'EditorJSONSyntaxHighlighter' is not exposed, skipping.
+#13 7.008 Class 'EditorLayoutsDialog' is not exposed, skipping.
+#13 7.008 Class 'EditorLocaleDialog' is not exposed, skipping.
+#13 7.008 Class 'EditorLog' is not exposed, skipping.
+#13 7.008 Class 'EditorMaterialPreviewPlugin' is not exposed, skipping.
+#13 7.008 Class 'EditorMeshPreviewPlugin' is not exposed, skipping.
+#13 7.008 Class 'EditorNativeShaderSourceVisualizer' is not exposed, skipping.
+#13 7.008 Class 'EditorNode' is not exposed, skipping.
+#13 7.009 Class 'EditorOBJImporter' is not exposed, skipping.
+#13 7.009 Class 'EditorObjectSelector' is not exposed, skipping.
+#13 7.009 Class 'EditorPackedScenePreviewPlugin' is not exposed, skipping.
+#13 7.009 Class 'EditorPerformanceProfiler' is not exposed, skipping.
+#13 7.009 Class 'EditorPluginCSG' is not exposed, skipping.
+#13 7.009 Class 'EditorPluginSettings' is not exposed, skipping.
+#13 7.009 Class 'EditorProfiler' is not exposed, skipping.
+#13 7.010 Class 'EditorPropertyInteger' is not exposed, skipping.
+#13 7.010 Class 'EditorPropertyNameProcessor' is not exposed, skipping.
+#13 7.010 Class 'EditorPropertyPath' is not exposed, skipping.
+#13 7.010 Class 'EditorPropertyVector2i' is not exposed, skipping.
+#13 7.010 Class 'EditorPropertyVectorN' is not exposed, skipping.
+#13 7.010 Class 'EditorQuickOpen' is not exposed, skipping.
+#13 7.011 Class 'EditorRunBar' is not exposed, skipping.
+#13 7.011 Class 'EditorRunNative' is not exposed, skipping.
+#13 7.011 Class 'EditorSceneExporterGLTFSettings' is not exposed, skipping.
+#13 7.011 Class 'EditorSceneFormatImporterCollada' is not exposed, skipping.
+#13 7.011 Class 'EditorSceneFormatImporterESCN' is not exposed, skipping.
+#13 7.011 Class 'EditorSceneTabs' is not exposed, skipping.
+#13 7.012 Class 'EditorScriptPreviewPlugin' is not exposed, skipping.
+#13 7.014 Class 'EditorSettingsDialog' is not exposed, skipping.
+#13 7.017 Class 'EditorTexturePreviewPlugin' is not exposed, skipping.
+#13 7.017 Class 'EditorTextureTooltipPlugin' is not exposed, skipping.
+#13 7.017 Class 'EditorTheme' is not exposed, skipping.
+#13 7.017 Class 'EditorTitleBar' is not exposed, skipping.
+#13 7.017 Class 'EditorToaster' is not exposed, skipping.
+#13 7.018 Class 'EditorValidationPanel' is not exposed, skipping.
+#13 7.018 Class 'EditorVisualProfiler' is not exposed, skipping.
+#13 7.018 Class 'EditorZoomWidget' is not exposed, skipping.
+#13 7.020 Class 'EventListenerLineEdit' is not exposed, skipping.
+#13 7.020 Class 'ExportTemplateManager' is not exposed, skipping.
+#13 7.020 Class 'FBXImporterManager' is not exposed, skipping.
+#13 7.041 Class 'FileSystemList' is not exposed, skipping.
+#13 7.041 Class 'FindInFiles' is not exposed, skipping.
+#13 7.041 Class 'FindInFilesDialog' is not exposed, skipping.
+#13 7.041 Class 'FindInFilesPanel' is not exposed, skipping.
+#13 7.041 Class 'FindReplaceBar' is not exposed, skipping.
+#13 7.042 Class 'FogMaterialConversionPlugin' is not exposed, skipping.
+#13 7.046 Class 'FontEditorPlugin' is not exposed, skipping.
+#13 7.049 Class 'GDScriptEditorTranslationParserPlugin' is not exposed, skipping.
+#13 7.049 Class 'GDScriptLanguageServer' is not exposed, skipping.
+#13 7.049 Class 'GDScriptNativeClass' is not exposed, skipping.
+#13 7.049 Class 'GDScriptSyntaxHighlighter' is not exposed, skipping.
+#13 7.051 Class 'GLTFDocumentExtensionPhysics' is not exposed, skipping.
+#13 7.051 Class 'GLTFDocumentExtensionTextureKTX' is not exposed, skipping.
+#13 7.051 Class 'GLTFDocumentExtensionTextureWebP' is not exposed, skipping.
+#13 7.055 Class 'GPUParticles2DEditorPlugin' is not exposed, skipping.
+#13 7.056 Class 'GPUParticles3DEditor' is not exposed, skipping.
+#13 7.056 Class 'GPUParticles3DEditorBase' is not exposed, skipping.
+#13 7.056 Class 'GPUParticles3DEditorPlugin' is not exposed, skipping.
+#13 7.065 Class 'GPUParticlesCollisionSDF3DEditorPlugin' is not exposed, skipping.
+#13 7.069 Class 'Gizmo3DHelper' is not exposed, skipping.
+#13 7.069 Class 'GodotNavigationServer2D' is not exposed, skipping.
+#13 7.069 Class 'GodotPhysicsServer2D' is not exposed, skipping.
+#13 7.069 Class 'GodotPhysicsServer3D' is not exposed, skipping.
+#13 7.070 Class 'GradientEditorPlugin' is not exposed, skipping.
+#13 7.070 Class 'GradientTexture2DEditorPlugin' is not exposed, skipping.
+#13 7.072 Class 'GraphEditFilter' is not exposed, skipping.
+#13 7.072 Class 'GraphEditMinimap' is not exposed, skipping.
+#13 7.075 Class 'GridMapEditor' is not exposed, skipping.
+#13 7.075 Class 'GridMapEditorPlugin' is not exposed, skipping.
+#13 7.076 Class 'GroupSettingsEditor' is not exposed, skipping.
+#13 7.076 Class 'GroupsEditor' is not exposed, skipping.
+#13 7.086 Class 'HistoryDock' is not exposed, skipping.
+#13 7.086 Class 'IPUnix' is not exposed, skipping.
+#13 7.088 Class 'ImportDefaultsEditor' is not exposed, skipping.
+#13 7.088 Class 'ImportDefaultsEditorSettings' is not exposed, skipping.
+#13 7.088 Class 'ImportDock' is not exposed, skipping.
+#13 7.088 Class 'ImportDockParameters' is not exposed, skipping.
+#13 7.090 Class 'InputEventConfigurationDialog' is not exposed, skipping.
+#13 7.090 Class 'InputEventEditorPlugin' is not exposed, skipping.
+#13 7.096 Class 'InspectorDock' is not exposed, skipping.
+#13 7.106 Class 'LightOccluder2DEditor' is not exposed, skipping.
+#13 7.106 Class 'LightOccluder2DEditorPlugin' is not exposed, skipping.
+#13 7.108 Class 'LightmapGIEditorPlugin' is not exposed, skipping.
+#13 7.109 Class 'Line2DEditor' is not exposed, skipping.
+#13 7.109 Class 'Line2DEditorPlugin' is not exposed, skipping.
+#13 7.112 Class 'LocalizationEditor' is not exposed, skipping.
+#13 7.113 Class 'MaterialEditorPlugin' is not exposed, skipping.
+#13 7.115 Class 'MeshEditorPlugin' is not exposed, skipping.
+#13 7.117 Class 'MeshInstance3DEditor' is not exposed, skipping.
+#13 7.117 Class 'MeshInstance3DEditorPlugin' is not exposed, skipping.
+#13 7.117 Class 'MeshLibraryEditor' is not exposed, skipping.
+#13 7.117 Class 'MeshLibraryEditorPlugin' is not exposed, skipping.
+#13 7.119 Class 'MovieWriterMJPEG' is not exposed, skipping.
+#13 7.119 Class 'MovieWriterPNGWAV' is not exposed, skipping.
+#13 7.119 Class 'MultiMeshEditor' is not exposed, skipping.
+#13 7.119 Class 'MultiMeshEditorPlugin' is not exposed, skipping.
+#13 7.122 Class 'MultiplayerEditorDebugger' is not exposed, skipping.
+#13 7.122 Class 'MultiplayerEditorPlugin' is not exposed, skipping.
+#13 7.127 Class 'NavigationLink2DEditor' is not exposed, skipping.
+#13 7.127 Class 'NavigationLink2DEditorPlugin' is not exposed, skipping.
+#13 7.128 Class 'NavigationMeshEditor' is not exposed, skipping.
+#13 7.128 Class 'NavigationMeshEditorPlugin' is not exposed, skipping.
+#13 7.129 Class 'NavigationObstacle2DEditor' is not exposed, skipping.
+#13 7.129 Class 'NavigationObstacle2DEditorPlugin' is not exposed, skipping.
+#13 7.130 Class 'NavigationObstacle3DEditor' is not exposed, skipping.
+#13 7.130 Class 'NavigationObstacle3DEditorPlugin' is not exposed, skipping.
+#13 7.132 Class 'NavigationPolygonEditor' is not exposed, skipping.
+#13 7.132 Class 'NavigationPolygonEditorPlugin' is not exposed, skipping.
+#13 7.136 Class 'Node3DEditor' is not exposed, skipping.
+#13 7.136 Class 'Node3DEditorPlugin' is not exposed, skipping.
+#13 7.136 Class 'Node3DEditorViewport' is not exposed, skipping.
+#13 7.136 Class 'Node3DEditorViewportContainer' is not exposed, skipping.
+#13 7.136 Class 'NodeDock' is not exposed, skipping.
+#13 7.136 Class 'NoiseEditorInspectorPlugin' is not exposed, skipping.
+#13 7.136 Class 'NoiseEditorPlugin' is not exposed, skipping.
+#13 7.138 Class 'ORMMaterial3DConversionPlugin' is not exposed, skipping.
+#13 7.140 Class 'OccluderInstance3DEditorPlugin' is not exposed, skipping.
+#13 7.149 Class 'OrphanResourcesDialog' is not exposed, skipping.
+#13 7.150 Class 'PackedSceneEditorPlugin' is not exposed, skipping.
+#13 7.150 Class 'PackedSceneEditorTranslationParserPlugin' is not exposed, skipping.
+#13 7.152 Class 'PanoramaSkyMaterialConversionPlugin' is not exposed, skipping.
+#13 7.153 Class 'ParallaxBackgroundEditorPlugin' is not exposed, skipping.
+#13 7.154 Class 'ParticleProcessMaterialConversionPlugin' is not exposed, skipping.
+#13 7.154 Class 'Path2DEditor' is not exposed, skipping.
+#13 7.154 Class 'Path2DEditorPlugin' is not exposed, skipping.
+#13 7.155 Class 'Path3DEditorPlugin' is not exposed, skipping.
+#13 7.155 Class 'Path3DGizmoPlugin' is not exposed, skipping.
+#13 7.157 Class 'PhysicalBone3DEditorPlugin' is not exposed, skipping.
+#13 7.160 Class 'PhysicalSkyMaterialConversionPlugin' is not exposed, skipping.
+#13 7.173 Class 'PluginConfigDialog' is not exposed, skipping.
+#13 7.175 Class 'Polygon2DEditor' is not exposed, skipping.
+#13 7.175 Class 'Polygon2DEditorPlugin' is not exposed, skipping.
+#13 7.175 Class 'Polygon3DEditor' is not exposed, skipping.
+#13 7.175 Class 'Polygon3DEditorPlugin' is not exposed, skipping.
+#13 7.179 Class 'PostImportPluginSkeletonRenamer' is not exposed, skipping.
+#13 7.179 Class 'PostImportPluginSkeletonRestFixer' is not exposed, skipping.
+#13 7.179 Class 'PostImportPluginSkeletonTrackOrganizer' is not exposed, skipping.
+#13 7.180 Class 'ProceduralSkyMaterialConversionPlugin' is not exposed, skipping.
+#13 7.181 Class 'ProgressDialog' is not exposed, skipping.
+#13 7.181 Class 'ProjectExportDialog' is not exposed, skipping.
+#13 7.181 Class 'ProjectExportTextureFormatError' is not exposed, skipping.
+#13 7.181 Class 'ProjectSettingsEditor' is not exposed, skipping.
+#13 7.181 Class 'PropertySelector' is not exposed, skipping.
+#13 7.192 Class 'RenameDialog' is not exposed, skipping.
+#13 7.196 Class 'ReparentDialog' is not exposed, skipping.
+#13 7.196 Class 'ReplicationEditor' is not exposed, skipping.
+#13 7.196 Class 'ResourceFormatImporterSaver' is not exposed, skipping.
+#13 7.202 Class 'ResourcePreloaderEditor' is not exposed, skipping.
+#13 7.202 Class 'ResourcePreloaderEditorPlugin' is not exposed, skipping.
+#13 7.207 Class 'RunInstancesDialog' is not exposed, skipping.
+#13 7.207 Class 'SceneCacheInterface' is not exposed, skipping.
+#13 7.207 Class 'SceneCreateDialog' is not exposed, skipping.
+#13 7.207 Class 'SceneExporterGLTFPlugin' is not exposed, skipping.
+#13 7.207 Class 'SceneImportSettingsData' is not exposed, skipping.
+#13 7.207 Class 'SceneImportSettingsDialog' is not exposed, skipping.
+#13 7.208 Class 'SceneRPCInterface' is not exposed, skipping.
+#13 7.208 Class 'SceneReplicationInterface' is not exposed, skipping.
+#13 7.208 Class 'SceneTileProxyObject' is not exposed, skipping.
+#13 7.210 Class 'SceneTreeDialog' is not exposed, skipping.
+#13 7.210 Class 'SceneTreeDock' is not exposed, skipping.
+#13 7.210 Class 'SceneTreeEditor' is not exposed, skipping.
+#13 7.210 Class 'ScreenSelect' is not exposed, skipping.
+#13 7.236 Class 'ScriptEditorDebugger' is not exposed, skipping.
+#13 7.236 Class 'ScriptEditorPlugin' is not exposed, skipping.
+#13 7.239 Class 'SectionedInspector' is not exposed, skipping.
+#13 7.239 Class 'SectionedInspectorFilter' is not exposed, skipping.
+#13 7.242 Class 'ShaderCreateDialog' is not exposed, skipping.
+#13 7.242 Class 'ShaderEditorPlugin' is not exposed, skipping.
+#13 7.242 Class 'ShaderFileEditor' is not exposed, skipping.
+#13 7.242 Class 'ShaderFileEditorPlugin' is not exposed, skipping.
+#13 7.242 Class 'ShaderGlobalsEditor' is not exposed, skipping.
+#13 7.242 Class 'ShaderGlobalsEditorInterface' is not exposed, skipping.
+#13 7.244 Class 'SizeFlagPresetPicker' is not exposed, skipping.
+#13 7.244 Class 'Skeleton2DEditor' is not exposed, skipping.
+#13 7.244 Class 'Skeleton2DEditorPlugin' is not exposed, skipping.
+#13 7.245 Class 'Skeleton3DEditorPlugin' is not exposed, skipping.
+#13 7.245 Class 'Skeleton3DGizmoPlugin' is not exposed, skipping.
+#13 7.246 Class 'SkeletonIK3DEditorPlugin' is not exposed, skipping.
+#13 7.257 Class 'SnapDialog' is not exposed, skipping.
+#13 7.260 Class 'SplitContainerDragger' is not exposed, skipping.
+#13 7.263 Class 'Sprite2DEditor' is not exposed, skipping.
+#13 7.263 Class 'Sprite2DEditorPlugin' is not exposed, skipping.
+#13 7.268 Class 'SpriteFramesEditor' is not exposed, skipping.
+#13 7.268 Class 'SpriteFramesEditorPlugin' is not exposed, skipping.
+#13 7.270 Class 'StandardMaterial3DConversionPlugin' is not exposed, skipping.
+#13 7.275 Class 'StyleBoxEditorPlugin' is not exposed, skipping.
+#13 7.277 Class 'SubViewportPreviewEditorPlugin' is not exposed, skipping.
+#13 7.278 Class 'SurfaceUpgradeDialog' is not exposed, skipping.
+#13 7.278 Class 'SurfaceUpgradeTool' is not exposed, skipping.
+#13 7.285 Class 'Texture3DEditorPlugin' is not exposed, skipping.
+#13 7.287 Class 'TextureEditorPlugin' is not exposed, skipping.
+#13 7.287 Class 'TextureLayeredEditorPlugin' is not exposed, skipping.
+#13 7.290 Class 'TextureRegionEditor' is not exposed, skipping.
+#13 7.290 Class 'TextureRegionEditorPlugin' is not exposed, skipping.
+#13 7.291 Class 'ThemeContext' is not exposed, skipping.
+#13 7.291 Class 'ThemeEditor' is not exposed, skipping.
+#13 7.291 Class 'ThemeEditorPlugin' is not exposed, skipping.
+#13 7.291 Class 'ThemeEditorPreview' is not exposed, skipping.
+#13 7.291 Class 'ThemeItemEditorDialog' is not exposed, skipping.
+#13 7.291 Class 'ThemeItemImportTree' is not exposed, skipping.
+#13 7.291 Class 'ThemeTypeDialog' is not exposed, skipping.
+#13 7.291 Class 'ThemeTypeEditor' is not exposed, skipping.
+#13 7.291 Class 'TileAtlasView' is not exposed, skipping.
+#13 7.295 Class 'TileMapEditorPlugin' is not exposed, skipping.
+#13 7.296 Class 'TileMapLayerEditor' is not exposed, skipping.
+#13 7.296 Class 'TileMapLayerEditorTerrainsPlugin' is not exposed, skipping.
+#13 7.296 Class 'TileMapLayerEditorTilesPlugin' is not exposed, skipping.
+#13 7.296 Class 'TileProxiesManagerDialog' is not exposed, skipping.
+#13 7.299 Class 'TileSetAtlasSourceEditor' is not exposed, skipping.
+#13 7.299 Class 'TileSetAtlasSourceProxyObject' is not exposed, skipping.
+#13 7.299 Class 'TileSetEditor' is not exposed, skipping.
+#13 7.299 Class 'TileSetEditorPlugin' is not exposed, skipping.
+#13 7.299 Class 'TileSetScenesCollectionProxyObject' is not exposed, skipping.
+#13 7.299 Class 'TileSetScenesCollectionSourceEditor' is not exposed, skipping.
+#13 7.299 Class 'TileSourceInspectorPlugin' is not exposed, skipping.
+#13 7.299 Class 'TilesEditorUtils' is not exposed, skipping.
+#13 7.304 Class 'UVEditDialog' is not exposed, skipping.
+#13 7.311 Class 'VersionControlEditorPlugin' is not exposed, skipping.
+#13 7.312 Class 'ViewPanner' is not exposed, skipping.
+#13 7.315 Class 'ViewportNavigationControl' is not exposed, skipping.
+#13 7.315 Class 'ViewportRotationControl' is not exposed, skipping.
+#13 7.320 Class 'VisualShaderConversionPlugin' is not exposed, skipping.
+#13 7.361 Class 'VoxelGIEditorPlugin' is not exposed, skipping.
+#13 7.364 Class 'WindowWrapper' is not exposed, skipping.
+#13 7.396 Loaded system CA certificates
+#13 8.526 EditorSettings: Save OK!
+#13 8.845 ERROR: Unable to open file: res://.godot/imported/Arthax.png-2a37eac02504fd5d17082f44cac67d94.ctex.
+#13 8.845    at: _load_data (scene/resources/compressed_texture.cpp:41)
+#13 8.845 ERROR: Failed loading resource: res://.godot/imported/Arthax.png-2a37eac02504fd5d17082f44cac67d94.ctex. Make sure resources have been imported by opening the project in the editor at least once.
+#13 8.845    at: _load (core/io/resource_loader.cpp:283)
+#13 8.845 ERROR: Failed loading resource: res://Assets/MiniWorldSprites/Characters/Champions/Arthax.png. Make sure resources have been imported by opening the project in the editor at least once.
+#13 8.845    at: _load (core/io/resource_loader.cpp:283)
+#13 8.851 ERROR: Unable to open file: res://.godot/imported/Arthax.png-2a37eac02504fd5d17082f44cac67d94.ctex.
+#13 8.851    at: _load_data (scene/resources/compressed_texture.cpp:41)
+#13 8.851 ERROR: Failed loading resource: res://.godot/imported/Arthax.png-2a37eac02504fd5d17082f44cac67d94.ctex. Make sure resources have been imported by opening the project in the editor at least once.
+#13 8.851    at: _load (core/io/resource_loader.cpp:283)
+#13 8.851 ERROR: Failed loading resource: res://Assets/MiniWorldSprites/Characters/Champions/Arthax.png. Make sure resources have been imported by opening the project in the editor at least once.
+#13 8.851    at: _load (core/io/resource_loader.cpp:283)
+#13 8.896 ERROR: Unable to open file: res://.godot/imported/Rocks.png-55965eb583e75d83ff4684e08d10dceb.ctex.
+#13 8.896    at: _load_data (scene/resources/compressed_texture.cpp:41)
+#13 8.896 ERROR: Failed loading resource: res://.godot/imported/Rocks.png-55965eb583e75d83ff4684e08d10dceb.ctex. Make sure resources have been imported by opening the project in the editor at least once.
+#13 8.896    at: _load (core/io/resource_loader.cpp:283)
+#13 8.896 ERROR: Failed loading resource: res://Assets/MiniWorldSprites/Nature/Rocks.png. Make sure resources have been imported by opening the project in the editor at least once.
+#13 8.896    at: _load (core/io/resource_loader.cpp:283)
+#13 8.900 ERROR: Unable to open file: res://.godot/imported/PineTrees.png-d5ba73a29ad45370298d230059d4697b.ctex.
+#13 8.900    at: _load_data (scene/resources/compressed_texture.cpp:41)
+#13 8.900 ERROR: Failed loading resource: res://.godot/imported/PineTrees.png-d5ba73a29ad45370298d230059d4697b.ctex. Make sure resources have been imported by opening the project in the editor at least once.
+#13 8.900    at: _load (core/io/resource_loader.cpp:283)
+#13 8.900 ERROR: Failed loading resource: res://Assets/MiniWorldSprites/Nature/PineTrees.png. Make sure resources have been imported by opening the project in the editor at least once.
+#13 8.900    at: _load (core/io/resource_loader.cpp:283)
+#13 8.904 WARNING: Addon 'res://addons/gemini_godot/plugin.cfg' failed to load. No directory found. Removing from enabled plugins.
+#13 8.904      at: set_addon_plugin_enabled (editor/editor_node.cpp:3643)
+#13 9.212 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/RedMelee/SwordsmanRed.png
+#13 9.212 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/AssasinTemplate.png
+#13 9.212 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/AxemanTemplate.png
+#13 9.212 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/SpearmanTemplate.png
+#13 9.212 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/SwordsmanTemplate.png
+#13 9.212 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Mounted/CyanKnight.png
+#13 9.212 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Mounted/LimeKnight.png
+#13 9.281 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Mounted/CyanKnight.png" import took 68 ms.
+#13 9.281 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/AxemanTemplate.png" import took 68 ms.
+#13 9.281 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/SwordsmanTemplate.png" import took 68 ms.
+#13 9.281 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/AssasinTemplate.png" import took 68 ms.
+#13 9.281 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/RedMelee/SwordsmanRed.png" import took 68 ms.
+#13 9.281 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Mounted/LimeKnight.png" import took 68 ms.
+#13 9.281 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/SpearmanTemplate.png" import took 68 ms.
+#13 9.282 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Mounted/PurpleKnight.png
+#13 9.282 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Mounted/RedKnight.png
+#13 9.282 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/CyanRanged/BowmanCyan.png
+#13 9.282 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/CyanRanged/MageCyan.png
+#13 9.282 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/CyanRanged/MusketeerCyan.png
+#13 9.282 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/LimeRanged/BowmanLime.png
+#13 9.282 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/LimeRanged/MageLime.png
+#13 9.286 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/CyanRanged/MusketeerCyan.png" import took 4 ms.
+#13 9.286 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/LimeRanged/MusketeerLime.png
+#13 9.286 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/CyanRanged/MageCyan.png" import took 4 ms.
+#13 9.286 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/PurpleRanged/BowmanPurple.png
+#13 9.286 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/CyanRanged/BowmanCyan.png" import took 4 ms.
+#13 9.286 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/PurpleRanged/MagePurple.png
+#13 9.286 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/LimeRanged/BowmanLime.png" import took 5 ms.
+#13 9.286 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/PurpleRanged/MusketeerPurple.png
+#13 9.287 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/LimeRanged/MageLime.png" import took 5 ms.
+#13 9.287 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/RedRanged/BowmanRed.png
+#13 9.288 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/LimeRanged/MusketeerLime.png" import took 2 ms.
+#13 9.288 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/RedRanged/MageRed.png
+#13 9.288 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Mounted/PurpleKnight.png" import took 6 ms.
+#13 9.288 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/RedRanged/MusketeerRed.png
+#13 9.289 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/PurpleRanged/MusketeerPurple.png" import took 2 ms.
+#13 9.289 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/Ballista.png
+#13 9.289 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Mounted/RedKnight.png" import took 8 ms.
+#13 9.289 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/PurpleRanged/BowmanPurple.png" import took 4 ms.
+#13 9.289 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/BowmanTemplate.png
+#13 9.290 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/MageTemplate.png
+#13 9.290 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/PurpleRanged/MagePurple.png" import took 4 ms.
+#13 9.290 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Workers/CyanWorker/FarmerCyan.png
+#13 9.291 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/RedRanged/MageRed.png" import took 4 ms.
+#13 9.291 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Workers/LimeWorker/FarmerLime.png
+#13 9.292 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/RedRanged/MusketeerRed.png" import took 4 ms.
+#13 9.292 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Pirates/PirateCaptain.png
+#13 9.292 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/RedRanged/BowmanRed.png" import took 5 ms.
+#13 9.292 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Pirates/PirateGrunt.png
+#13 9.292 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/Ballista.png" import took 2 ms.
+#13 9.292 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Pirates/PirateGunner.png
+#13 9.292 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/BowmanTemplate.png" import took 3 ms.
+#13 9.292 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Slimes/KingSlimeBlue.png
+#13 9.294 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Ranged/MageTemplate.png" import took 4 ms.
+#13 9.294 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Slimes/KingSlimeGreen.png
+#13 9.295 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Pirates/PirateCaptain.png" import took 3 ms.
+#13 9.295 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Slimes/MegaSlimeBlue.png
+#13 9.295 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Pirates/PirateGunner.png" import took 4 ms.
+#13 9.295 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Slimes/MegaSlimeGreen.png
+#13 9.295 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Pirates/PirateGrunt.png" import took 4 ms.
+#13 9.295 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Slimes/Slime.png
+#13 9.296 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Slimes/KingSlimeBlue.png" import took 3 ms.
+#13 9.296 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Slimes/SlimeBlue.png
+#13 9.296 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Slimes/KingSlimeGreen.png" import took 2 ms.
+#13 9.296 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Undead/Necromancer.png
+#13 9.297 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Slimes/MegaSlimeBlue.png" import took 2 ms.
+#13 9.297 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Undead/Skeleton-Soldier.png
+#13 9.297 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Slimes/MegaSlimeGreen.png" import took 1 ms.
+#13 9.297 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/CyanMelee/AssasinCyan.png
+#13 9.297 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Slimes/Slime.png" import took 1 ms.
+#13 9.297 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/CyanMelee/AxemanCyan.png
+#13 9.298 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Workers/LimeWorker/FarmerLime.png" import took 7 ms.
+#13 9.298 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/CyanMelee/SpearmanCyan.png
+#13 9.299 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Slimes/SlimeBlue.png" import took 3 ms.
+#13 9.299 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/CyanMelee/SwordsmanCyan.png
+#13 9.300 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Workers/CyanWorker/FarmerCyan.png" import took 10 ms.
+#13 9.300 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/LimeMelee/AssasinLime.png
+#13 9.301 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Undead/Necromancer.png" import took 4 ms.
+#13 9.301 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/LimeMelee/AxemanLime.png
+#13 9.301 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Undead/Skeleton-Soldier.png" import took 4 ms.
+#13 9.301 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/LimeMelee/SpearmanLime.png
+#13 9.302 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/CyanMelee/AxemanCyan.png" import took 5 ms.
+#13 9.302 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/LimeMelee/SwordsmanLime.png
+#13 9.302 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/CyanMelee/AssasinCyan.png" import took 6 ms.
+#13 9.302 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/PurpleMelee/AssasinPurple.png
+#13 9.303 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/CyanMelee/SwordsmanCyan.png" import took 4 ms.
+#13 9.303 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/PurpleMelee/AxemanPurple.png
+#13 9.304 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/CyanMelee/SpearmanCyan.png" import took 5 ms.
+#13 9.304 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/PurpleMelee/SpearmanPurple.png
+#13 9.304 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/LimeMelee/AssasinLime.png" import took 5 ms.
+#13 9.304 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/PurpleMelee/SwordsmanPurple.png
+#13 9.305 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/LimeMelee/SwordsmanLime.png" import took 3 ms.
+#13 9.305 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/RedMelee/AssasinRed.png
+#13 9.305 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/LimeMelee/AxemanLime.png" import took 4 ms.
+#13 9.305 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/RedMelee/AxemanRed.png
+#13 9.306 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/LimeMelee/SpearmanLime.png" import took 5 ms.
+#13 9.306 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/RedMelee/SpearmanRed.png
+#13 9.306 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/PurpleMelee/AssasinPurple.png" import took 3 ms.
+#13 9.306 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Nature/Trees.png
+#13 9.307 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/PurpleMelee/AxemanPurple.png" import took 4 ms.
+#13 9.307 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Nature/Tumbleweed.png
+#13 9.307 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/PurpleMelee/SpearmanPurple.png" import took 3 ms.
+#13 9.307 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Nature/Wheatfield.png
+#13 9.308 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/PurpleMelee/SwordsmanPurple.png" import took 3 ms.
+#13 9.308 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Nature/WinterDeadTrees.png
+#13 9.308 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/RedMelee/AxemanRed.png" import took 3 ms.
+#13 9.308 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Nature/WinterTrees.png
+#13 9.309 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/RedMelee/AssasinRed.png" import took 4 ms.
+#13 9.309 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Objects/ArrowLong.png
+#13 9.309 EditorFileSystem: "res://Assets/MiniWorldSprites/Nature/Tumbleweed.png" import took 2 ms.
+#13 9.309 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Objects/ArrowShort.png
+#13 9.309 EditorFileSystem: "res://Assets/MiniWorldSprites/Nature/Wheatfield.png" import took 2 ms.
+#13 9.309 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Objects/Axe.png
+#13 9.309 EditorFileSystem: "res://Assets/MiniWorldSprites/Nature/Trees.png" import took 4 ms.
+#13 9.309 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Objects/BallistaBolt.png
+#13 9.310 EditorFileSystem: "res://Assets/MiniWorldSprites/Nature/WinterDeadTrees.png" import took 3 ms.
+#13 9.310 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Objects/Bullet.png
+#13 9.311 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Soldiers/Melee/RedMelee/SpearmanRed.png" import took 5 ms.
+#13 9.311 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Objects/FireballProjectile.png
+#13 9.311 EditorFileSystem: "res://Assets/MiniWorldSprites/Nature/WinterTrees.png" import took 2 ms.
+#13 9.311 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Objects/ShortBig.png
+#13 9.311 EditorFileSystem: "res://Assets/MiniWorldSprites/Objects/BallistaBolt.png" import took 1 ms.
+#13 9.311 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Objects/Spear.png
+#13 9.312 EditorFileSystem: "res://Assets/MiniWorldSprites/Objects/ArrowLong.png" import took 3 ms.
+#13 9.312 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Objects/SwordShort.png
+#13 9.312 EditorFileSystem: "res://Assets/MiniWorldSprites/Objects/Axe.png" import took 3 ms.
+#13 9.312 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Templates/16x16Large.png
+#13 9.312 EditorFileSystem: "res://Assets/MiniWorldSprites/Objects/FireballProjectile.png" import took 1 ms.
+#13 9.312 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Templates/16x16Small.png
+#13 9.312 EditorFileSystem: "res://Assets/MiniWorldSprites/Objects/ArrowShort.png" import took 3 ms.
+#13 9.312 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Templates/32x32Small.png
+#13 9.312 EditorFileSystem: "res://Assets/MiniWorldSprites/Objects/ShortBig.png" import took 1 ms.
+#13 9.312 EditorFileSystem: "res://Assets/MiniWorldSprites/Objects/Bullet.png" import took 1 ms.
+#13 9.312 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/User Interface/BoxSelector.png
+#13 9.312 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/User Interface/Highlighted-Boxes.png
+#13 9.313 EditorFileSystem: "res://Assets/MiniWorldSprites/Objects/SwordShort.png" import took 1 ms.
+#13 9.313 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/User Interface/Icons-Essentials.png
+#13 9.313 EditorFileSystem: "res://Assets/MiniWorldSprites/Objects/Spear.png" import took 2 ms.
+#13 9.313 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/User Interface/UiIcons.png
+#13 9.315 EditorFileSystem: "res://Assets/MiniWorldSprites/User Interface/Highlighted-Boxes.png" import took 3 ms.
+#13 9.315 EditorFileSystem: "res://Assets/MiniWorldSprites/User Interface/BoxSelector.png" import took 3 ms.
+#13 9.315 EditorFileSystem: "res://Assets/MiniWorldSprites/User Interface/Icons-Essentials.png" import took 2 ms.
+#13 9.315 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/AllAssetsPreview.png
+#13 9.315 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/ColoredBuildingsPreview.png
+#13 9.315 EditorFileSystem: Importing file: res://Assets/EasyChar_2026-03-06T08_59_55.250Z.png
+#13 9.316 EditorFileSystem: "res://Assets/MiniWorldSprites/User Interface/UiIcons.png" import took 4 ms.
+#13 9.316 EditorFileSystem: Importing file: res://Assets/EasyChar_2026-03-06T09_08_29.159Z.png
+#13 9.317 EditorFileSystem: "res://Assets/MiniWorldSprites/Templates/32x32Small.png" import took 5 ms.
+#13 9.317 EditorFileSystem: "res://Assets/MiniWorldSprites/Templates/16x16Small.png" import took 5 ms.
+#13 9.317 EditorFileSystem: Importing file: res://icon.svg
+#13 9.317 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Workers/PurpleWorker/FarmerPurple.png
+#13 9.318 EditorFileSystem: "res://Assets/EasyChar_2026-03-06T08_59_55.250Z.png" import took 3 ms.
+#13 9.318 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Workers/RedWorker/FarmerRed.png
+#13 9.319 EditorFileSystem: "res://Assets/EasyChar_2026-03-06T09_08_29.159Z.png" import took 3 ms.
+#13 9.319 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Workers/FarmerTemplate.png
+#13 9.322 EditorFileSystem: "res://icon.svg" import took 5 ms.
+#13 9.322 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Ground/Cliff-Water.png
+#13 9.322 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Workers/RedWorker/FarmerRed.png" import took 4 ms.
+#13 9.322 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Ground/Cliff.png
+#13 9.322 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Workers/FarmerTemplate.png" import took 3 ms.
+#13 9.322 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Ground/DeadGrass.png
+#13 9.323 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Workers/PurpleWorker/FarmerPurple.png" import took 6 ms.
+#13 9.323 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Ground/Grass.png
+#13 9.324 EditorFileSystem: "res://Assets/MiniWorldSprites/Ground/Grass.png" import took 2 ms.
+#13 9.324 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Ground/Shore.png
+#13 9.325 EditorFileSystem: "res://Assets/MiniWorldSprites/Ground/Cliff-Water.png" import took 3 ms.
+#13 9.325 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Ground/TexturedGrass.png
+#13 9.325 EditorFileSystem: "res://Assets/MiniWorldSprites/Ground/DeadGrass.png" import took 2 ms.
+#13 9.325 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Ground/Winter.png
+#13 9.326 EditorFileSystem: "res://Assets/MiniWorldSprites/Ground/Shore.png" import took 1 ms.
+#13 9.326 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Miscellaneous/Boat.png
+#13 9.327 EditorFileSystem: "res://Assets/MiniWorldSprites/Ground/Winter.png" import took 2 ms.
+#13 9.327 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Miscellaneous/Bridge.png
+#13 9.327 EditorFileSystem: "res://Assets/MiniWorldSprites/Ground/TexturedGrass.png" import took 2 ms.
+#13 9.327 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Miscellaneous/Chests.png
+#13 9.327 EditorFileSystem: "res://Assets/MiniWorldSprites/Ground/Cliff.png" import took 5 ms.
+#13 9.327 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Miscellaneous/PirateShip.png
+#13 9.327 EditorFileSystem: "res://Assets/MiniWorldSprites/Miscellaneous/Boat.png" import took 1 ms.
+#13 9.327 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Miscellaneous/Portal.png
+#13 9.328 EditorFileSystem: "res://Assets/MiniWorldSprites/Miscellaneous/Portal.png" import took 1 ms.
+#13 9.328 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Miscellaneous/QuestBoard.png
+#13 9.328 EditorFileSystem: "res://Assets/MiniWorldSprites/Templates/16x16Large.png" import took 17 ms.
+#13 9.328 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Miscellaneous/Signs.png
+#13 9.329 EditorFileSystem: "res://Assets/MiniWorldSprites/Miscellaneous/QuestBoard.png" import took 1 ms.
+#13 9.329 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Miscellaneous/StreetSigns.png
+#13 9.329 EditorFileSystem: "res://Assets/MiniWorldSprites/Miscellaneous/PirateShip.png" import took 2 ms.
+#13 9.329 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Miscellaneous/Tombstones.png
+#13 9.330 EditorFileSystem: "res://Assets/MiniWorldSprites/Miscellaneous/Signs.png" import took 1 ms.
+#13 9.330 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Miscellaneous/TransportShip.png
+#13 9.330 EditorFileSystem: "res://Assets/MiniWorldSprites/Miscellaneous/Bridge.png" import took 3 ms.
+#13 9.330 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Miscellaneous/WarShip.png
+#13 9.330 EditorFileSystem: "res://Assets/MiniWorldSprites/Miscellaneous/Chests.png" import took 3 ms.
+#13 9.330 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Miscellaneous/Well.png
+#13 9.330 EditorFileSystem: "res://Assets/MiniWorldSprites/Miscellaneous/StreetSigns.png" import took 1 ms.
+#13 9.330 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Nature/Cactus.png
+#13 9.331 EditorFileSystem: "res://Assets/MiniWorldSprites/Miscellaneous/TransportShip.png" import took 1 ms.
+#13 9.331 EditorFileSystem: "res://Assets/MiniWorldSprites/Miscellaneous/Tombstones.png" import took 2 ms.
+#13 9.331 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Nature/CoconutTrees.png
+#13 9.331 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Nature/DeadTrees.png
+#13 9.332 EditorFileSystem: "res://Assets/MiniWorldSprites/Nature/CoconutTrees.png" import took 1 ms.
+#13 9.332 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Nature/PineTrees.png
+#13 9.332 EditorFileSystem: "res://Assets/MiniWorldSprites/Nature/Cactus.png" import took 2 ms.
+#13 9.332 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Nature/Rocks.png
+#13 9.333 EditorFileSystem: "res://Assets/MiniWorldSprites/Miscellaneous/WarShip.png" import took 3 ms.
+#13 9.333 EditorFileSystem: "res://Assets/MiniWorldSprites/Nature/DeadTrees.png" import took 2 ms.
+#13 9.333 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Lime/LimeDocks.png
+#13 9.333 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Lime/LimeHouses.png
+#13 9.333 EditorFileSystem: "res://Assets/MiniWorldSprites/Miscellaneous/Well.png" import took 3 ms.
+#13 9.333 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Lime/LimeHuts.png
+#13 9.334 EditorFileSystem: "res://Assets/MiniWorldSprites/Nature/PineTrees.png" import took 2 ms.
+#13 9.334 EditorFileSystem: "res://Assets/MiniWorldSprites/Nature/Rocks.png" import took 1 ms.
+#13 9.334 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Lime/LimeKeep.png
+#13 9.334 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Lime/LimeMarket.png
+#13 9.336 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Lime/LimeDocks.png" import took 3 ms.
+#13 9.336 EditorFileSystem: "res://Assets/MiniWorldSprites/ColoredBuildingsPreview.png" import took 21 ms.
+#13 9.336 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Lime/LimeHouses.png" import took 3 ms.
+#13 9.336 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Lime/LimeResources.png
+#13 9.336 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Lime/LimeShip.png
+#13 9.336 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Lime/LimeTaverns.png
+#13 9.336 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Lime/LimeMarket.png" import took 2 ms.
+#13 9.336 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Lime/LimeTower.png
+#13 9.336 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Lime/LimeHuts.png" import took 4 ms.
+#13 9.336 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Lime/LimeWell.png
+#13 9.337 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Lime/LimeKeep.png" import took 3 ms.
+#13 9.337 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Lime/LimeWorkshops.png
+#13 9.337 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Lime/LimeWell.png" import took 0 ms.
+#13 9.337 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Purple/PurpleBarracks.png
+#13 9.337 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Lime/LimeTaverns.png" import took 2 ms.
+#13 9.337 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Purple/PurpleChapels.png
+#13 9.337 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Lime/LimeTower.png" import took 2 ms.
+#13 9.338 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Purple/PurpleDocks.png
+#13 9.339 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Lime/LimeWorkshops.png" import took 2 ms.
+#13 9.339 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Purple/PurpleHouses.png
+#13 9.339 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Lime/LimeResources.png" import took 3 ms.
+#13 9.339 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Purple/PurpleHuts.png
+#13 9.340 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Lime/LimeShip.png" import took 4 ms.
+#13 9.340 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Purple/PurpleDocks.png" import took 2 ms.
+#13 9.340 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Purple/PurpleKeep.png
+#13 9.340 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Purple/PurpleBarracks.png" import took 4 ms.
+#13 9.340 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Purple/PurpleHouses.png" import took 2 ms.
+#13 9.340 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Purple/PurpleMarket.png
+#13 9.341 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Purple/PurpleHuts.png" import took 2 ms.
+#13 9.341 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Purple/PurpleResources.png
+#13 9.341 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Purple/PurpleChapels.png" import took 3 ms.
+#13 9.341 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Purple/PurpleShip.png
+#13 9.342 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Purple/PurpleMarket.png" import took 1 ms.
+#13 9.342 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Purple/PurpleTaverns.png
+#13 9.342 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Purple/PurpleWell.png
+#13 9.342 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Purple/PurpleTower.png
+#13 9.342 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Purple/PurpleResources.png" import took 1 ms.
+#13 9.342 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Purple/PurpleWorkshops.png
+#13 9.343 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Purple/PurpleTaverns.png" import took 1 ms.
+#13 9.343 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Red/RedBarracks.png
+#13 9.343 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Purple/PurpleWorkshops.png" import took 1 ms.
+#13 9.343 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Red/RedChapels.png
+#13 9.343 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Purple/PurpleKeep.png" import took 3 ms.
+#13 9.343 EditorFileSystem: Importing file: res://Assets/Interface/MapTiles.png
+#13 9.345 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Purple/PurpleShip.png" import took 4 ms.
+#13 9.345 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Animals/Boar.png
+#13 9.345 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Purple/PurpleTower.png" import took 4 ms.
+#13 9.345 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Animals/Chick.png
+#13 9.345 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Purple/PurpleWell.png" import took 4 ms.
+#13 9.345 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Animals/Chicken.png
+#13 9.347 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Red/RedChapels.png" import took 4 ms.
+#13 9.347 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Animals/HornedSheep.png
+#13 9.347 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Red/RedBarracks.png" import took 5 ms.
+#13 9.347 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Animals/Horse(32x32).png
+#13 9.349 EditorFileSystem: "res://Assets/Interface/MapTiles.png" import took 5 ms.
+#13 9.349 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Animals/MarineAnimals.png
+#13 9.350 EditorFileSystem: "res://Assets/MiniWorldSprites/Animals/Chicken.png" import took 4 ms.
+#13 9.350 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Animals/Pig.png
+#13 9.350 EditorFileSystem: "res://Assets/MiniWorldSprites/Animals/MarineAnimals.png" import took 1 ms.
+#13 9.350 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Animals/Sheep.png
+#13 9.350 EditorFileSystem: "res://Assets/MiniWorldSprites/Animals/Chick.png" import took 5 ms.
+#13 9.350 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Cyan/CyanBarracks.png
+#13 9.350 EditorFileSystem: "res://Assets/MiniWorldSprites/Animals/HornedSheep.png" import took 3 ms.
+#13 9.351 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Cyan/CyanChapels.png
+#13 9.351 EditorFileSystem: "res://Assets/MiniWorldSprites/Animals/Boar.png" import took 6 ms.
+#13 9.351 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Cyan/CyanDocks.png
+#13 9.352 EditorFileSystem: "res://Assets/MiniWorldSprites/Animals/Horse(32x32).png" import took 4 ms.
+#13 9.352 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Cyan/CyanHouses.png
+#13 9.352 EditorFileSystem: "res://Assets/MiniWorldSprites/Animals/Sheep.png" import took 3 ms.
+#13 9.352 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Cyan/CyanHuts.png
+#13 9.353 EditorFileSystem: "res://Assets/MiniWorldSprites/Animals/Pig.png" import took 3 ms.
+#13 9.353 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Cyan/CyanKeep.png
+#13 9.355 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Cyan/CyanKeep.png" import took 2 ms.
+#13 9.355 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Cyan/CyanDocks.png" import took 4 ms.
+#13 9.355 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Cyan/CyanMarket.png
+#13 9.355 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Cyan/CyanResources.png
+#13 9.355 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Cyan/CyanChapels.png" import took 4 ms.
+#13 9.356 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Cyan/CyanShip.png
+#13 9.356 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Cyan/CyanBarracks.png" import took 5 ms.
+#13 9.356 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Cyan/CyanTaverns.png
+#13 9.356 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Cyan/CyanHouses.png" import took 4 ms.
+#13 9.356 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Cyan/CyanTower.png
+#13 9.357 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Cyan/CyanHuts.png" import took 4 ms.
+#13 9.357 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Cyan/CyanWell.png
+#13 9.358 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Cyan/CyanShip.png" import took 2 ms.
+#13 9.358 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Cyan/CyanWorkshops.png
+#13 9.358 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Cyan/CyanTower.png" import took 2 ms.
+#13 9.358 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Enemy/Orc/AllBuildings-Preview.png
+#13 9.359 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Cyan/CyanResources.png" import took 3 ms.
+#13 9.359 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Enemy/Mausoleum.png
+#13 9.359 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Cyan/CyanMarket.png" import took 4 ms.
+#13 9.359 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Enemy/SpearWall.png
+#13 9.360 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Cyan/CyanTaverns.png" import took 4 ms.
+#13 9.360 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Lime/LimeBarracks.png
+#13 9.360 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Cyan/CyanWell.png" import took 3 ms.
+#13 9.360 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Lime/LimeChapels.png
+#13 9.360 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Cyan/CyanWorkshops.png" import took 2 ms.
+#13 9.360 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Champions/Grum.png
+#13 9.362 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Lime/LimeBarracks.png" import took 2 ms.
+#13 9.362 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Enemy/Mausoleum.png" import took 3 ms.
+#13 9.362 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Champions/Kanji.png
+#13 9.362 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Champions/Katan.png
+#13 9.362 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Lime/LimeChapels.png" import took 2 ms.
+#13 9.362 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Enemy/SpearWall.png" import took 3 ms.
+#13 9.362 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Champions/Okomo.png
+#13 9.362 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Champions/Zhinja.png
+#13 9.364 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Champions/Grum.png" import took 5 ms.
+#13 9.364 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Demons/ArmouredRedDemon.png
+#13 9.365 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Champions/Kanji.png" import took 4 ms.
+#13 9.365 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Demons/PurpleDemon.png
+#13 9.366 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Champions/Katan.png" import took 4 ms.
+#13 9.366 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Demons/RedDemon.png
+#13 9.368 EditorFileSystem: "res://Assets/MiniWorldSprites/AllAssetsPreview.png" import took 53 ms.
+#13 9.368 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Dragons/BlackDragon.png
+#13 9.368 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Enemy/Orc/AllBuildings-Preview.png" import took 9 ms.
+#13 9.368 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Dragons/BlueDragon.png
+#13 9.368 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Champions/Okomo.png" import took 6 ms.
+#13 9.368 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Dragons/RedDragon.png
+#13 9.369 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Champions/Zhinja.png" import took 7 ms.
+#13 9.369 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Demons/RedDemon.png" import took 3 ms.
+#13 9.369 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Dragons/WhiteDragon.png
+#13 9.369 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Demons/PurpleDemon.png" import took 3 ms.
+#13 9.369 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Demons/ArmouredRedDemon.png" import took 4 ms.
+#13 9.369 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Dragons/YellowDragon.png
+#13 9.369 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Frostborn/Mammoth.png
+#13 9.369 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Frostborn/Wendigo.png
+#13 9.372 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Frostborn/Mammoth.png" import took 2 ms.
+#13 9.372 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Frostborn/Yeti.png
+#13 9.374 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Frostborn/Wendigo.png" import took 4 ms.
+#13 9.374 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/GiantAnimals/GiantCrab.png
+#13 9.374 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Dragons/BlueDragon.png" import took 7 ms.
+#13 9.375 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Orcs/ArcherGoblin.png
+#13 9.375 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Frostborn/Yeti.png" import took 3 ms.
+#13 9.375 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Orcs/ClubGoblin.png
+#13 9.375 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Dragons/RedDragon.png" import took 7 ms.
+#13 9.375 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Orcs/FarmerGoblin.png
+#13 9.376 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Dragons/BlackDragon.png" import took 8 ms.
+#13 9.376 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Orcs/KamikazeGoblin.png
+#13 9.377 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/GiantAnimals/GiantCrab.png" import took 3 ms.
+#13 9.377 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Orcs/Minotaur.png
+#13 9.377 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Dragons/WhiteDragon.png" import took 8 ms.
+#13 9.377 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Orcs/Orc.png
+#13 9.378 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Orcs/FarmerGoblin.png" import took 3 ms.
+#13 9.378 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Orcs/OrcMage.png
+#13 9.378 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Dragons/YellowDragon.png" import took 9 ms.
+#13 9.378 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Orcs/OrcShaman.png
+#13 9.378 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Orcs/ClubGoblin.png" import took 4 ms.
+#13 9.378 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Orcs/ArcherGoblin.png" import took 4 ms.
+#13 9.379 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Monsters/Orcs/SpearGoblin.png
+#13 9.379 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Red/RedDocks.png
+#13 9.379 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Orcs/Minotaur.png" import took 2 ms.
+#13 9.379 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Red/RedHouses.png
+#13 9.379 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Orcs/KamikazeGoblin.png" import took 3 ms.
+#13 9.379 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Red/RedHuts.png
+#13 9.380 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Red/RedHouses.png" import took 1 ms.
+#13 9.380 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Red/RedKeep.png
+#13 9.380 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Orcs/OrcMage.png" import took 2 ms.
+#13 9.380 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Red/RedMarket.png
+#13 9.380 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Red/RedHuts.png" import took 1 ms.
+#13 9.380 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Red/RedResources.png
+#13 9.380 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Orcs/Orc.png" import took 4 ms.
+#13 9.380 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Red/RedDocks.png" import took 2 ms.
+#13 9.380 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Red/RedShip.png
+#13 9.381 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Red/RedTaverns.png
+#13 9.381 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Orcs/SpearGoblin.png" import took 3 ms.
+#13 9.381 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Red/RedTower.png
+#13 9.382 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Red/RedResources.png" import took 2 ms.
+#13 9.382 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Red/RedWell.png
+#13 9.383 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Red/RedKeep.png" import took 2 ms.
+#13 9.383 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Red/RedWorkshops.png
+#13 9.383 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Red/RedTower.png" import took 1 ms.
+#13 9.383 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Wood/Barracks.png
+#13 9.383 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Red/RedTaverns.png" import took 2 ms.
+#13 9.383 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Wood/CaveV2.png
+#13 9.383 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Red/RedMarket.png" import took 3 ms.
+#13 9.383 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Wood/Chapels.png
+#13 9.384 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Red/RedShip.png" import took 3 ms.
+#13 9.384 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Wood/Docks.png
+#13 9.384 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Red/RedWell.png" import took 2 ms.
+#13 9.384 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Wood/Houses.png
+#13 9.385 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Red/RedWorkshops.png" import took 2 ms.
+#13 9.385 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Wood/Huts.png
+#13 9.385 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Monsters/Orcs/OrcShaman.png" import took 7 ms.
+#13 9.385 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Wood/Keep.png
+#13 9.385 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Wood/CaveV2.png" import took 2 ms.
+#13 9.385 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Wood/Market.png
+#13 9.386 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Wood/Docks.png" import took 2 ms.
+#13 9.386 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Wood/Barracks.png" import took 3 ms.
+#13 9.386 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Wood/Resources.png
+#13 9.386 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Wood/Taverns.png
+#13 9.386 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Wood/Houses.png" import took 2 ms.
+#13 9.386 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Wood/Tower2.png
+#13 9.386 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Wood/Huts.png" import took 1 ms.
+#13 9.386 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Wood/Tower.png
+#13 9.386 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Wood/Chapels.png" import took 3 ms.
+#13 9.386 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Buildings/Wood/Workshops.png
+#13 9.387 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Wood/Taverns.png" import took 1 ms.
+#13 9.387 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Champions/Arthax.png
+#13 9.387 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Wood/Resources.png" import took 1 ms.
+#13 9.387 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Champions/Börg.png
+#13 9.388 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Wood/Market.png" import took 2 ms.
+#13 9.388 EditorFileSystem: Importing file: res://Assets/MiniWorldSprites/Characters/Champions/Gangblanc.png
+#13 9.388 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Wood/Tower2.png" import took 2 ms.
+#13 9.388 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Wood/Tower.png" import took 2 ms.
+#13 9.388 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Wood/Workshops.png" import took 2 ms.
+#13 9.388 EditorFileSystem: "res://Assets/MiniWorldSprites/Buildings/Wood/Keep.png" import took 3 ms.
+#13 9.389 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Champions/Arthax.png" import took 2 ms.
+#13 9.390 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Champions/Gangblanc.png" import took 2 ms.
+#13 9.390 EditorFileSystem: "res://Assets/MiniWorldSprites/Characters/Champions/Börg.png" import took 3 ms.
+#13 CANCELED
+
+ [33m2 warnings found (use docker --debug to expand):
+[0m - FromPlatformFlagConstDisallowed: FROM --platform flag should not use constant value "linux/amd64" (line 4)
+ - FromPlatformFlagConstDisallowed: FROM --platform flag should not use constant value "linux/amd64" (line 44)
+ERROR: failed to build: failed to solve: Canceled: context canceled
