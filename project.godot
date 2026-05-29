@@ -22,7 +22,8 @@ ActionGateway="*res://Logic/ActionGateway.gd"
 TickManager="*res://Logic/TickManager.gd"
 DebugWindow="*res://UI/DebugWindow.tscn"
 ResourceSpawner="*res://Entities/Map/Resource_spawner.gd"
-Networking="*res://Logic/Server.gd"
+Networking="*res://Logic/multiplayer/network.gd"
+PlayerManager="*uid://bqcde2y2487d6"
 
 [dotnet]
 
