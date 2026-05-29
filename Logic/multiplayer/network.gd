@@ -45,19 +45,23 @@ func _on_peer_connected(id: int):
 @rpc("any_peer", "call_remote", "reliable")
 func on_player_registered(player_uuid: String) -> void:
 	var peer_id = multiplayer.get_remote_sender_id()
+	var new_player = PlayerManager.is_new_player(player_uuid)
 	var local_id = PlayerManager.get_or_create_local_id(player_uuid)
 	
-	# 2. Store the session data in our manager
 	PlayerManager.connected_players[peer_id] = {
 		"peer_id": peer_id,
 		"local_id": local_id,
 		"player_uuid": player_uuid,
 		"connected_at": Time.get_unix_time_from_system()
 	}
-	
 	print("Player registered: UUID=", player_uuid, " LocalID=", local_id, " Peer=", peer_id)
+
+	if new_player:
+		var gateway = get_node_or_null("/root/ActionGateway")
+		if gateway:
+			gateway.spawn_initial_unit(local_id)
 	
-	# 3. Send the local_id back to the specific client
+	
 	rpc_id(peer_id, "receive_player_registration", local_id)
 	GameRoomManager.join_player_to_room("room-1", player_uuid)
 
