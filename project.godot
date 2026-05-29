@@ -23,14 +23,11 @@ TickManager="*res://Logic/TickManager.gd"
 PlanReceiver="*res://Logic/PlanReceiver.gd"
 DebugWindow="*res://UI/DebugWindow.tscn"
 ResourceSpawner="*res://Entities/Map/Resource_spawner.gd"
+Networking="*res://Logic/Server.gd"
 
 [dotnet]
 
-project/assembly_name="New Game Project"
-
-[editor_plugins]
-
-enabled=PackedStringArray()
+project/assembly_name="Core"
 
 [input]
 
@@ -63,3 +60,4 @@ WheelDown={
 
 textures/canvas_textures/default_texture_filter=0
 rendering_device/driver.windows="d3d12"
+textures/vram_compression/import_etc2_astc=true

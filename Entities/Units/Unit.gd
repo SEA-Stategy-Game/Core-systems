@@ -173,8 +173,7 @@ func _input(event) -> void:
 			# Manual move clears any AI queue so the player takes over
 			if command_queue:
 				command_queue.clear()
-			$NavigationAgent2D.target_position = get_global_mouse_position()
-			current_path_index = 0;
+			set_target(get_global_mouse_position())
 			set_anim(velocity.length_squared() > 100)
 			
 # -----------------------------------------------------------------
@@ -197,17 +196,27 @@ func _physics_process(delta) -> void:
 			is_idle = false
 		command_queue.process_tick(delta)
 		return  # AI commands take priority -- skip manual logic
-	
+
 	# 2. Otherwise, fall back to manual right-click movement.
 	if $NavigationAgent2D.is_navigation_finished():
 		return
+	pathfind_and_move(delta)
+	# Below is used for Godto RVO avoidance but this data is not caught by the server so it is commented out
+	#$NavigationAgent2D.set_velocity(desired_velocity)
+
+## Sets the target on the unit for pathfinding and resets the current_path_index
+func set_target(target) -> void:
+	$NavigationAgent2D.target_position = target
+	current_path_index = 0;
+
+## Moves the unit based on the pathfinding algorithm. Snaps the unit back into a navigateble area if it is out-of-bounds
+func pathfind_and_move(delta) -> void:
 	var nav_point_direction = to_local($NavigationAgent2D.get_next_path_position()).normalized()
 	velocity = nav_point_direction * speed * delta #* get_local_movement_speed()
 	move_and_slide()
 	global_position = NavigationServer2D.map_get_closest_point(
 		$NavigationAgent2D.get_navigation_map(), global_position)
-	#$NavigationAgent2D.set_velocity(desired_velocity)
-	
+
 # -----------------------------------------------------------------
 # Signal relays
 # -----------------------------------------------------------------
