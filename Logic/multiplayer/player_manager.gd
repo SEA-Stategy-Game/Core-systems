@@ -3,7 +3,7 @@ extends Node
 # Persistent mapping: { uuid: String -> local_id: int }
 var player_uuid_to_local_id = {}
 
-# Current session data: { peer_id: int -> { "local_id": int, "uuid": String, ... } }
+# Current session data: { peer_id: int -> { "local_id": int, "player_uuid": String, ... } }
 var connected_players = {}
 
 # Counter for assigning new local IDs

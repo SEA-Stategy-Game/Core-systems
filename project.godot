@@ -23,7 +23,8 @@ TickManager="*res://Logic/TickManager.gd"
 DebugWindow="*res://UI/DebugWindow.tscn"
 ResourceSpawner="*res://Entities/Map/Resource_spawner.gd"
 Networking="*res://Logic/multiplayer/network.gd"
-PlayerManager="*uid://bqcde2y2487d6"
+PlayerManager="*res://Logic/multiplayer/player_manager.gd"
+GameRoomManager="*res://Logic/multiplayer/game_room_manager.gd"
 
 [dotnet]
 

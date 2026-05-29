@@ -59,12 +59,13 @@ func on_player_registered(player_uuid: String) -> void:
 	
 	# 3. Send the local_id back to the specific client
 	rpc_id(peer_id, "receive_player_registration", local_id)
+	GameRoomManager.join_player_to_room("room-1", player_uuid)
 
 
 ## Called when a client disconnects
 func _on_peer_disconnected(id: int):
 	if PlayerManager.connected_players.has(id):
-		var p_id = PlayerManager.connected_players[id].player_id
+		var p_id = PlayerManager.connected_players[id]['player_uuid']
 		print("Player ", p_id, " (Peer ", id, ") disconnected.")
 		PlayerManager.connected_players.erase(id) # Remove from manager
 	else:
@@ -80,23 +81,24 @@ func _on_peer_disconnected(id: int):
 ## [param state] A dictionary containing the current dynamic world state.
 func broadcast_state(tick: int) -> void:
 	var peers = multiplayer.get_peers()
-	print("Broadcasting to peers: ", peers)
-	
-	# TODO:
-	# Expand the state to also include map-data
-	# Create unit paths:
-	var state = {
-		"current_tick" : tick,
-		# Always send all units since the majority are likely to be dynamic 
-		"units" : units.get_children().map(func(x): return build_dynamic_unit(x)),
-		# For objects, we only send objects that are modified since there are a lot of these and they are likely to be mostly static 
-		"modified_objects" : queued_objects
-	}
-	queued_objects = []
-	#print("Dynamic state: ", state)
-	var bytes = JSON.stringify(state).to_utf8_buffer()
-	var compressed = bytes.compress(FileAccess.COMPRESSION_GZIP)
-	rpc("receive_state", compressed)
+	if len(peers) > 0 :
+		print("Broadcasting to peers: ", peers)
+		
+		# TODO:
+		# Expand the state to also include map-data
+		# Create unit paths:
+		var state = {
+			"current_tick" : tick,
+			# Always send all units since the majority are likely to be dynamic 
+			"units" : units.get_children().map(func(x): return build_dynamic_unit(x)),
+			# For objects, we only send objects that are modified since there are a lot of these and they are likely to be mostly static 
+			"modified_objects" : queued_objects
+		}
+		queued_objects = []
+		#print("Dynamic state: ", state)
+		var bytes = JSON.stringify(state).to_utf8_buffer()
+		var compressed = bytes.compress(FileAccess.COMPRESSION_GZIP)
+		rpc("receive_state", compressed)
 
 func build_dynamic_unit(unit):
 	return {
@@ -196,18 +198,24 @@ func _get_port_from_args(default_port: int) -> int:
 # Godot can compute a matching RPC checksum between client and server.
 # -----------------------------------------------------------------------
 
+@rpc("any_peer", "call_remote", "unreliable")
+func receive_state(data: PackedByteArray):
+	pass
+
 ## Stub: called by the client to request the full static world state.
-@rpc("any_peer", "call_remote", "reliable")
+@rpc("authority", "call_remote", "reliable")
 func request_static_state() -> void:
 	pass
-	
 
 ## Stub: receives the compressed static world state from the server.
-@rpc("any_peer", "call_remote", "unreliable")
+@rpc("authority", "call_remote", "unreliable")
 func receive_static_state(data: PackedByteArray):
 	pass
 
-
 @rpc("authority", "call_remote", "reliable")
 func receive_player_registration(player_local_id: int) -> void:
+	pass
+	
+@rpc("authority", "call_remote", "reliable")
+func register_player(player_uuid: String) -> void:
 	pass
