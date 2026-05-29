@@ -4,7 +4,7 @@
 extends Node
 
 const LISTEN_PORT  = 8085
-const PLANNING_URL = "http://127.0.0.1:5020"
+const PLANNING_URL = "http://127.0.0.1:5000"
 
 ## unit_id (String) → { "steps": Array, "index": int }
 var _store: Dictionary = {}
@@ -141,14 +141,20 @@ func _fetch_and_store(game_id: String, player_id: String, unit_ids: Array) -> vo
 	var unit_plans: Array = resp_body.get("unit_plans", [])
 	print("PlanReceiver: received %d UnitPlan(s)" % unit_plans.size())
 
-	# Debug: vis alle unit entity_ids i scenen
+	var valid_unit_ids: Array = []
 	var gateway = get_node_or_null("/root/ActionGateway")
 	if gateway:
-		var all_units = gateway.get_all_units()
-		print("PlanReceiver: units in scene: %s" % str(all_units.map(func(u): return u.get("id", "?"))))
+		var player_units = gateway.get_player_units(int(player_id))
+		valid_unit_ids = player_units.map(func(u): return str(u.get("id", "")))
+		print("PlanReceiver: units in scene for player %s: %s" % [player_id, str(valid_unit_ids)])
 
 	for up in unit_plans:
 		var uid_str: String = str(up.get("unit_id", ""))
+		
+		if not uid_str in valid_unit_ids:
+			print("PlanReceiver: unit_id='%s' does not belong to player %s — skipping" % [uid_str, player_id])
+			continue
+			
 		var steps: Array    = up.get("steps", [])
 		print("PlanReceiver: processing UnitPlan for unit_id='%s', %d steps" % [uid_str, steps.size()])
 
