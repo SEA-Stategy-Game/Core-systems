@@ -269,6 +269,9 @@ func _ai_get_plan() -> Dictionary:
 func get_all_units() -> Array:
 	return sense().get_all_units()
 
+func get_player_units(pid: int) -> Array:
+	return sense().get_player_units(pid)
+
 func get_idle_units(pid: int) -> Array:
 	return sense().get_idle_units(pid)
 
