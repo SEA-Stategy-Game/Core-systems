@@ -33,6 +33,7 @@ func _start_server(port: int):
 
 	multiplayer.multiplayer_peer = peer
 	multiplayer.peer_connected.connect(_on_peer_connected)
+	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	for ip in IP.get_local_addresses():
 		if ip.begins_with("192.") or ip.begins_with("10."):
 			print("Server started, hosting on: ", ip)
@@ -41,26 +42,35 @@ func _start_server(port: int):
 func _on_peer_connected(id: int):
 	print("Client connected: ", id)
 	
-# -----------------------------------------------------------------------
-# Client RPC stubs
-# These functions are never executed on the server. They exist solely so
-# Godot can compute a matching RPC checksum between client and server.
-# -----------------------------------------------------------------------
-
-## Stub: called by the client to request the full static world state.
 @rpc("any_peer", "call_remote", "reliable")
-func request_static_state() -> void:
-	pass
+func on_player_registered(player_uuid: String) -> void:
+	var peer_id = multiplayer.get_remote_sender_id()
+	var local_id = PlayerManager.get_or_create_local_id(player_uuid)
+	
+	# 2. Store the session data in our manager
+	PlayerManager.connected_players[peer_id] = {
+		"peer_id": peer_id,
+		"local_id": local_id,
+		"player_uuid": player_uuid,
+		"connected_at": Time.get_unix_time_from_system()
+	}
+	
+	print("Player registered: UUID=", player_uuid, " LocalID=", local_id, " Peer=", peer_id)
+	
+	# 3. Send the local_id back to the specific client
+	rpc_id(peer_id, "receive_player_registration", local_id)
 
-## Stub: receives a dynamic state delta broadcast from the server.
-@rpc("any_peer", "call_remote", "unreliable")
-func receive_state(state: Dictionary):
-	pass
 
-## Stub: receives the compressed static world state from the server.
-@rpc("any_peer", "call_remote", "unreliable")
-func receive_static_state(state: Dictionary):
-	pass
+## Called when a client disconnects
+func _on_peer_disconnected(id: int):
+	if PlayerManager.connected_players.has(id):
+		var p_id = PlayerManager.connected_players[id].player_id
+		print("Player ", p_id, " (Peer ", id, ") disconnected.")
+		PlayerManager.connected_players.erase(id) # Remove from manager
+	else:
+		print("Unregistered peer ", id, " disconnected.")
+
+#
 
 # -----------------------------------------------------------------------
 # Server functions
@@ -179,3 +189,25 @@ func _get_port_from_args(default_port: int) -> int:
 			if value.is_valid_int():
 				return value.to_int()
 	return default_port
+	
+# -----------------------------------------------------------------------
+# Client RPC stubs
+# These functions are never executed on the server. They exist solely so
+# Godot can compute a matching RPC checksum between client and server.
+# -----------------------------------------------------------------------
+
+## Stub: called by the client to request the full static world state.
+@rpc("any_peer", "call_remote", "reliable")
+func request_static_state() -> void:
+	pass
+	
+
+## Stub: receives the compressed static world state from the server.
+@rpc("any_peer", "call_remote", "unreliable")
+func receive_static_state(data: PackedByteArray):
+	pass
+
+
+@rpc("authority", "call_remote", "reliable")
+func receive_player_registration(player_local_id: int) -> void:
+	pass
