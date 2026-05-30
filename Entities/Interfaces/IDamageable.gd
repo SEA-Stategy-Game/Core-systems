@@ -1,4 +1,3 @@
-## IDamageable.gd
 ## -----------------------------------------------------------------------
 ## Interface contract for any game object that can receive damage.
 ## Trees, Units, Buildings -- anything that has HP implements this.
