@@ -12,6 +12,15 @@ class_name Unit
 @export var attack_damage: int = 10    ## Damage per combat tick
 @export var attack_cooldown: float = 1.0  ## Seconds between attacks
 
+## -----------------------------------------------------------------------
+## Ranged attack / projectile configuration
+## -----------------------------------------------------------------------
+@export var uses_projectiles: bool = false       ## If true, attacks fire projectiles instead of melee.
+@export var projectile_speed: float = 240.0
+@export var projectile_damage: int = -1          ## -1 = use attack_damage
+@export var projectile_spread_radians: float = 0.12
+@export var projectile_aim_jitter_pixels: float = 6.0
+
 var current_health: int
 
 @onready var box = get_node("HitBox")
@@ -231,6 +240,26 @@ func _on_cq_queue_empty(uid: int) -> void:
 	if not is_idle:
 		is_idle = true
 		unit_idled.emit(uid)
+
+# -----------------------------------------------------------------
+# Projectile firing
+# -----------------------------------------------------------------
+
+## Spawn a Projectile aimed at `target` (a Node2D) or at a Vector2 point.
+## The projectile is added to the world (under the unit's parent) so it
+## survives the unit dying / being freed mid-flight.
+func fire_projectile(target) -> Projectile:
+	var dmg: int = projectile_damage if projectile_damage >= 0 else attack_damage
+	var projectile := Projectile.create(self, target, dmg, projectile_speed)
+	projectile.spread_radians = projectile_spread_radians
+	projectile.aim_jitter_pixels = projectile_aim_jitter_pixels
+
+	var spawn_parent: Node = get_parent()
+	if spawn_parent == null:
+		spawn_parent = self
+	spawn_parent.add_child(projectile)
+	projectile.global_position = global_position
+	return projectile
 	
 # Small function to set animation. I don't know if starting animation is expensive.
 # Otherwise just remove and set directly

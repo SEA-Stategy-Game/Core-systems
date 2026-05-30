@@ -1,6 +1,7 @@
 extends Node2D
 
 var units = []
+var fog_of_war: FogOfWar = null
 var headless: bool = false
 
 func _init() -> void:
@@ -9,6 +10,14 @@ func _init() -> void:
 		
 func _ready():
 	get_units()
+	Game.spawnUnit(position)
+	if has_node("Camera2D"):
+		$Camera2D.area_selected.connect(_on_area_selected)
+	if has_node("FogOfWar"):
+		fog_of_war = $FogOfWar as FogOfWar
+		# Run an initial rebuild so the fog is correct before the first tick.
+		if fog_of_war != null:
+			fog_of_war.rebuild_all_players()
 	if not headless:
 		Game.spawnUnit(position)
 		if has_node("Camera2D"):

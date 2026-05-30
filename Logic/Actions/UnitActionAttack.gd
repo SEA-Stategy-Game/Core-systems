@@ -93,18 +93,25 @@ func tick(unit: CharacterBody2D, delta: float) -> int:
 
 	if _cooldown_timer <= 0.0:
 		_cooldown_timer = _attack_cooldown
-		if _target_node.has_method("take_damage"):
+		# Ranged units fire projectiles instead of applying melee damage.
+		var fired_projectile: bool = false
+		if "uses_projectiles" in unit and unit.uses_projectiles and unit.has_method("fire_projectile"):
+			unit.fire_projectile(_target_node)
+			fired_projectile = true
+			print("[COMBAT_LOG] Unit ", _get_uid(unit), " fired a projectile at target at ", _target_node.global_position)
+
+		if not fired_projectile and _target_node.has_method("take_damage"):
 			_target_node.take_damage(_attack_damage)
 			print("[COMBAT_LOG] Unit ", _get_uid(unit), " dealt ", _attack_damage, " damage to target at ", _target_node.global_position)
 
-			# Play attack animation if available
-			if unit.has_node("AnimationPlayer"):
-				var anim: AnimationPlayer = unit.get_node("AnimationPlayer")
-				# If we don't have an attack animation, play work/chop as fallback
-				if anim.has_animation("Attack"):
-					anim.play("Attack")
-				elif anim.has_animation("Work"):
-					anim.play("Work")
+		# Play attack animation if available
+		if unit.has_node("AnimationPlayer"):
+			var anim: AnimationPlayer = unit.get_node("AnimationPlayer")
+			# If we don't have an attack animation, play work/chop as fallback
+			if anim.has_animation("Attack"):
+				anim.play("Attack")
+			elif anim.has_animation("Work"):
+				anim.play("Work")
 
 	return _state
 
