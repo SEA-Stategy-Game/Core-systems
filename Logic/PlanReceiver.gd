@@ -2,23 +2,31 @@
 ## sequential, looping plan execution for each unit via ActionGateway.
 extends Node
 
-const LISTEN_PORT  = 8085
 const PLANNING_URL = "http://127.0.0.1:5000"
 
-## unit_id (String) → { "steps": Array, "index": int }
+## unit_id (String) -> { "steps": Array, "index": int }
 var _store: Dictionary = {}
 
-var _server: TCPServer = TCPServer.new()
+var _receiver_strategy: Node = null
 
 # ----------------------------------------------------------------
 # Lifecycle
 # ----------------------------------------------------------------
 
 func _ready() -> void:
-	if _server.listen(LISTEN_PORT, "127.0.0.1") != OK:
-		push_error("PlanReceiver: failed to listen on port %d" % LISTEN_PORT)
-		return
-	print("PlanReceiver: listening on port %d" % LISTEN_PORT)
+	var redis_flag = OS.get_environment("USE_REDIS_PUBSUB")
+	
+	if redis_flag == "true" or redis_flag == "1":
+		var RedisReceiver = load("res://Logic/Notifications/RedisNotificationReceiver.gd")
+		_receiver_strategy = RedisReceiver.new()
+		_receiver_strategy.name = "RedisNotificationReceiver"
+	else:
+		var HttpReceiver = load("res://Logic/Notifications/HttpNotificationReceiver.gd")
+		_receiver_strategy = HttpReceiver.new()
+		_receiver_strategy.name = "HttpNotificationReceiver"
+
+	add_child(_receiver_strategy)
+	_receiver_strategy.plan_notified.connect(_on_plan_notified)
 
 	var gateway = get_node_or_null("/root/ActionGateway")
 	if gateway:
@@ -27,79 +35,8 @@ func _ready() -> void:
 	else:
 		push_error("PlanReceiver: ActionGateway not found at startup")
 
-func _process(_delta: float) -> void:
-	if _server.is_connection_available():
-		_handle_connection(_server.take_connection())
-
-# ----------------------------------------------------------------
-# HTTP server, receive notification from Planning
-# ----------------------------------------------------------------
-
-func _handle_connection(peer: StreamPeerTCP) -> void:
-	print("PlanReceiver: incoming connection")
-	var raw = ""
-	var deadline = Time.get_ticks_msec() + 2000
-
-	while Time.get_ticks_msec() < deadline:
-		var n = peer.get_available_bytes()
-		if n > 0:
-			raw += peer.get_string(n)
-			if "\r\n\r\n" in raw:
-				break
-		OS.delay_msec(1)
-
-	if not "\r\n\r\n" in raw:
-		push_warning("PlanReceiver: timeout — no headers received")
-		_respond(peer, 400)
-		return
-
-	var content_length = 0
-	for line in raw.split("\r\n"):
-		if line.to_lower().begins_with("content-length:"):
-			content_length = int(line.split(":")[1].strip_edges())
-			break
-
-	var header_end = raw.find("\r\n\r\n") + 4
-	var body_so_far = raw.length() - header_end
-	deadline = Time.get_ticks_msec() + 1000
-	while body_so_far < content_length and Time.get_ticks_msec() < deadline:
-		var n = peer.get_available_bytes()
-		if n > 0:
-			raw += peer.get_string(n)
-			body_so_far = raw.length() - header_end
-		OS.delay_msec(1)
-
-	var body_text = raw.substr(header_end)
-	print("PlanReceiver: body received: %s" % body_text)
-
-	var json = JSON.new()
-	if json.parse(body_text) != OK:
-		push_warning("PlanReceiver: JSON parse error in body: '%s'" % body_text)
-		_respond(peer, 400)
-		return
-
-	var body: Dictionary = json.get_data()
-	var game_id: String   = body.get("game_id", "")
-	var player_id: String = body.get("player_id", "")
-	var unit_ids: Array   = body.get("unit_ids", [])
-
-	print("PlanReceiver: notification — game=%s player=%s units=%s" % [game_id, player_id, str(unit_ids)])
-
-	if game_id.is_empty() or player_id.is_empty() or unit_ids.is_empty():
-		push_warning("PlanReceiver: missing fields in notification")
-		_respond(peer, 422)
-		return
-
-	_respond(peer, 200)
-	peer.disconnect_from_host()
+func _on_plan_notified(game_id: String, player_id: String, unit_ids: Array) -> void:
 	_fetch_and_store.call_deferred(game_id, player_id, unit_ids)
-
-func _respond(peer: StreamPeerTCP, code: int) -> void:
-	var msg = "OK" if code == 200 else "Error"
-	peer.put_data(
-		("HTTP/1.1 %d %s\r\nContent-Length: 0\r\nConnection: close\r\n\r\n" % [code, msg])
-		.to_utf8_buffer()
-	)
 
 # ----------------------------------------------------------------
 # Get UnitPlans from Planning and save in _store
@@ -123,7 +60,7 @@ func _fetch_and_store(game_id: String, player_id: String, unit_ids: Array) -> vo
 	print("PlanReceiver: Planning responded with HTTP %d" % res[1])
 
 	if res[1] != 200:
-		push_warning("PlanReceiver: Planning returned %d — no plans assigned" % res[1])
+		push_warning("PlanReceiver: Planning returned %d - no plans assigned" % res[1])
 		return
 
 	var raw_body = res[3].get_string_from_utf8()
@@ -149,14 +86,14 @@ func _fetch_and_store(game_id: String, player_id: String, unit_ids: Array) -> vo
 		var uid_str: String = str(up.get("unit_id", ""))
 		
 		if not uid_str in valid_unit_ids:
-			print("PlanReceiver: unit_id='%s' does not belong to player %s — skipping" % [uid_str, player_id])
+			print("PlanReceiver: unit_id='%s' does not belong to player %s - skipping" % [uid_str, player_id])
 			continue
 			
 		var steps: Array    = up.get("steps", [])
 		print("PlanReceiver: processing UnitPlan for unit_id='%s', %d steps" % [uid_str, steps.size()])
 
 		if uid_str.is_empty() or steps.is_empty():
-			push_warning("PlanReceiver: empty UnitPlan — skipping")
+			push_warning("PlanReceiver: empty UnitPlan - skipping")
 			continue
 
 		_store[uid_str] = { "steps": steps, "index": 0 }
@@ -181,7 +118,7 @@ func _on_unit_idled(unit_id: int) -> void:
 		return
 	var entry = _store[uid_str]
 	entry["index"] = (entry["index"] + 1) % entry["steps"].size()
-	print("PlanReceiver: unit %d idle — advancing to step %d" % [unit_id, entry["index"]])
+	print("PlanReceiver: unit %d idle - advancing to step %d" % [unit_id, entry["index"]])
 	_execute_current_step(unit_id)
 
 func _execute_current_step(unit_id: int) -> void:
