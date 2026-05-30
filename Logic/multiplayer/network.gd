@@ -33,6 +33,7 @@ func _start_server(port: int):
 
 	multiplayer.multiplayer_peer = peer
 	multiplayer.peer_connected.connect(_on_peer_connected)
+	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	for ip in IP.get_local_addresses():
 		if ip.begins_with("192.") or ip.begins_with("10."):
 			print("Server started, hosting on: ", ip)
@@ -41,26 +42,40 @@ func _start_server(port: int):
 func _on_peer_connected(id: int):
 	print("Client connected: ", id)
 	
-# -----------------------------------------------------------------------
-# Client RPC stubs
-# These functions are never executed on the server. They exist solely so
-# Godot can compute a matching RPC checksum between client and server.
-# -----------------------------------------------------------------------
-
-## Stub: called by the client to request the full static world state.
 @rpc("any_peer", "call_remote", "reliable")
-func request_static_state() -> void:
-	pass
+func on_player_registered(player_uuid: String) -> void:
+	var peer_id = multiplayer.get_remote_sender_id()
+	var new_player = PlayerManager.is_new_player(player_uuid)
+	var local_id = PlayerManager.get_or_create_local_id(player_uuid)
+	
+	PlayerManager.connected_players[peer_id] = {
+		"peer_id": peer_id,
+		"local_id": local_id,
+		"player_uuid": player_uuid,
+		"connected_at": Time.get_unix_time_from_system()
+	}
+	print("Player registered: UUID=", player_uuid, " LocalID=", local_id, " Peer=", peer_id)
 
-## Stub: receives a dynamic state delta broadcast from the server.
-@rpc("any_peer", "call_remote", "unreliable")
-func receive_state(state: Dictionary):
-	pass
+	if new_player:
+		var gateway = get_node_or_null("/root/ActionGateway")
+		if gateway:
+			gateway.spawn_initial_unit(local_id)
+	
+	
+	rpc_id(peer_id, "receive_player_registration", local_id)
+	GameRoomManager.join_player_to_room("room-1", player_uuid)
 
-## Stub: receives the compressed static world state from the server.
-@rpc("any_peer", "call_remote", "unreliable")
-func receive_static_state(state: Dictionary):
-	pass
+
+## Called when a client disconnects
+func _on_peer_disconnected(id: int):
+	if PlayerManager.connected_players.has(id):
+		var p_id = PlayerManager.connected_players[id]['player_uuid']
+		print("Player ", p_id, " (Peer ", id, ") disconnected.")
+		PlayerManager.connected_players.erase(id) # Remove from manager
+	else:
+		print("Unregistered peer ", id, " disconnected.")
+
+#
 
 # -----------------------------------------------------------------------
 # Server functions
@@ -70,23 +85,24 @@ func receive_static_state(state: Dictionary):
 ## [param state] A dictionary containing the current dynamic world state.
 func broadcast_state(tick: int) -> void:
 	var peers = multiplayer.get_peers()
-	print("Broadcasting to peers: ", peers)
-	
-	# TODO:
-	# Expand the state to also include map-data
-	# Create unit paths:
-	var state = {
-		"current_tick" : tick,
-		# Always send all units since the majority are likely to be dynamic 
-		"units" : units.get_children().map(func(x): return build_dynamic_unit(x)),
-		# For objects, we only send objects that are modified since there are a lot of these and they are likely to be mostly static 
-		"modified_objects" : queued_objects
-	}
-	queued_objects = []
-	#print("Dynamic state: ", state)
-	var bytes = JSON.stringify(state).to_utf8_buffer()
-	var compressed = bytes.compress(FileAccess.COMPRESSION_GZIP)
-	rpc("receive_state", compressed)
+	if len(peers) > 0 :
+		print("Broadcasting to peers: ", peers)
+		
+		# TODO:
+		# Expand the state to also include map-data
+		# Create unit paths:
+		var state = {
+			"current_tick" : tick,
+			# Always send all units since the majority are likely to be dynamic 
+			"units" : units.get_children().map(func(x): return build_dynamic_unit(x)),
+			# For objects, we only send objects that are modified since there are a lot of these and they are likely to be mostly static 
+			"modified_objects" : queued_objects
+		}
+		queued_objects = []
+		#print("Dynamic state: ", state)
+		var bytes = JSON.stringify(state).to_utf8_buffer()
+		var compressed = bytes.compress(FileAccess.COMPRESSION_GZIP)
+		rpc("receive_state", compressed)
 
 func build_dynamic_unit(unit):
 	return {
@@ -179,3 +195,31 @@ func _get_port_from_args(default_port: int) -> int:
 			if value.is_valid_int():
 				return value.to_int()
 	return default_port
+	
+# -----------------------------------------------------------------------
+# Client RPC stubs
+# These functions are never executed on the server. They exist solely so
+# Godot can compute a matching RPC checksum between client and server.
+# -----------------------------------------------------------------------
+
+@rpc("any_peer", "call_remote", "unreliable")
+func receive_state(data: PackedByteArray):
+	pass
+
+## Stub: called by the client to request the full static world state.
+@rpc("authority", "call_remote", "reliable")
+func request_static_state() -> void:
+	pass
+
+## Stub: receives the compressed static world state from the server.
+@rpc("authority", "call_remote", "unreliable")
+func receive_static_state(data: PackedByteArray):
+	pass
+
+@rpc("authority", "call_remote", "reliable")
+func receive_player_registration(player_local_id: int) -> void:
+	pass
+	
+@rpc("authority", "call_remote", "reliable")
+func register_player(player_uuid: String) -> void:
+	pass
