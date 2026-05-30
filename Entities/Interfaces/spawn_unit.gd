@@ -2,6 +2,7 @@ extends Node2D
 
 @onready var unit = preload("res://Entities/Units/unit.tscn")
 var housePos = Vector2(300,300)
+var next_unit_id = 1
 
 func _on_yes_pressed() -> void:
 	var rng = RandomNumberGenerator.new()
@@ -12,16 +13,16 @@ func _on_yes_pressed() -> void:
 	var unitPath = get_tree().get_root().get_node("World/Units")
 	var worldPath = get_tree().get_root().get_node("World")
 	var unit1 = unit.instantiate()
+	unit1.entity_id = next_unit_id
+	next_unit_id += 1
 	
 	unit1.position = housePos + Vector2(randomPosX, randomPosY)
 	unitPath.add_child(unit1)
 	worldPath.get_units()
 
-
-
 func _on_no_pressed() -> void:
-	var housePath = get_tree().get_root().get_node("World/Houses")
+	var housePath = get_tree().get_root().get_node("World/NavigationRegion2D/TileMapLayer/Houses")
 	for i in housePath.get_child_count():
-		if housePath.get_child(i).Selected == true:
-			housePath.get_child(i).Selected = false
+		if housePath.get_child(i).selected == true:
+			housePath.get_child(i).selected = false
 	queue_free()

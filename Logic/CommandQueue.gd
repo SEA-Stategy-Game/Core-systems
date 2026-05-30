@@ -83,9 +83,13 @@ func process_tick(delta: float) -> void:
 		IUnitAction.ActionState.COMPLETED:
 			action_completed.emit(_unit_id, _current_action.serialize())
 			_current_action = null
+			if _queue.is_empty():
+				queue_empty.emit(_unit_id)
 		IUnitAction.ActionState.FAILED:
 			action_failed.emit(_unit_id, _current_action.serialize())
 			_current_action = null
+			if _queue.is_empty():
+				queue_empty.emit(_unit_id)
 		# RUNNING / PENDING -> continue next tick
 
 # -----------------------------------------------------------------

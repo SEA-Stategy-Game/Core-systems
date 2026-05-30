@@ -23,6 +23,8 @@ func start(unit: CharacterBody2D, target: Node2D) -> void:
 	_target_node = target
 	if target:
 		_target_position = target.global_position
+	unit.set_target(_target_position)
+
 	# Play walk animation if available
 	if unit.has_node("AnimationPlayer"):
 		unit.get_node("AnimationPlayer").play("Walk Down")
@@ -32,15 +34,25 @@ func tick(unit: CharacterBody2D, _delta: float) -> int:
 		return _state
 
 	# If following a live node, update destination every tick
-	if is_instance_valid(_target_node):
-		_target_position = _target_node.global_position
+	if is_instance_valid(_target_node and _target_position != _target_node.global_position):
+		unit.set_target(_target_position)
 
+	"""
 	var direction = unit.global_position.direction_to(_target_position)
-	var speed = unit.Speed if "Speed" in unit else 50
+	var base_speed = unit.Speed if "Speed" in unit else 50
+	var multiplier: float = 1.0
+	if Engine.has_singleton("MapManager"):
+		var mm = Engine.get_singleton("MapManager")
+		if mm and mm.has_method("get_tile_at_world_pos"):
+			var tile = mm.get_tile_at_world_pos(unit.global_position)
+			if tile and tile.has_method("get_movement_multiplier"):
+				multiplier = tile.get_movement_multiplier()
+	var speed = base_speed * multiplier
 	unit.velocity = direction * speed
-
+	"""
+	
 	if unit.global_position.distance_to(_target_position) > _arrival_radius:
-		unit.move_and_slide()
+		unit.pathfind_and_move(_delta);
 	else:
 		unit.velocity = Vector2.ZERO
 		_state = ActionState.COMPLETED

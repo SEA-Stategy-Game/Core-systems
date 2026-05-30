@@ -26,6 +26,16 @@ func get_all_units() -> Array:
 			result.append(_unit_snapshot(unit))
 	return result
 
+## Return a list of dictionaries describing every living unit belonging to a specific player.
+func get_player_units(pid: int) -> Array:
+	var result: Array = []
+	for unit in _tree.get_nodes_in_group("units"):
+		if unit is CharacterBody2D:
+			var unit_pid: int = unit.player_id if "player_id" in unit else 0
+			if unit_pid == pid:
+				result.append(_unit_snapshot(unit))
+	return result
+
 ## Return a snapshot of a single unit by its entity_id.
 func get_unit(unit_id: int) -> Dictionary:
 	for unit in _tree.get_nodes_in_group("units"):

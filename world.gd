@@ -2,7 +2,12 @@ extends Node2D
 
 var units = []
 var fog_of_war: FogOfWar = null
+var headless: bool = false
 
+func _init() -> void:
+	if is_headless():
+		headless = true
+		
 func _ready():
 	get_units()
 	Game.spawnUnit(position)
@@ -13,6 +18,16 @@ func _ready():
 		# Run an initial rebuild so the fog is correct before the first tick.
 		if fog_of_war != null:
 			fog_of_war.rebuild_all_players()
+	if not headless:
+		Game.spawnUnit(position)
+		if has_node("Camera2D"):
+			$Camera2D.area_selected.connect(_on_area_selected)
+	add_child(StoneResource.new())
+	#if Engine.has_singleton("MapManager"):
+	#	var mm = Engine.get_singleton("MapManager")
+	#	if mm:
+	#		mm.map_node = game_map
+	#		mm.tile_size = game_map.tile_size
 
 func get_units():
 	units = null
@@ -42,3 +57,8 @@ func get_units_in_area(area):
 				u.append(unit)
 				
 	return u
+
+	
+func is_headless() -> bool:
+	return  (DisplayServer.get_name() == "headless") or (OS.has_feature("dedicated_server")) or ("--server" in OS.get_cmdline_args())
+	

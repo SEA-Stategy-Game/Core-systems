@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="New Game Project"
+config/name="Core"
 run/main_scene="uid://ckavqb25bdaul"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
@@ -20,11 +20,16 @@ config/icon="res://icon.svg"
 Game="*res://Logic/Game.gd"
 ActionGateway="*res://Logic/ActionGateway.gd"
 TickManager="*res://Logic/TickManager.gd"
+PlanReceiver="*res://Logic/PlanReceiver.gd"
 DebugWindow="*res://UI/DebugWindow.tscn"
+ResourceSpawner="*res://Entities/Map/Resource_spawner.gd"
+Networking="*res://Logic/multiplayer/network.gd"
+PlayerManager="*res://Logic/multiplayer/player_manager.gd"
+GameRoomManager="*res://Logic/multiplayer/game_room_manager.gd"
 
-[editor_plugins]
+[dotnet]
 
-enabled=PackedStringArray("res://addons/gut/plugin.cfg")
+project/assembly_name="Core"
 
 [input]
 
@@ -57,3 +62,4 @@ WheelDown={
 
 textures/canvas_textures/default_texture_filter=0
 rendering_device/driver.windows="d3d12"
+textures/vram_compression/import_etc2_astc=true

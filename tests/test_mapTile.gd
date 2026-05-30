@@ -1,3 +1,28 @@
+extends Node
+class_name MapManager
+
+@export var tile_size: int = 32
+@export var map_node_path: NodePath = NodePath("")
+
+var map_node: Node = null
+
+func _ready() -> void:
+    if map_node_path != NodePath(""):
+        if has_node(map_node_path):
+            map_node = get_node(map_node_path)
+        else:
+            map_node = null
+
+func world_to_grid(world_pos: Vector2) -> Vector2i:
+    return Vector2i(int(floor(world_pos.x / tile_size)), int(floor(world_pos.y / tile_size)))
+
+func get_tile_at_world_pos(world_pos: Vector2) -> Variant:
+    var gpos = world_to_grid(world_pos)
+    if map_node:
+        if map_node.has_method("get_tile"):
+            return map_node.get_tile(gpos.x, gpos.y)
+    return null
+
 extends GutTest
 
 const DEFAULT_TILE_SIZE := 32
@@ -33,7 +58,7 @@ func test_init_sets_default_values() -> void:
 	var default_tile := MapTile.new()
 	assert_eq(default_tile.x, 0)
 	assert_eq(default_tile.y, 0)
-	assert_eq(default_tile.terrain, MapTile.TerrainType.DIRT)
+	assert_eq(default_tile.terrain, MapTile.TerrainType.PLAINS)
 	assert_null(default_tile.map_object)
 	assert_false(default_tile.is_occupied)
 
@@ -85,7 +110,7 @@ func test_clear_map_object_resets_state() -> void:
 # walkability / place
 # -------------------
 func test_is_walkable_false_when_occupied() -> void:
-	tile.terrain = MapTile.TerrainType.DIRT
+	tile.terrain = MapTile.TerrainType.PLAINS
 	tile.set_map_object(DamageReceiver.new())
 	assert_false(tile.is_walkable())
 
@@ -99,13 +124,13 @@ func test_is_walkable_false_for_mountain() -> void:
 	tile.clear_map_object()
 	assert_false(tile.is_walkable())
 
-func test_is_walkable_true_for_unoccupied_dirt() -> void:
-	tile.terrain = MapTile.TerrainType.DIRT
+func test_is_walkable_true_for_unoccupied_plains() -> void:
+	tile.terrain = MapTile.TerrainType.PLAINS
 	tile.clear_map_object()
 	assert_true(tile.is_walkable())
 
 func test_can_place_object_true_when_unoccupied_and_walkable() -> void:
-	tile.terrain = MapTile.TerrainType.DIRT
+	tile.terrain = MapTile.TerrainType.PLAINS
 	tile.clear_map_object()
 	assert_true(tile.can_place_object())
 
