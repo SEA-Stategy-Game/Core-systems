@@ -23,10 +23,18 @@ var _explored_by_player: Dictionary = {}
 
 func _ready() -> void:
 	if update_on_tick:
-		var tick_manager = get_node_or_null("../TickManager")
+		# TickManager is registered as a project-level autoload at /root/TickManager.
+		# Fall back to a sibling node for stand-alone tests or alternative scenes.
+		var tick_manager = get_node_or_null("/root/TickManager")
+		if tick_manager == null:
+			tick_manager = get_node_or_null("../TickManager")
 		if tick_manager and tick_manager.has_signal("tick_processed"):
 			if not tick_manager.tick_processed.is_connected(_on_tick_processed):
 				tick_manager.tick_processed.connect(_on_tick_processed)
+
+	# Rebuild once on entering tree so the initial visibility is correct
+	# even before the first tick fires.
+	call_deferred("rebuild_all_players")
 
 func _on_tick_processed(_count: int) -> void:
 	rebuild_all_players()
@@ -177,7 +185,8 @@ func _is_dead(node: Node) -> bool:
 func _get_vision_radius_tiles(source: Node) -> int:
 	if "vision_range_tiles" in source:
 		return max(0, int(source.vision_range_tiles))
-	if source.is_in_group("buildings") or source.get_parent() != null and source.get_parent().name == "Houses":
+	var parent_is_houses: bool = source.get_parent() != null and source.get_parent().name == "Houses"
+	if source.is_in_group("buildings") or parent_is_houses:
 		return default_building_vision_tiles
 	return default_unit_vision_tiles
 
