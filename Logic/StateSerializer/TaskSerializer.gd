@@ -6,11 +6,23 @@
 extends RefCounted
 class_name TaskSerializer
 
-const SAVE_PATH: String = "user://ai_task_state.json"
-
 # -----------------------------------------------------------------
 # Save
 # -----------------------------------------------------------------
+
+static var _strategy: IStateSerializer = null
+
+
+static func _static_init() -> void:
+	var use_redis = OS.get_environment("USE_REDIS_PUBSUB")
+	if use_redis == "true" or use_redis == "1":
+		_strategy = load("res://Logic/Persistence/RedisStateStrategy.gd").new()
+	else:
+		_strategy = load("res://Logic/Persistence/LocalStateStrategy.gd").new()
+
+
+static func _get_strategy() -> IStateSerializer:
+	return _strategy
 
 ## Serialise the command queues of all units and the global state
 ## into a JSON file.
@@ -33,15 +45,7 @@ static func save_state(scene_tree: SceneTree) -> bool:
 			}
 			state["units"].append(unit_data)
 
-	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
-	if file == null:
-		push_error("TaskSerializer: Cannot open ", SAVE_PATH, " for writing.")
-		return false
-
-	file.store_string(JSON.stringify(state, "\t"))
-	file.close()
-	print("[TaskSerializer] State saved to ", SAVE_PATH)
-	return true
+	return _get_strategy().save_state(state, scene_tree)
 
 # -----------------------------------------------------------------
 # Load
@@ -50,26 +54,7 @@ static func save_state(scene_tree: SceneTree) -> bool:
 ## Load previously saved task state.  Returns the parsed Dictionary
 ## or an empty Dictionary on failure.
 static func load_state() -> Dictionary:
-	if not FileAccess.file_exists(SAVE_PATH):
-		print("[TaskSerializer] No save file found at ", SAVE_PATH)
-		return {}
-
-	var file = FileAccess.open(SAVE_PATH, FileAccess.READ)
-	if file == null:
-		push_error("TaskSerializer: Cannot open ", SAVE_PATH, " for reading.")
-		return {}
-
-	var text: String = file.get_as_text()
-	file.close()
-
-	var json = JSON.new()
-	var err = json.parse(text)
-	if err != OK:
-		push_error("TaskSerializer: JSON parse error: ", json.get_error_message())
-		return {}
-
-	print("[TaskSerializer] State loaded from ", SAVE_PATH)
-	return json.data
+	return _get_strategy().load_state()
 
 # -----------------------------------------------------------------
 # Restore helpers
