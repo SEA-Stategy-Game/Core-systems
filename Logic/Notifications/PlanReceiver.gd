@@ -14,8 +14,7 @@ var _receiver_strategy: Node = null
 # ----------------------------------------------------------------
 
 func _ready() -> void:
-	var redis_flag = "true"
-	
+	var redis_flag = OS.get_environment("USE_REDIS")
 	if redis_flag == "true" or redis_flag == "1":
 		var RedisReceiver = load("res://Logic/Notifications/RedisNotificationReceiver.gd")
 		_receiver_strategy = RedisReceiver.new()
