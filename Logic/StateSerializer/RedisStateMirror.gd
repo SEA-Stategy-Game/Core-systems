@@ -9,8 +9,8 @@ var game_id: String = "testgame"
 var _redis: Object = null 
 
 func _ready() -> void:
-	var use_redis = "true"
-	if use_redis != "true" and use_redis != "1":
+	var redis_flag = OS.get_environment("USE_REDIS")
+	if redis_flag != "true" and redis_flag != "1":
 		queue_free()
 		return
 		
@@ -18,39 +18,34 @@ func _ready() -> void:
 	if game_id == "":
 		game_id = "testgame"
 
-	if has_node("/root/RedisClient"):
-		_redis = get_node("/root/RedisClient")
+	
+	_redis = RedisClient
 
 # --- Incremental Updates (Fire + Forget) ---
 func add_unit(unit_id: int) -> void:
-	if _redis and _redis.has_method("sadd"):
-		var key = "game:%s:units" % game_id
-		_redis.sadd(key, str(unit_id))
-		print("[STATE_MIRROR] Added unit ", unit_id, " to Redis.")
+	var key = "game:%s:units" % game_id
+	_redis.sadd(key, str(unit_id))
+	print("[STATE_MIRROR] Added unit ", unit_id, " to Redis.")
 
 func remove_unit(unit_id: int) -> void:
-	if _redis and _redis.has_method("srem"):
-		var key = "game:%s:units" % game_id
-		_redis.srem(key, str(unit_id))
-		print("[STATE_MIRROR] Removed unit ", unit_id, " from Redis.")
+	var key = "game:%s:units" % game_id
+	_redis.srem(key, str(unit_id))
+	print("[STATE_MIRROR] Removed unit ", unit_id, " from Redis.")
 
 func add_resource(resource_id: int) -> void:
-	if _redis and _redis.has_method("sadd"):
-		var key = "game:%s:resources" % game_id
-		_redis.sadd(key, str(resource_id))
-		print("[STATE_MIRROR] Added resource ", resource_id, " to Redis.")
+	var key = "game:%s:resources" % game_id
+	_redis.sadd(key, str(resource_id))
+	print("[STATE_MIRROR] Added resource ", resource_id, " to Redis.")
 
 func remove_resource(resource_id: int) -> void:
-	if _redis and _redis.has_method("srem"):
-		var key = "game:%s:resources" % game_id
-		_redis.srem(key, str(resource_id))
-		print("[STATE_MIRROR] Removed resource ", resource_id, " from Redis.")
+	var key = "game:%s:resources" % game_id
+	_redis.srem(key, str(resource_id))
+	print("[STATE_MIRROR] Removed resource ", resource_id, " from Redis.")
 
 
 func mirror_state() -> void:
-	if not _redis: return
-	
-	var sense_api = get_node_or_null("/root/SenseAPI")
+	var sense_api = ActionGateway.sense()
+
 	if not sense_api:
 		push_error("[STATE_MIRROR] SenseAPI not found. Cannot mirror state.")
 		return
@@ -60,21 +55,28 @@ func mirror_state() -> void:
 	
 	# Retrieve the definitive Source of Truth from the Core system
 	var units_data = []
-	if sense_api.has_method("get_all_units"):
-		units_data = sense_api.get_all_units()
+	units_data = sense_api.get_all_units()
 		
 	var resources_data = []
-	if sense_api.has_method("get_all_resources"):
-		resources_data = sense_api.get_all_resources()
-	elif sense_api.has_method("get_world_resources"):
-		resources_data = sense_api.get_world_resources()
+	resources_data = sense_api.get_all_resources()
+	resources_data = sense_api.get_world_resources()
 	
-	# Forcefully overwrite the existing Redis state to resolve any inconsistencies
-	if _redis.has_method("set_value"):
-		_redis.set_value(units_key, JSON.stringify(units_data))
-		_redis.set_value(resources_key, JSON.stringify(resources_data))
-	elif _redis.has_method("set"):
-		_redis.set(units_key, JSON.stringify(units_data))
-		_redis.set(resources_key, JSON.stringify(resources_data))
+	var u_ids = []
+	for unit in units_data:
+		var uid = unit.get("id", unit.get("entity_id", null))
+		if uid != null:
+			u_ids.append(str(uid))
+	_redis.del_key(units_key)
+	if not u_ids.is_empty():
+		_redis.sadd_array(units_key, u_ids)
+		
+	var r_ids = []
+	for res in resources_data:
+		var rid = res.get("id", res.get("entity_id", null))
+		if rid != null:
+			r_ids.append(str(rid))
+	_redis.del_key(resources_key)
+	if not r_ids.is_empty():
+		_redis.sadd_array(resources_key, r_ids)
 		
 	print("[STATE_MIRROR] State overridden and mirrored for game_id: ", game_id)

@@ -12,16 +12,14 @@ class_name TaskSerializer
 
 static var _strategy: IStateSerializer = null
 
-
-static func _static_init() -> void:
-	var use_redis = "true"
-	if use_redis == "true" or use_redis == "1":
-		_strategy = load("res://Logic/StateSerializer/RedisStatePersistence.gd").new()
-	else:
-		_strategy = load("res://Logic/StateSerializer/LocalStatePersistence.gd").new()
-
-
 static func _get_strategy() -> IStateSerializer:
+	if _strategy == null:
+		var redis_flag = OS.get_environment("USE_REDIS")
+		if redis_flag == "true" or redis_flag == "1":
+			_strategy = load("res://Logic/StateSerializer/RedisStatePersistence.gd").new()
+		else:
+			_strategy = load("res://Logic/StateSerializer/LocalStatePersistence.gd").new()
+			
 	return _strategy
 
 ## Serialise the command queues of all units and the global state
