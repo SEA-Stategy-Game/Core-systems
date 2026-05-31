@@ -27,7 +27,7 @@ Networking="*res://Logic/multiplayer/network.gd"
 PlayerManager="*res://Logic/multiplayer/player_manager.gd"
 GameRoomManager="*res://Logic/multiplayer/game_room_manager.gd"
 RedisStateMirror="*res://Logic/StateSerializer/RedisStateMirror.gd"
-RedisClient="*uid://cwgndka1kmnau"
+RedisClient="*res://Logic/RedisClient.gd"
 
 [dotnet]
 
