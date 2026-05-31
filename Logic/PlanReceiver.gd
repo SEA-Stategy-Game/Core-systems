@@ -209,7 +209,9 @@ func _dispatch_step(unit_id: int, step: Dictionary) -> void:
 		"Harvest":
 			var resource_type: String = params.get("resource_type", "")
 			if resource_type != "":
-				var unit_node = gateway._find_unit(unit_id)
+				var entry = _store.get(str(unit_id), {})
+				var player_id_int = int(entry.get("player_id", "-1"))
+				var unit_node = gateway._find_unit_for_player(unit_id, player_id_int)
 				if unit_node == null:
 					return
 				var nearest = _find_nearest_resource_by_type(resource_type, unit_node.global_position)
@@ -217,10 +219,9 @@ func _dispatch_step(unit_id: int, step: Dictionary) -> void:
 					push_warning("PlanReceiver: no %s found near unit %d" % [resource_type, unit_id])
 					return
 				print("PlanReceiver: found nearest %s, enqueuing move+harvest" % resource_type)
-				var cq = unit_node.get("command_queue")
-				if cq:
-					cq.enqueue(UnitActionMove.create_to_node(nearest))
-					cq.enqueue(UnitActionHarvest.create(nearest))
+				var cq: CommandQueue = gateway._get_or_create_queue(unit_node)
+				cq.enqueue(UnitActionMove.create_to_node(nearest))
+				cq.enqueue(UnitActionHarvest.create(nearest))
 			else:
 				var tid = int(params.get("target_id", -1))
 				gateway.go_chop_tree(unit_id, tid)
@@ -229,7 +230,8 @@ func _dispatch_step(unit_id: int, step: Dictionary) -> void:
 			var player_id_int = int(entry.get("player_id", "-1"))
 			var unit_node = gateway._find_unit_for_player(unit_id, player_id_int)
 			if unit_node:
-				gateway.attack_move(unit_id, unit_node.global_position, player_id_int)
+				var cq: CommandQueue = gateway._get_or_create_queue(unit_node)
+				cq.enqueue(UnitActionAttack.create_auto())
 			else:
 				push_warning("PlanReceiver: Attack — unit %d not found for player %d" % [unit_id, player_id_int])
 		"Construct":
