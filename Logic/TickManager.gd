@@ -16,6 +16,15 @@ var tick_count: int = 0
 ## Auto-save interval (in ticks).  0 = disabled.
 var auto_save_interval: int = 60  # Every 30 seconds at 2 tps
 
+func _ready() -> void:
+
+	var env_auto_save = OS.get_environment("AUTO_SAVE_INTERVAL") 
+	if env_auto_save != "":
+		var parsed_auto_save = env_auto_save.to_int()
+		if parsed_auto_save >= 0:
+			auto_save_interval = parsed_auto_save
+			print("[TickManager] auto_save_interval set to ", auto_save_interval, " via environment variable.")
+
 func _process(delta: float) -> void:
 	time_passed += delta
 	if time_passed >= tick_interval:
