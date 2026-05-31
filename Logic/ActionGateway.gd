@@ -479,6 +479,17 @@ func _find_unit(unit_id: int) -> CharacterBody2D:
 	push_warning("ActionGateway: Unit ", unit_id, " not found.")
 	return null
 
+## Find a unit by entity_id filtered to a specific player.
+## Falls back to entity_id-only search when player_id < 0 (single-player / test).
+func _find_unit_for_player(unit_id: int, player_id: int) -> Node:
+	if player_id < 0:
+		return _find_unit(unit_id)
+	for unit in get_tree().get_nodes_in_group("units"):
+		if unit.get("entity_id") == unit_id and unit.get("player_id") == player_id:
+			return unit
+	push_warning("ActionGateway: Unit %d not found for player %d" % [unit_id, player_id])
+	return null
+
 func _find_resource(resource_id: int) -> Node2D:
 	# Search in Objects and direct World children
 	var search_roots: Array = []
