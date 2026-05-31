@@ -17,7 +17,9 @@ func save_state(state: Dictionary, tree: SceneTree) -> bool:
 			
 		print("[TaskSerializer] State synced to Redis successfully.")
 		return true
-		
+	
+	else:
+		print("not redis ");
 	push_error("[TaskSerializer] Redis flag enabled but RedisClient is missing.")
 	return false
 

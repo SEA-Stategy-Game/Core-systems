@@ -14,11 +14,11 @@ static var _strategy: IStateSerializer = null
 
 
 static func _static_init() -> void:
-	var use_redis = OS.get_environment("USE_REDIS_PUBSUB")
+	var use_redis = "true"
 	if use_redis == "true" or use_redis == "1":
-		_strategy = load("res://Logic/Persistence/RedisStateStrategy.gd").new()
+		_strategy = load("res://Logic/StateSerializer/RedisStatePersistence.gd").new()
 	else:
-		_strategy = load("res://Logic/Persistence/LocalStateStrategy.gd").new()
+		_strategy = load("res://Logic/StateSerializer/LocalStatePersistence.gd").new()
 
 
 static func _get_strategy() -> IStateSerializer:
