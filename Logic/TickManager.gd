@@ -16,6 +16,10 @@ var tick_count: int = 0
 ## Auto-save interval (in ticks).  0 = disabled.
 var auto_save_interval: int = 60  # Every 30 seconds at 2 tps
 
+## Get the auto-save interval in actual seconds
+func get_auto_save_interval_seconds() -> float:
+	return tick_interval * auto_save_interval
+
 func _ready() -> void:
 
 	var env_auto_save = OS.get_environment("AUTO_SAVE_INTERVAL") 

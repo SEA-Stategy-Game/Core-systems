@@ -17,7 +17,6 @@ var _was_tcp_connected: bool = false
 var _was_pubsub_connected: bool = false
 var _reconnect_timer: float = 0.0
 var _connecting_timer: float = 0.0
-var _status_log_timer: float = 0.0
 
 func _ready() -> void:
 	var env_host = OS.get_environment("REDIS_HOST")
@@ -39,22 +38,14 @@ func _process(_delta: float) -> void:
 	var tcp_status = _tcp.get_status()
 	var pubsub_status = _tcp_pubsub.get_status()
 	
-	# --- Diagnostic Logging & Connection Timeout ---
-	if tcp_status != StreamPeerTCP.STATUS_CONNECTED or pubsub_status != StreamPeerTCP.STATUS_CONNECTED:
-		_status_log_timer += _delta
-		if _status_log_timer >= 2.0:
-			print("[REDIS] Socket Status -> Main: ", tcp_status, " | PubSub: ", pubsub_status, " | Target: ", host, ":", port)
-			if tcp_status == StreamPeerTCP.STATUS_CONNECTING:
-				print("[REDIS] Socket is stuck connecting! (If using Docker, ensure REDIS_HOST targets the Redis container name, not 127.0.0.1)")
-			_status_log_timer = 0.0
-			
-		if tcp_status == StreamPeerTCP.STATUS_CONNECTING or pubsub_status == StreamPeerTCP.STATUS_CONNECTING:
-			_connecting_timer += _delta
-			if _connecting_timer >= 5.0:
-				print("[REDIS] Connection attempt timed out (5s). Forcing disconnect...")
-				_tcp.disconnect_from_host()
-				_tcp_pubsub.disconnect_from_host()
-				_connecting_timer = 0.0
+	# --- Connection Timeout ---
+	if tcp_status == StreamPeerTCP.STATUS_CONNECTING or pubsub_status == StreamPeerTCP.STATUS_CONNECTING:
+		_connecting_timer += _delta
+		if _connecting_timer >= 5.0:
+			push_warning("[REDIS] Connection attempt timed out (5s). Forcing disconnect...")
+			_tcp.disconnect_from_host()
+			_tcp_pubsub.disconnect_from_host()
+			_connecting_timer = 0.0
 	else:
 		_connecting_timer = 0.0
 
@@ -99,7 +90,6 @@ func _process(_delta: float) -> void:
 ## Core internal method to encode and send RESP arrays
 func _send_command(args: Array) -> void:
 	if _tcp.get_status() != StreamPeerTCP.STATUS_CONNECTED:
-		print("[REDIS] Main socket not ready. Dropping command: ", args)
 		return
 		
 	var req = "*%d\r\n" % args.size()
@@ -113,7 +103,6 @@ func _send_command(args: Array) -> void:
 ## Internal method specifically for PubSub commands on the secondary connection
 func _send_pubsub_command(args: Array) -> void:
 	if _tcp_pubsub.get_status() != StreamPeerTCP.STATUS_CONNECTED:
-		print("[REDIS] PubSub socket not ready. Buffering command: ", args)
 		return
 		
 	var req = "*%d\r\n" % args.size()
@@ -149,7 +138,6 @@ func subscribe(channel: String, callable: Callable) -> void:
 # Basic PubSub Parsing
 # =================================================================
 func _handle_incoming_data(data: String) -> void:
-	print("[REDIS_CLIENT] Raw PubSub Data Rx:\n", data)
 	_read_buffer += data
 	
 	# Robust RESP parser that handles fragmented TCP packets 
@@ -193,22 +181,17 @@ func _handle_incoming_data(data: String) -> void:
 				return
 				
 		if not is_complete:
-			print("[REDIS_CLIENT] Packet fragmented, waiting for more data...")
 			break
 			
 		if elements.size() == 3:
 			if elements[0] == "message":
-				print("[REDIS_CLIENT] Valid message parsed for channel: ", elements[1])
 				if _subscriptions.has(elements[1]):
 					_subscriptions[elements[1]].call(elements[1], elements[2])
-			elif elements[0] == "subscribe":
-				print("[REDIS_CLIENT] Subscription confirmed by server for channel: ", elements[1])
 				
 		_read_buffer = _read_buffer.substr(ptr)
 
 	# Recover buffer if misaligned
 	if _read_buffer.length() > 0 and not _read_buffer.begins_with("*3\r\n"):
-		print("[REDIS_CLIENT] Non-PubSub/Misaligned data in buffer: ", _read_buffer)
 		var next_start = _read_buffer.find("*3\r\n")
 		if next_start != -1:
 			_read_buffer = _read_buffer.substr(next_start)
