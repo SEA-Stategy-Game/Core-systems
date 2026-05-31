@@ -26,7 +26,8 @@ ResourceSpawner="*res://Entities/Map/Resource_spawner.gd"
 Networking="*res://Logic/multiplayer/network.gd"
 PlayerManager="*res://Logic/multiplayer/player_manager.gd"
 GameRoomManager="*res://Logic/multiplayer/game_room_manager.gd"
-RedisClient="**res://Logic/Clients/RedisClient.gd"
+RedisStateMirror="*res://Logic/StateSerializer/RedisStateMirror.gd"
+RedisClient="*uid://cwgndka1kmnau"
 
 [dotnet]
 
