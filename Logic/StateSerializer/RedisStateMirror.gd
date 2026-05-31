@@ -45,3 +45,36 @@ func remove_resource(resource_id: int) -> void:
 		var key = "game:%s:resources" % game_id
 		_redis.srem(key, str(resource_id))
 		print("[STATE_MIRROR] Removed resource ", resource_id, " from Redis.")
+
+
+func mirror_state() -> void:
+	if not _redis: return
+	
+	var sense_api = get_node_or_null("/root/SenseAPI")
+	if not sense_api:
+		push_error("[STATE_MIRROR] SenseAPI not found. Cannot mirror state.")
+		return
+		
+	var units_key = "game:%s:units" % game_id
+	var resources_key = "game:%s:resources" % game_id
+	
+	# Retrieve the definitive Source of Truth from the Core system
+	var units_data = []
+	if sense_api.has_method("get_all_units"):
+		units_data = sense_api.get_all_units()
+		
+	var resources_data = []
+	if sense_api.has_method("get_all_resources"):
+		resources_data = sense_api.get_all_resources()
+	elif sense_api.has_method("get_world_resources"):
+		resources_data = sense_api.get_world_resources()
+	
+	# Forcefully overwrite the existing Redis state to resolve any inconsistencies
+	if _redis.has_method("set_value"):
+		_redis.set_value(units_key, JSON.stringify(units_data))
+		_redis.set_value(resources_key, JSON.stringify(resources_data))
+	elif _redis.has_method("set"):
+		_redis.set(units_key, JSON.stringify(units_data))
+		_redis.set(resources_key, JSON.stringify(resources_data))
+		
+	print("[STATE_MIRROR] State overridden and mirrored for game_id: ", game_id)
