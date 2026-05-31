@@ -173,14 +173,16 @@ func _dispatch_step(unit_id: int, step: Dictionary) -> void:
 		push_error("PlanReceiver: ActionGateway not found")
 		return
 
-	var action_type: String  = step.get("action_type", "")
-	var params: Dictionary   = step.get("parameters", {})
+	var action_type: String = step.get("action_type", "")
+	var params: Dictionary  = step.get("parameters", {})
 	print("PlanReceiver: dispatching step for unit %d: action_type=%s params=%s" % [unit_id, action_type, str(params)])
+
+	var dispatched := false
 
 	match action_type:
 		"MoveTo":
 			var pos = Vector2(float(params.get("x", 0)), float(params.get("y", 0)))
-			gateway.move_unit(unit_id, pos)
+			dispatched = gateway.move_unit(unit_id, pos)
 		"Harvest":
 			var resource_type: String = params.get("resource_type", "")
 			if resource_type != "":
@@ -188,18 +190,20 @@ func _dispatch_step(unit_id: int, step: Dictionary) -> void:
 				var player_id_int = int(entry.get("player_id", "-1"))
 				var unit_node = gateway._find_unit_for_player(unit_id, player_id_int)
 				if unit_node == null:
-					return
-				var nearest = _find_nearest_resource_by_type(resource_type, unit_node.global_position)
-				if nearest == null:
-					push_warning("PlanReceiver: no %s found near unit %d" % [resource_type, unit_id])
-					return
-				print("PlanReceiver: found nearest %s, enqueuing move+harvest" % resource_type)
-				var cq: CommandQueue = gateway._get_or_create_queue(unit_node)
-				cq.enqueue(UnitActionMove.create_to_node(nearest))
-				cq.enqueue(UnitActionHarvest.create(nearest))
+					push_warning("PlanReceiver: Harvest — unit %d not found for player %d" % [unit_id, player_id_int])
+				else:
+					var nearest = _find_nearest_resource_by_type(resource_type, unit_node.global_position)
+					if nearest == null:
+						push_warning("PlanReceiver: no %s found near unit %d" % [resource_type, unit_id])
+					else:
+						print("PlanReceiver: found nearest %s, enqueuing move+harvest" % resource_type)
+						var cq: CommandQueue = gateway._get_or_create_queue(unit_node)
+						cq.enqueue(UnitActionMove.create_to_node(nearest))
+						cq.enqueue(UnitActionHarvest.create(nearest))
+						dispatched = true
 			else:
 				var tid = int(params.get("target_id", -1))
-				gateway.go_chop_tree(unit_id, tid)
+				dispatched = gateway.go_chop_tree(unit_id, tid)
 		"Attack":
 			var entry = _store.get(str(unit_id), {})
 			var player_id_int = int(entry.get("player_id", "-1"))
@@ -207,10 +211,11 @@ func _dispatch_step(unit_id: int, step: Dictionary) -> void:
 			if unit_node:
 				var cq: CommandQueue = gateway._get_or_create_queue(unit_node)
 				cq.enqueue(UnitActionAttack.create_auto())
+				dispatched = true
 			else:
 				push_warning("PlanReceiver: Attack — unit %d not found for player %d" % [unit_id, player_id_int])
 		"Construct":
-			gateway.go_construct(
+			dispatched = gateway.go_construct(
 				unit_id,
 				params.get("scene", ""),
 				Vector2(float(params.get("x", 0)), float(params.get("y", 0))),
@@ -218,6 +223,10 @@ func _dispatch_step(unit_id: int, step: Dictionary) -> void:
 			)
 		_:
 			push_warning("PlanReceiver: unknown action_type '%s'" % action_type)
+
+	if not dispatched:
+		print("PlanReceiver: unit %d — '%s' could not be dispatched, skipping to next step" % [unit_id, action_type])
+		_on_unit_idled.call_deferred(unit_id)
 
 # ----------------------------------------------------------------
 # Conditional execution
