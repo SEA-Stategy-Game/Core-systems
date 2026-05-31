@@ -8,6 +8,11 @@ const PLANNING_URL = "http://127.0.0.1:5000"
 var _store: Dictionary = {}
 
 var _receiver_strategy: Node = null
+## unit_id (String) → { "steps": Array, "index": int, "player_id": String, "if_state": null|Dictionary }
+var _store: Dictionary = {}
+
+var _server: TCPServer = TCPServer.new()
+var _sense: SenseAPI   = null
 
 # ----------------------------------------------------------------
 # Lifecycle
@@ -26,6 +31,8 @@ func _ready() -> void:
 
 	add_child(_receiver_strategy)
 	_receiver_strategy.plan_notified.connect(_on_plan_notified)
+
+	_sense = SenseAPI.new(get_tree())
 
 	var gateway = get_node_or_null("/root/ActionGateway")
 	if gateway:
@@ -81,6 +88,19 @@ func _fetch_and_store(game_id: String, player_id: String, unit_ids: Array) -> vo
 		valid_unit_ids = player_units.map(func(u): return str(u.get("id", "")))
 		print("PlanReceiver: units in scene for player %s: %s" % [player_id, str(valid_unit_ids)])
 
+	var keys_to_erase: Array = []
+	for k in _store.keys():
+		if _store[k].get("player_id", "") == player_id:
+			keys_to_erase.append(k)
+	for k in keys_to_erase:
+		if gateway:
+			var old_unit = gateway._find_unit_for_player(int(k), int(player_id))
+			if old_unit and old_unit.get("command_queue") and old_unit.command_queue:
+				old_unit.command_queue.clear()
+		_store.erase(k)
+	if not keys_to_erase.is_empty():
+		print("PlanReceiver: cleared %d old store entries for player %s" % [keys_to_erase.size(), player_id])
+
 	for up in unit_plans:
 		var uid_str: String = str(up.get("unit_id", ""))
 		
@@ -95,7 +115,7 @@ func _fetch_and_store(game_id: String, player_id: String, unit_ids: Array) -> vo
 			push_warning("PlanReceiver: empty UnitPlan - skipping")
 			continue
 
-		_store[uid_str] = { "steps": steps, "index": 0, "player_id": player_id }
+		_store[uid_str] = { "steps": steps, "index": 0, "player_id": player_id, "if_state": null }
 
 		var uid_int = int(uid_str)
 		if gateway:
@@ -119,6 +139,25 @@ func _on_unit_idled(unit_id: int) -> void:
 	entry["index"] = (entry["index"] + 1) % entry["steps"].size()
 	print("PlanReceiver: unit %d idle - advancing to step %d" % [unit_id, entry["index"]])
 	_execute_current_step(unit_id)
+	var entry    = _store[uid_str]
+	var if_state = entry.get("if_state", null)
+
+	if if_state != null:
+		var branch: Array = if_state["branch"]
+		var next_bi: int  = if_state["branch_index"] + 1
+		if next_bi < branch.size():
+			if_state["branch_index"] = next_bi
+			print("PlanReceiver: unit %d idle in if-branch — step %d" % [unit_id, next_bi])
+			_dispatch_step(unit_id, branch[next_bi])
+		else:
+			entry["if_state"] = null
+			entry["index"] = (entry["index"] + 1) % entry["steps"].size()
+			print("PlanReceiver: unit %d idle — if-branch done, top-level step %d" % [unit_id, entry["index"]])
+			_execute_current_step(unit_id)
+	else:
+		entry["index"] = (entry["index"] + 1) % entry["steps"].size()
+		print("PlanReceiver: unit %d idle — advancing to step %d" % [unit_id, entry["index"]])
+		_execute_current_step(unit_id)
 
 func _execute_current_step(unit_id: int) -> void:
 	var uid_str = str(unit_id)
@@ -126,7 +165,7 @@ func _execute_current_step(unit_id: int) -> void:
 		return
 	var entry = _store[uid_str]
 	var step  = entry["steps"][entry["index"]]
-	_dispatch_step(unit_id, step)
+	_execute_step_by_type(unit_id, step)
 
 func _dispatch_step(unit_id: int, step: Dictionary) -> void:
 	var gateway = get_node_or_null("/root/ActionGateway")
@@ -179,6 +218,77 @@ func _dispatch_step(unit_id: int, step: Dictionary) -> void:
 			)
 		_:
 			push_warning("PlanReceiver: unknown action_type '%s'" % action_type)
+
+# ----------------------------------------------------------------
+# Conditional execution
+# ----------------------------------------------------------------
+
+func _execute_step_by_type(unit_id: int, step: Dictionary) -> void:
+	if step.get("step_type", "action") == "conditional":
+		_execute_if_step(unit_id, step)
+	else:
+		_dispatch_step(unit_id, step)
+
+func _execute_if_step(unit_id: int, step: Dictionary) -> void:
+	var uid_str       = str(unit_id)
+	var entry         = _store[uid_str]
+	var player_id_int = int(entry.get("player_id", "-1"))
+	var condition     = step.get("parameters", {}).get("condition", "")
+	var result        = _eval_condition(condition, unit_id, player_id_int)
+	print("PlanReceiver: unit %d — if '%s' → %s" % [unit_id, condition, str(result)])
+
+	var branch: Array = step.get("body", []) if result else step.get("else_body", [])
+	if branch.is_empty():
+		entry["index"] = (entry["index"] + 1) % entry["steps"].size()
+		_execute_current_step(unit_id)
+		return
+
+	entry["if_state"] = { "branch": branch, "branch_index": 0 }
+	_dispatch_step(unit_id, branch[0])
+
+func _eval_condition(condition: String, unit_id: int, player_id_int: int) -> bool:
+	if _sense == null:
+		_sense = SenseAPI.new(get_tree())
+	var cond    = condition.strip_edges()
+	var gateway = get_node_or_null("/root/ActionGateway")
+
+	if cond.to_lower() == "enemy_nearby":
+		var unit_node = gateway._find_unit_for_player(unit_id, player_id_int) if gateway else null
+		if unit_node == null:
+			return false
+		for u in _sense.get_units_near(unit_node.global_position, 200.0):
+			if int(u.get("player_id", -1)) != player_id_int and int(u.get("id", -1)) != unit_id:
+				return true
+		return false
+
+	if cond.to_lower() == "resources_nearby":
+		var unit_node = gateway._find_unit_for_player(unit_id, player_id_int) if gateway else null
+		if unit_node == null:
+			return false
+		return not _sense.get_resources_near(unit_node.global_position, 200.0).is_empty()
+
+	var parts = cond.split(" ", false)
+	if parts.size() >= 3:
+		var subject = parts[0].to_lower()
+		var op      = parts[1]
+		var rhs     = float(parts[2]) if parts[2].is_valid_float() else 0.0
+		var lhs: float = 0.0
+		if subject == "stockpile.wood":
+			lhs = float(_sense.get_resources_stockpile().get("wood", 0))
+		elif subject == "stockpile.stone":
+			lhs = float(_sense.get_resources_stockpile().get("stone", 0))
+		elif subject == "unit.health":
+			lhs = float(_sense.get_unit(unit_id).get("health", 0))
+		match op:
+			">=": return lhs >= rhs
+			"<=": return lhs <= rhs
+			">":  return lhs > rhs
+			"<":  return lhs < rhs
+			"==": return is_equal_approx(lhs, rhs)
+			"!=": return not is_equal_approx(lhs, rhs)
+
+	push_warning("PlanReceiver: unrecognised condition '%s' — defaulting to false" % condition)
+	return false
 
 func _find_nearest_resource_by_type(resource_type: String, origin: Vector2) -> Node:
 	var target_name = "ressource_" + resource_type.to_lower()
