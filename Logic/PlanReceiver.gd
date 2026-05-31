@@ -159,13 +159,13 @@ func _fetch_and_store(game_id: String, player_id: String, unit_ids: Array) -> vo
 			push_warning("PlanReceiver: empty UnitPlan — skipping")
 			continue
 
-		_store[uid_str] = { "steps": steps, "index": 0 }
+		_store[uid_str] = { "steps": steps, "index": 0, "player_id": player_id }
 
 		var uid_int = int(uid_str)
 		if gateway:
-			var unit = gateway._find_unit(uid_int)
+			var unit = gateway._find_unit_for_player(uid_int, int(player_id))
 			if unit == null:
-				push_warning("PlanReceiver: no unit with entity_id=%d found in scene" % uid_int)
+				push_warning("PlanReceiver: no unit with entity_id=%d for player %s found in scene" % [uid_int, player_id])
 				continue
 			if unit.command_queue:
 				unit.command_queue.clear()
@@ -224,6 +224,14 @@ func _dispatch_step(unit_id: int, step: Dictionary) -> void:
 			else:
 				var tid = int(params.get("target_id", -1))
 				gateway.go_chop_tree(unit_id, tid)
+		"Attack":
+			var entry = _store.get(str(unit_id), {})
+			var player_id_int = int(entry.get("player_id", "-1"))
+			var unit_node = gateway._find_unit_for_player(unit_id, player_id_int)
+			if unit_node:
+				gateway.attack_move(unit_id, unit_node.global_position, player_id_int)
+			else:
+				push_warning("PlanReceiver: Attack — unit %d not found for player %d" % [unit_id, player_id_int])
 		"Construct":
 			gateway.go_construct(
 				unit_id,
