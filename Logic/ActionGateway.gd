@@ -526,8 +526,9 @@ func spawn_initial_unit(player_id: int, scene_path: String = "res://Entities/Uni
 		print("[SPAWN] Initial unit created for Player ", player_id, " at ", random_spawn_point)
 		
 		# Mirror instant spawn event to Redis
-		if has_node("/root/RedisStateMirror"):
-			get_node("/root/RedisStateMirror").add_unit(new_id)
+		var redis_flag = OS.get_environment("USE_REDIS")
+		if (redis_flag == "true" or redis_flag == "1"):
+			RedisStateMirror.add_unit(new_id)
 	else:
 		push_error("ActionGateway.spawn_initial_unit: Could not find 'Units' container in current scene.")
 		
