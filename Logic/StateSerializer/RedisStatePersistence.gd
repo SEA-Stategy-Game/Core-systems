@@ -1,9 +1,7 @@
 extends IStateSerializer
 
 func _get_state_key() -> String:
-	var game_id = OS.get_environment("GAME_ROOM_ID")
-	if game_id == "": 
-		game_id = "testgame"
+	var game_id = Game.game_room_id
 		
 	return "game:%s:state_snapshot" % game_id
 

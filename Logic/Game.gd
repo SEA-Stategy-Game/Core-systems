@@ -4,6 +4,13 @@ extends Node
 
 var Wood = 0
 var Stone = 0
+var game_room_id: String = "testgame"
+
+func _init() -> void:
+	var env_game_id = OS.get_environment("GAME_ROOM_ID")
+	if env_game_id != "":
+		game_room_id = env_game_id
+
 
 func spawnUnit(position):
 	var path = get_tree().get_root().get_node("World/UI")
