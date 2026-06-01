@@ -13,32 +13,41 @@ func _ready() -> void:
 	if redis_flag != "true" and redis_flag != "1":
 		queue_free()
 		return
-		
-	game_id = Game.game_room_id
 
-	
+	game_id = Game.game_room_id
 	_redis = RedisClient
 
-# --- Incremental Updates (Fire + Forget) ---
-func add_unit(unit_id: int) -> void:
+	GlobalSignals.unit_created.connect(_on_unit_created)
+	GlobalSignals.unit_destroyed.connect(_on_unit_destroyed)
+	GlobalSignals.resource_created.connect(_on_resource_created)
+	GlobalSignals.resource_destroyed.connect(_on_resource_destroyed)
+
+func _on_unit_created(unit: Node) -> void:
+	var unit_id = unit.get("entity_id")
+	if unit_id == null:
+		unit_id = -1
 	var key = "game:%s:units" % game_id
 	_redis.sadd(key, str(unit_id))
-	print("[STATE_MIRROR] Added unit ", unit_id, " to Redis.")
+	print("[STATE_MIRROR] Added unit ", unit_id, " to Redis set via signal.")
 
-func remove_unit(unit_id: int) -> void:
+func _on_unit_destroyed(unit_id: int) -> void:
 	var key = "game:%s:units" % game_id
 	_redis.srem(key, str(unit_id))
-	print("[STATE_MIRROR] Removed unit ", unit_id, " from Redis.")
+	print("[STATE_MIRROR] Removed unit ", unit_id, " from Redis set via signal.")
 
-func add_resource(resource_id: int) -> void:
+func _on_resource_created(resource: Node) -> void:
+	var resource_id = resource.get("entity_id")
+	if resource_id == null:
+		resource_id = -1
 	var key = "game:%s:resources" % game_id
 	_redis.sadd(key, str(resource_id))
-	print("[STATE_MIRROR] Added resource ", resource_id, " to Redis.")
+	print("[STATE_MIRROR] Added resource ", resource_id, " to Redis set via signal.")
 
-func remove_resource(resource_id: int) -> void:
+func _on_resource_destroyed(resource_id: int) -> void:
 	var key = "game:%s:resources" % game_id
 	_redis.srem(key, str(resource_id))
-	print("[STATE_MIRROR] Removed resource ", resource_id, " from Redis.")
+	print("[STATE_MIRROR] Removed resource ", resource_id, " from Redis set via signal.")
+
 
 
 func mirror_state() -> void:

@@ -178,6 +178,7 @@ func die() -> void:
 	print("[COMBAT_LOG] Unit ", entity_id, " (player ", player_id, ") destroyed.")
 	if command_queue:
 		command_queue.clear()
+	GlobalSignals.unit_destroyed.emit(entity_id)
 	queue_free()
 
 # -----------------------------------------------------------------
