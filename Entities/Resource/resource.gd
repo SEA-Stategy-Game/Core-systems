@@ -71,6 +71,7 @@ func _on_timer_timeout() -> void:
 		
 func on_finished_harvesting():
 	modified.emit(self)
+	GlobalSignals.resource_destroyed.emit(self.entity_id)
 	queue_free()
 	nav_region.rebuild_nav()
 	

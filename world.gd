@@ -22,7 +22,12 @@ func _ready():
 		Game.spawnUnit(position)
 		if has_node("Camera2D"):
 			$Camera2D.area_selected.connect(_on_area_selected)
-	add_child(StoneResource.new())
+	
+	var stone = StoneResource.new()
+	var new_id = ActionGateway.get_next_entity_id()
+	stone.set("entity_id", new_id)
+	add_child(stone)
+	GlobalSignals.resource_created.emit(stone)
 	#if Engine.has_singleton("MapManager"):
 	#	var mm = Engine.get_singleton("MapManager")
 	#	if mm:
