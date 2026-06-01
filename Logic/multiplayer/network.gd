@@ -62,7 +62,7 @@ func on_player_registered(player_uuid: String) -> void:
 			gateway.spawn_initial_unit(local_id)
 	
 	
-	rpc_id(peer_id, "receive_player_registration", local_id, "testgame")
+	rpc_id(peer_id, "receive_player_registration", local_id, Game.game_room_id)
 	GameRoomManager.join_player_to_room("room-1", player_uuid)
 
 

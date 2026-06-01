@@ -2,13 +2,11 @@ extends Node
 
 signal plan_notified(game_id: String, player_id: String, unit_ids: Array)
 
-var game_id: String = "testgame"
+var game_id: String
 var _redis: Object = null
 
 func _ready() -> void:
-	game_id = OS.get_environment("GAME_ROOM_ID")
-	if game_id == "":
-		game_id = "testgame"
+	game_id = Game.game_room_id
 
 	_redis = RedisClient
 	var topic = "planning.%s.plan-updated" % game_id

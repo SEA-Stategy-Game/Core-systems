@@ -5,7 +5,7 @@
 ## -----------------------------------------------------------------------
 extends Node
 
-var game_id: String = "testgame"
+var game_id: String
 var _redis: Object = null 
 
 func _ready() -> void:
@@ -14,9 +14,7 @@ func _ready() -> void:
 		queue_free()
 		return
 		
-	game_id = OS.get_environment("GAME_ROOM_ID")
-	if game_id == "":
-		game_id = "testgame"
+	game_id = Game.game_room_id
 
 	
 	_redis = RedisClient
