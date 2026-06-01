@@ -62,7 +62,7 @@ func on_player_registered(player_uuid: String) -> void:
 			gateway.spawn_initial_unit(local_id)
 	
 	
-	rpc_id(peer_id, "receive_player_registration", local_id)
+	rpc_id(peer_id, "receive_player_registration", local_id, "testgame")
 	GameRoomManager.join_player_to_room("room-1", player_uuid)
 
 
@@ -217,7 +217,7 @@ func receive_static_state(data: PackedByteArray):
 	pass
 
 @rpc("authority", "call_remote", "reliable")
-func receive_player_registration(player_local_id: int) -> void:
+func receive_player_registration(player_local_id: int, game_room_id: String) -> void:
 	pass
 	
 @rpc("authority", "call_remote", "reliable")
