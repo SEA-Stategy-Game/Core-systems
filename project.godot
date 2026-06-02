@@ -17,8 +17,6 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-; IMPORTANT: Game.gd must be loaded first as it sets up global state
-; like 'game_room_id' which other singletons may depend on at initialization.
 Game="*res://Logic/Game.gd"
 GlobalSignals="*res://Logic/GlobalSignals.gd"
 RedisClient="*res://Logic/Clients/RedisClient.gd"

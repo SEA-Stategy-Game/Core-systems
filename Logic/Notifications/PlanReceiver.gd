@@ -2,11 +2,14 @@
 ## sequential, looping plan execution for each unit via ActionGateway.
 extends Node
 
+const LISTEN_PORT  = 8085
+const PLANNING_URL = "http://127.0.0.1:5000"
 
 ## unit_id (String) -> { "steps": Array, "index": int }
 var _store: Dictionary = {}
 
 var _receiver_strategy: Node = null
+var _sense: SenseAPI   = null
 
 # ----------------------------------------------------------------
 # Lifecycle
