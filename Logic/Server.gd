@@ -49,6 +49,95 @@ func receive_static_state(state: Dictionary):
 	pass
 
 # -----------------------------------------------------------------------
+# AI Planning Group -- server-side RPC entry points
+# -----------------------------------------------------------------------
+# These run on the server only.  An AI peer (the planning group's process)
+# connects to port 12345 and calls rpc_id(1, "<name>", ...).  Each method
+# forwards into the local ActionGateway autoload, which validates ownership
+# and enqueues IUnitAction objects on the relevant CommandQueue.
+
+## Push a JSON-style "Big Plan" produced by the AI planner.
+## Expected dict shape: see ActionGateway.execute_plan().
+@rpc("any_peer", "call_remote", "reliable")
+func ai_execute_plan(plan: Dictionary) -> void:
+	var gw = get_node_or_null("/root/ActionGateway")
+	if gw == null:
+		push_error("Server.ai_execute_plan: ActionGateway not loaded.")
+		return
+	gw.execute_plan(plan)
+
+## Move-to-position.  pid = requesting player.
+@rpc("any_peer", "call_remote", "reliable")
+func ai_move_unit(unit_id: int, x: float, y: float, pid: int) -> void:
+	var gw = get_node_or_null("/root/ActionGateway")
+	if gw == null: return
+	gw.move_unit(unit_id, Vector2(x, y), pid)
+
+## Attack-move: walk to a destination, auto-engage hostiles encountered.
+@rpc("any_peer", "call_remote", "reliable")
+func ai_attack_move(unit_id: int, x: float, y: float, pid: int) -> void:
+	var gw = get_node_or_null("/root/ActionGateway")
+	if gw == null: return
+	gw.attack_move(unit_id, Vector2(x, y), pid)
+
+## Chop a specific tree by entity_id.
+@rpc("any_peer", "call_remote", "reliable")
+func ai_chop_tree(unit_id: int, tree_id: int, pid: int) -> void:
+	var gw = get_node_or_null("/root/ActionGateway")
+	if gw == null: return
+	gw.go_chop_tree(unit_id, tree_id, pid)
+
+## ID-free: chop whichever tree is closest to the unit.
+@rpc("any_peer", "call_remote", "reliable")
+func ai_chop_nearest_tree(unit_id: int, pid: int) -> void:
+	var gw = get_node_or_null("/root/ActionGateway")
+	if gw == null: return
+	gw.go_chop_nearest_tree(unit_id, pid)
+
+## Mine a specific stone by entity_id.
+@rpc("any_peer", "call_remote", "reliable")
+func ai_mine_stone(unit_id: int, stone_id: int, pid: int) -> void:
+	var gw = get_node_or_null("/root/ActionGateway")
+	if gw == null: return
+	gw.go_mine_stone(unit_id, stone_id, pid)
+
+## ID-free: mine the closest stone to the unit.
+@rpc("any_peer", "call_remote", "reliable")
+func ai_mine_nearest_stone(unit_id: int, pid: int) -> void:
+	var gw = get_node_or_null("/root/ActionGateway")
+	if gw == null: return
+	gw.go_mine_nearest_stone(unit_id, pid)
+
+## Attack a specific target by entity_id.
+@rpc("any_peer", "call_remote", "reliable")
+func ai_attack_target(unit_id: int, target_id: int, pid: int) -> void:
+	var gw = get_node_or_null("/root/ActionGateway")
+	if gw == null: return
+	gw.attack_target(unit_id, target_id, pid)
+
+## ID-free: attack whatever hostile is nearest.
+@rpc("any_peer", "call_remote", "reliable")
+func ai_attack_nearest(unit_id: int, pid: int) -> void:
+	var gw = get_node_or_null("/root/ActionGateway")
+	if gw == null: return
+	gw.attack_nearest_enemy(unit_id, pid)
+
+## Construct a building.  scene_path e.g. "res://Houses/Barracks.tscn".
+@rpc("any_peer", "call_remote", "reliable")
+func ai_construct(unit_id: int, scene_path: String, x: float, y: float,
+		duration: float, pid: int) -> void:
+	var gw = get_node_or_null("/root/ActionGateway")
+	if gw == null: return
+	gw.go_construct(unit_id, scene_path, Vector2(x, y), duration, pid)
+
+## Composite: chop nearest tree then return to base and idle.
+@rpc("any_peer", "call_remote", "reliable")
+func ai_chop_nearest_and_return(unit_id: int, pid: int) -> void:
+	var gw = get_node_or_null("/root/ActionGateway")
+	if gw == null: return
+	gw.go_chop_nearest_tree_and_return(unit_id, pid)
+
+# -----------------------------------------------------------------------
 # Server functions
 # -----------------------------------------------------------------------
 

@@ -19,6 +19,8 @@ radius = 5.0
 script = ExtResource("1_2cgd5")
 
 [node name="Chop Tree" type="Area2D" parent="." unique_id=1272582681 groups=["Tree"]]
+collision_layer = 0
+collision_mask = 2
 script = ExtResource("2_6qyk8")
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="Chop Tree" unique_id=1101035522 groups=["Tree"]]

@@ -77,13 +77,19 @@ func serialize() -> Dictionary:
 # -----------------------------------------------------------------
 # Convenience factory
 # -----------------------------------------------------------------
-static func create(destination: Vector2) -> UnitActionMove:
+static func create(destination: Vector2, arrival_radius: float = 12.0) -> UnitActionMove:
 	var action = UnitActionMove.new()
 	action._target_position = destination
+	action._arrival_radius = arrival_radius
 	return action
 
-static func create_to_node(target_node: Node2D) -> UnitActionMove:
+## Move-to-node.  Pass a larger arrival_radius (e.g. ~25) when the target is a
+## body the unit cannot push into — barracks, buildings, large rocks — so MOVE
+## completes once the unit is pressed against the obstacle rather than spinning
+## forever trying to reach the centre.
+static func create_to_node(target_node: Node2D, arrival_radius: float = 12.0) -> UnitActionMove:
 	var action = UnitActionMove.new()
+	action._arrival_radius = arrival_radius
 	if target_node:
 		action._target_position = target_node.global_position
 		action._target_node = target_node

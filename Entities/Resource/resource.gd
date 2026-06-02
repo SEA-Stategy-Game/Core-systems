@@ -17,14 +17,18 @@ class_name MapResource
 
 @onready var nav_region = $"/root/World/NavigationRegion2D"
 
-@onready var server = get_node("/root/World/ClientGateway")     
+@onready var server = get_node_or_null("/root/World/ClientGateway")
 
 var amount: int = 1
-var maxAmount: int = 1 
+var maxAmount: int = 1
 var currentTime: float
 var units_harvesting: int = 0
 
-# Signal for notifying the server when the object must be queued for broadcast 
+# Player-id of the unit most recently registered as harvesting this resource.
+# Used to credit the correct stockpile when a chunk is finished.
+var last_harvester_pid: int = 0
+
+# Signal for notifying the server when the object must be queued for broadcast
 signal modified
 
 func _ready() -> void:
@@ -38,8 +42,9 @@ func _ready() -> void:
 	if is_in_group("units"):
 		remove_from_group("units")
 	add_to_group("resources")
-	self.modified.connect(server._on_ressource_modified)
-	
+	if server and server.has_method("_on_ressource_modified"):
+		self.modified.connect(server._on_ressource_modified)
+
 func harvest():
 	if amount > 0:
 		amount -= 1
@@ -49,8 +54,10 @@ func harvest():
 
 func _on_harvest_area_body_entered(body: Node2D) -> void:
 	# Checks if the body is a 'Unit' class
-	if body is Unit: 
+	if body is Unit:
 		units_harvesting += 1
+		if "player_id" in body:
+			last_harvester_pid = body.player_id
 		if timer and timer.is_stopped():
 			timer.start()
 
@@ -62,17 +69,16 @@ func _on_harvest_area_body_exited(body: Node2D) -> void:
 
 func _on_timer_timeout() -> void:
 	currentTime -= 1 * units_harvesting
-	
+
 	if bar:
 		var tween = get_tree().create_tween()
 		tween.tween_property(bar, "value", currentTime, 0.5)
-	
+
 	if currentTime <= 0:
 		harvest()
 
-		
+
 func on_finished_harvesting():
 	modified.emit(self)
 	queue_free()
 	nav_region.rebuild_nav()
-	

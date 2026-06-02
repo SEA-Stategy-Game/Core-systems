@@ -3,6 +3,7 @@ extends StaticBody2D
 ## -----------------------------------------------------------------------
 ## Barracks -- player home base.  Units return here after composite tasks.
 ## Implements IDamageable contract for universal combat targeting.
+## Click to open the spawn-unit pop-up (charges 10 wood + 5 stone).
 ## -----------------------------------------------------------------------
 
 @export var entity_id: int = -1
@@ -27,7 +28,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		if mouseEntered == true:
 			Selected = !Selected
 			if Selected == true:
-				Game.spawnUnit(global_position)
+				Game.spawnUnit(global_position, player_id)
 
 func _on_mouse_entered() -> void:
 	mouseEntered = true

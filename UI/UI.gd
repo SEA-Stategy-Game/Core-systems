@@ -1,12 +1,12 @@
 extends CanvasLayer
 
+@onready var label: Label = $Label
 
-@onready var label = $Label
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	label.text = "Wood " + str(Game.Wood) + "  Stone " + str(Game.Stone) 
+func _process(_delta: float) -> void:
+	var lines: Array[String] = []
+	var count = max(1, Game.player_count)
+	for pid in range(count):
+		lines.append("P%d  Wood %d  Stone %d" % [
+			pid, Game.get_player_wood(pid), Game.get_player_stone(pid)
+		])
+	label.text = "\n".join(lines)

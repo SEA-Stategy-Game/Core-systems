@@ -15,6 +15,11 @@
 ## -----------------------------------------------------------------------
 extends Node
 
+## Damage multiplier applied when a player explicitly commands an attack
+## (vs. auto-aggro defence).  Keeps the initiative advantage small so
+## reactive defence still has a chance.
+const PLAYER_INITIATIVE_BONUS: float = 1.25
+
 # -----------------------------------------------------------------
 #  Signals -- AI team connects to these for feedback
 # -----------------------------------------------------------------
@@ -144,7 +149,10 @@ func move_unit(unit_id: int, destination: Vector2, requesting_player_id: int = -
 	cq.enqueue(action)
 	return true
 
-## AttackTarget: move to and attack a specific hostile target.
+## AttackTarget: attack a specific hostile target.  The ATTACK action chases
+## the target on its own (see UnitActionAttack.CHASE_SPEED), so we don't
+## prepend a MOVE — that previously stalled when the attacker's body
+## collided with the target's body before MOVE could reach arrival_radius.
 func attack_target(unit_id: int, target_id: int, requesting_player_id: int = -1) -> bool:
 	var unit = _find_unit(unit_id)
 	if unit == null:
@@ -165,11 +173,8 @@ func attack_target(unit_id: int, target_id: int, requesting_player_id: int = -1)
 			push_warning("[OWNERSHIP_ERR] Cannot attack friendly entity ", target_id)
 			return false
 
-	var move_action = UnitActionMove.create_to_node(target_node)
-	var attack_action = UnitActionAttack.create_focused(target_node)
-
+	var attack_action = UnitActionAttack.create_focused(target_node, PLAYER_INITIATIVE_BONUS)
 	var cq: CommandQueue = _get_or_create_queue(unit)
-	cq.enqueue(move_action)
 	cq.enqueue(attack_action)
 	return true
 
@@ -183,11 +188,88 @@ func attack_move(unit_id: int, destination: Vector2, requesting_player_id: int =
 		return false
 
 	var move_action = UnitActionMove.create(destination)
-	var attack_action = UnitActionAttack.create_auto()
+	var attack_action = UnitActionAttack.create_auto(PLAYER_INITIATIVE_BONUS)
 
 	var cq: CommandQueue = _get_or_create_queue(unit)
 	cq.enqueue(move_action)
 	cq.enqueue(attack_action)
+	return true
+
+# =================================================================
+#  ID-FREE WRAPPERS  (the AI team scrapped target-id tracking, so
+#  these resolve the nearest matching entity for them).
+# =================================================================
+
+## Chop the nearest tree to the named unit.  Returns true on success.
+func go_chop_nearest_tree(unit_id: int, requesting_player_id: int = -1) -> bool:
+	var unit = _find_unit(unit_id)
+	if unit == null:
+		return false
+	if not _validate_ownership(unit, requesting_player_id):
+		return false
+	var tree_node = _find_nearest_resource_of_kind(unit.global_position, "tree")
+	if tree_node == null:
+		print("[SENSE_QUERY] No trees available for unit ", unit_id)
+		return false
+	var cq: CommandQueue = _get_or_create_queue(unit)
+	cq.enqueue(UnitActionMove.create_to_node(tree_node))
+	cq.enqueue(UnitActionHarvest.create(tree_node))
+	return true
+
+## Mine the nearest stone to the named unit.
+func go_mine_nearest_stone(unit_id: int, requesting_player_id: int = -1) -> bool:
+	var unit = _find_unit(unit_id)
+	if unit == null:
+		return false
+	if not _validate_ownership(unit, requesting_player_id):
+		return false
+	var stone_node = _find_nearest_resource_of_kind(unit.global_position, "stone")
+	if stone_node == null:
+		print("[SENSE_QUERY] No stones available for unit ", unit_id)
+		return false
+	var cq: CommandQueue = _get_or_create_queue(unit)
+	cq.enqueue(UnitActionMove.create_to_node(stone_node))
+	cq.enqueue(UnitActionHarvest.create(stone_node))
+	return true
+
+## Attack the nearest hostile entity (unit / building) of any other player.
+func attack_nearest_enemy(unit_id: int, requesting_player_id: int = -1) -> bool:
+	var unit = _find_unit(unit_id)
+	if unit == null:
+		return false
+	if not _validate_ownership(unit, requesting_player_id):
+		return false
+	var target = _find_nearest_hostile(unit)
+	if target == null:
+		print("[COMBAT_LOG] No hostiles available for unit ", unit_id)
+		return false
+	# UnitActionAttack chases on its own; queue MOVE separately and the body
+	# collision against the target prevents MOVE from ever arriving.
+	var cq: CommandQueue = _get_or_create_queue(unit)
+	cq.enqueue(UnitActionAttack.create_focused(target, PLAYER_INITIATIVE_BONUS))
+	return true
+
+## Convenience composite: chop nearest tree, then march back to the unit's
+## nearest barracks and idle.  Mirrors `go_chop_tree_and_return` but
+## without requiring a tree_id.
+func go_chop_nearest_tree_and_return(unit_id: int, requesting_player_id: int = -1) -> bool:
+	var unit = _find_unit(unit_id)
+	if unit == null:
+		return false
+	if not _validate_ownership(unit, requesting_player_id):
+		return false
+	var tree_node = _find_nearest_resource_of_kind(unit.global_position, "tree")
+	if tree_node == null:
+		return false
+	var cq: CommandQueue = _get_or_create_queue(unit)
+	cq.enqueue(UnitActionMove.create_to_node(tree_node))
+	cq.enqueue(UnitActionHarvest.create(tree_node))
+	var uid = _get_uid(unit)
+	_chop_return_state[uid] = {
+		"state": "CHOPPING",
+		"player_id": unit.player_id if "player_id" in unit else 0
+	}
+	print("[IDLE_REPORT] Unit ", uid, " starting nearest-tree chop-and-return.")
 	return true
 
 # =================================================================
@@ -244,6 +326,14 @@ func execute_plan(plan: Dictionary) -> bool:
 			"ATTACK_MOVE":
 				var t = cmd.get("target", {})
 				attack_move(uid, Vector2(t.get("x", 0), t.get("y", 0)), plan_player_id)
+			"CHOP_NEAREST":
+				go_chop_nearest_tree(uid, plan_player_id)
+			"MINE_NEAREST":
+				go_mine_nearest_stone(uid, plan_player_id)
+			"ATTACK_NEAREST":
+				attack_nearest_enemy(uid, plan_player_id)
+			"CHOP_NEAREST_AND_RETURN":
+				go_chop_nearest_tree_and_return(uid, plan_player_id)
 			_:
 				push_warning("ActionGateway: Unknown action '", action_str, "' in plan.")
 
@@ -360,6 +450,53 @@ func _find_entity(eid: int) -> Node2D:
 	# Check resources
 	return _find_resource(eid)
 
+## Find the nearest resource ("tree" or "stone") to a position.
+func _find_nearest_resource_of_kind(pos: Vector2, kind: String) -> Node2D:
+	var closest: Node2D = null
+	var closest_dist: float = INF
+	for r in get_tree().get_nodes_in_group("resources"):
+		if not is_instance_valid(r):
+			continue
+		var name_lower: String = ""
+		if "resource_name" in r:
+			name_lower = String(r.resource_name).to_lower()
+		else:
+			name_lower = String(r.name).to_lower()
+		if kind == "tree" and not (name_lower.contains("tree") or r is TreeResource):
+			continue
+		if kind == "stone" and not (name_lower.contains("stone") or r is StoneResource):
+			continue
+		var d = pos.distance_to(r.global_position)
+		if d < closest_dist:
+			closest_dist = d
+			closest = r
+	return closest
+
+## Find the nearest hostile (different player_id, not -1) to a unit.
+func _find_nearest_hostile(unit: Node2D) -> Node2D:
+	var unit_pid: int = unit.player_id if "player_id" in unit else 0
+	var closest: Node2D = null
+	var closest_dist: float = INF
+	var candidates: Array = []
+	candidates.append_array(get_tree().get_nodes_in_group("units"))
+	candidates.append_array(get_tree().get_nodes_in_group("buildings"))
+	candidates.append_array(get_tree().get_nodes_in_group("barracks"))
+	for c in candidates:
+		if c == unit or not is_instance_valid(c):
+			continue
+		if not c.has_method("get_player_id"):
+			continue
+		var c_pid: int = c.get_player_id()
+		if c_pid == unit_pid or c_pid == -1:
+			continue
+		if c.has_method("is_alive") and not c.is_alive():
+			continue
+		var d = unit.global_position.distance_to(c.global_position)
+		if d < closest_dist:
+			closest_dist = d
+			closest = c
+	return closest
+
 ## Find the nearest Barracks to the given position for a specific player.
 func _find_nearest_barracks(pos: Vector2, pid: int) -> Node2D:
 	var closest: Node2D = null
@@ -467,7 +604,9 @@ func _initiate_return_to_base(unit_id: int, pid: int) -> void:
 		return
 
 	_chop_return_state[unit_id]["state"] = "RETURNING"
-	var move_action = UnitActionMove.create_to_node(barracks)
+	# Barracks body is bigger than a unit can push into — use a 25 px arrival
+	# radius so MOVE completes once the unit is pressed against it.
+	var move_action = UnitActionMove.create_to_node(barracks, 25.0)
 	var cq: CommandQueue = _get_or_create_queue(unit)
 	cq.enqueue(move_action)
 	print("[IDLE_REPORT] Unit ", unit_id, " returning to barracks at ", barracks.global_position)

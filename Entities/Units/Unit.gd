@@ -17,7 +17,8 @@ var current_health: int
 @onready var box = get_node("HitBox")
 @onready var anim = get_node("AnimationPlayer")
 @onready var attack_range_area: Area2D = get_node_or_null("Range")
-@onready var tile_map: TileMapLayer = get_node("/root/World/NavigationRegion2D/TileMapLayer")     
+@onready var health_bar: ProgressBar = get_node_or_null("HealthBar")
+@onready var tile_map: TileMapLayer = get_node("/root/World/NavigationRegion2D/TileMapLayer")
 
 ## -----------------------------------------------------------------------
 ## Movement (manual player control -- right-click)
@@ -56,6 +57,7 @@ func _ready() -> void:
 	current_health = max_health
 	add_to_group("units", true)
 	set_selected(selected)
+	_refresh_health_bar()
 
 	# Initialise the command queue
 	command_queue = CommandQueue.new()
@@ -133,7 +135,8 @@ func get_local_movement_speed() -> float:
 func take_damage(amount: int) -> void:
 	current_health -= amount
 	print("[COMBAT_LOG] Unit ", entity_id, " (player ", player_id, ") took ", amount, " damage. HP: ", current_health, "/", max_health)
-	
+	_refresh_health_bar()
+
 	# Visual feedback: flash red!
 	var sprite = get_node_or_null("Arthax") # The Sprite2D name in unit.tscn
 	if not sprite:
@@ -147,6 +150,14 @@ func take_damage(amount: int) -> void:
 
 	if current_health <= 0:
 		die()
+
+func _refresh_health_bar() -> void:
+	if health_bar == null:
+		return
+	health_bar.max_value = max_health
+	health_bar.value = clamp(current_health, 0, max_health)
+	# Hide when totally full so the world isn't littered with bars.
+	health_bar.visible = current_health < max_health
 
 func get_current_health() -> int:
 	return current_health

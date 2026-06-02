@@ -22,6 +22,7 @@ ActionGateway="*res://Logic/ActionGateway.gd"
 TickManager="*res://Logic/TickManager.gd"
 DebugWindow="*res://UI/DebugWindow.tscn"
 ResourceSpawner="*res://Entities/Map/Resource_spawner.gd"
+WinConditionChecker="*res://Logic/WinConditionChecker.gd"
 
 [dotnet]
 
