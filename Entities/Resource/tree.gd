@@ -5,7 +5,7 @@ extends MapResource
 func _ready() -> void:
 	# Parent Init
 	super()
-	amount = 1 
+	amount = 1
 	totalTime = 5.0
 	currentTime = totalTime
 	bar.max_value = totalTime
@@ -25,6 +25,6 @@ func damage_tree(damage: float):
 
 func on_finished_harvesting():
 	amount = 0
-	Game.Wood += 1
+	Game.add_resource(last_harvester_pid, "wood", 1)
 	# Parent function to remove it
 	super.on_finished_harvesting()

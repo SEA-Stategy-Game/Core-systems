@@ -26,7 +26,8 @@ var current_health: int
 @onready var box = get_node("HitBox")
 @onready var anim = get_node("AnimationPlayer")
 @onready var attack_range_area: Area2D = get_node_or_null("Range")
-@onready var tile_map: TileMapLayer = get_node("/root/World/NavigationRegion2D/TileMapLayer")     
+@onready var health_bar: ProgressBar = get_node_or_null("HealthBar")
+@onready var tile_map: TileMapLayer = get_node("/root/World/NavigationRegion2D/TileMapLayer")
 
 ## -----------------------------------------------------------------------
 ## Movement (manual player control -- right-click)
@@ -48,6 +49,12 @@ var command_queue: CommandQueue = null
 var is_idle: bool = true
 
 ## -----------------------------------------------------------------------
+## Equipment & derived stats
+## -----------------------------------------------------------------------
+@export var vision_range_tiles: int = 6   ## Read by FogOfWar
+var equipped: Array[Equipment] = []
+
+## -----------------------------------------------------------------------
 ## Combat state -- tracked bodies inside the Range Area2D
 ## -----------------------------------------------------------------------
 var _bodies_in_range: Array = []       ## All bodies currently inside Range
@@ -65,6 +72,7 @@ func _ready() -> void:
 	current_health = max_health
 	add_to_group("units", true)
 	set_selected(selected)
+	_refresh_health_bar()
 
 	# Initialise the command queue
 	command_queue = CommandQueue.new()
@@ -140,9 +148,18 @@ func get_local_movement_speed() -> float:
 # -----------------------------------------------------------------
 
 func take_damage(amount: int) -> void:
-	current_health -= amount
-	print("[COMBAT_LOG] Unit ", entity_id, " (player ", player_id, ") took ", amount, " damage. HP: ", current_health, "/", max_health)
-	
+	# Armor from equipment reduces incoming damage (always at least 1 lands).
+	var armor = get_total_armor()
+	var net = max(1, amount - armor)
+	current_health -= net
+	if armor > 0:
+		print("[COMBAT_LOG] Unit ", entity_id, " (player ", player_id, ") took ", net,
+			" damage (raw ", amount, " - armor ", armor, "). HP: ", current_health, "/", max_health)
+	else:
+		print("[COMBAT_LOG] Unit ", entity_id, " (player ", player_id, ") took ", net,
+			" damage. HP: ", current_health, "/", max_health)
+	_refresh_health_bar()
+
 	# Visual feedback: flash red!
 	var sprite = get_node_or_null("Arthax") # The Sprite2D name in unit.tscn
 	if not sprite:
@@ -156,6 +173,43 @@ func take_damage(amount: int) -> void:
 
 	if current_health <= 0:
 		die()
+
+func _refresh_health_bar() -> void:
+	if health_bar == null:
+		return
+	health_bar.max_value = max_health
+	health_bar.value = clamp(current_health, 0, max_health)
+	# Hide when totally full so the world isn't littered with bars.
+	health_bar.visible = current_health < max_health
+
+# -----------------------------------------------------------------
+# Equipment
+# -----------------------------------------------------------------
+
+## Attach an Equipment object to this unit, summing its bonuses in.
+func equip(item: Equipment) -> bool:
+	if item == null:
+		return false
+	equipped.append(item)
+	item.apply_to(self)
+	return true
+
+## Remove a previously-equipped Equipment object.
+func unequip(item: Equipment) -> bool:
+	var idx = equipped.find(item)
+	if idx < 0:
+		return false
+	equipped.remove_at(idx)
+	item.remove_from(self)
+	return true
+
+## Sum of armor across all equipped items.
+func get_total_armor() -> int:
+	var total = 0
+	for e in equipped:
+		if is_instance_valid(e):
+			total += e.armor
+	return total
 
 func get_current_health() -> int:
 	return current_health
@@ -220,9 +274,16 @@ func set_target(target) -> void:
 	current_path_index = 0;
 
 ## Moves the unit based on the pathfinding algorithm. Snaps the unit back into a navigateble area if it is out-of-bounds
+## Speed is scaled by the terrain multiplier of the tile the unit is standing on
+## (PLAINS 1.10, FOREST 0.75, HILLS 0.6, WATER 0.0).
 func pathfind_and_move(delta) -> void:
 	var nav_point_direction = to_local($NavigationAgent2D.get_next_path_position()).normalized()
-	velocity = nav_point_direction * speed * delta #* get_local_movement_speed()
+	var effective_speed = float(speed)
+	if tile_map and tile_map.has_method("get_tile_at_world_pos"):
+		var tile = tile_map.get_tile_at_world_pos(global_position)
+		if tile != null and tile.has_method("get_movement_multiplier"):
+			effective_speed *= tile.get_movement_multiplier()
+	velocity = nav_point_direction * effective_speed * delta
 	move_and_slide()
 	global_position = NavigationServer2D.map_get_closest_point(
 		$NavigationAgent2D.get_navigation_map(), global_position)

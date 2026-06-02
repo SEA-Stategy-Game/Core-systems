@@ -19,6 +19,8 @@ script = ExtResource("1_37pa3")
 resource_name = "Stone"
 
 [node name="Mine Stone" type="Area2D" parent="." unique_id=1272582681 groups=["Stone"]]
+collision_layer = 0
+collision_mask = 2
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="Mine Stone" unique_id=1101035522 groups=["Stone"]]
 position = Vector2(0, -8)

@@ -1,16 +1,16 @@
 extends Node2D
 
-var units = []
-var fog_of_war: FogOfWar = null
-var headless: bool = false
+const PLAYER_SELECT_SCENE: PackedScene = preload("res://UI/PlayerSelectPopup.tscn")
 
-func _init() -> void:
-	if is_headless():
-		headless = true
-		
+var units = []
+
 func _ready():
 	get_units()
-	Game.spawnUnit(position)
+	# Show the player-count pop-up; it spawns the starting units once the
+	# user picks 1-4.  No automatic Game.spawnUnit() here.
+	var popup = PLAYER_SELECT_SCENE.instantiate()
+	add_child(popup)
+
 	if has_node("Camera2D"):
 		$Camera2D.area_selected.connect(_on_area_selected)
 	if has_node("FogOfWar"):
@@ -60,10 +60,5 @@ func get_units_in_area(area):
 		if unit.global_position.x > area[0].x and unit.global_position.x < area[1].x:
 			if unit.global_position.y > area[0].y and unit.global_position.y < area[1].y:
 				u.append(unit)
-				
-	return u
 
-	
-func is_headless() -> bool:
-	return  (DisplayServer.get_name() == "headless") or (OS.has_feature("dedicated_server")) or ("--server" in OS.get_cmdline_args())
-	
+	return u

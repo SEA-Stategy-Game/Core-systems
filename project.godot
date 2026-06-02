@@ -31,10 +31,16 @@ ResourceSpawner="*res://Entities/Map/Resource_spawner.gd"
 Networking="*res://Logic/Multiplayer/network.gd"
 PlayerManager="*res://Logic/Multiplayer/player_manager.gd"
 GameRoomManager="*res://Logic/Multiplayer/game_room_manager.gd"
+WinConditionChecker="*res://Logic/WinConditionChecker.gd"
+FogManager="*res://Entities/Map/FogOfWar.gd"
 
 [dotnet]
 
-project/assembly_name="Core"
+project/assembly_name="New Game Project"
+
+[editor_plugins]
+
+enabled=PackedStringArray()
 
 [input]
 
@@ -67,4 +73,3 @@ WheelDown={
 
 textures/canvas_textures/default_texture_filter=0
 rendering_device/driver.windows="d3d12"
-textures/vram_compression/import_etc2_astc=true
