@@ -26,6 +26,9 @@ ActionGateway="*res://Logic/ActionGateway.gd"
 TickManager="*res://Logic/TickManager.gd"
 PlanReceiver="*res://Logic/Notifications/PlanReceiver.gd"
 RedisStateMirror="*res://Logic/StateSerializer/RedisStateMirror.gd"
+Networking="*res://Logic/multiplayer/network.gd"
+PlayerManager="*res://Logic/multiplayer/player_manager.gd"
+GameRoomManager="*res://Logic/multiplayer/game_room_manager.gd"
 DebugWindow="*res://UI/DebugWindow.tscn"
 ResourceSpawner="*res://Entities/Map/Resource_spawner.gd"
 Networking="*res://Logic/Multiplayer/network.gd"
@@ -37,6 +40,7 @@ GameRoomManager="*res://Logic/Multiplayer/game_room_manager.gd"
 project/assembly_name="Core"
 PlanReceiver="*res://Logic/PlanReceiver.gd"
 WinConditionChecker="*res://Logic/WinConditionChecker.gd"
+FogManager="*res://Entities/Map/FogOfWar.gd"
 
 [dotnet]
 

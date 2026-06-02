@@ -29,6 +29,8 @@ signal expired()
 @export var owner_player_id: int = -1        ## set by the firing entity
 @export var spread_radians: float = 0.12     ## random launch angle jitter
 @export var aim_jitter_pixels: float = 6.0   ## random target offset
+@export var explosion_radius: float = 0.0    ## > 0 = AoE on impact
+@export var explosion_falloff: float = 0.6   ## damage at edge = damage × this
 
 var _target_node: Node2D = null
 var _aim_point: Vector2 = Vector2.ZERO
@@ -169,10 +171,46 @@ func _try_hit(node: Node) -> void:
 
 func _apply_hit(node: Node) -> void:
 	_has_hit = true
-	if node != null and node.has_method("take_damage"):
+	if explosion_radius > 0.0:
+		_explode_at(global_position)
+	elif node != null and node.has_method("take_damage"):
 		node.take_damage(damage)
 	hit.emit(node)
 	_despawn()
+
+## Apply damage to every damageable hostile within explosion_radius.
+## Damage falls off linearly from `damage` at the centre to
+## `damage * explosion_falloff` at the edge.
+func _explode_at(pos: Vector2) -> void:
+	var tree = get_tree()
+	if tree == null:
+		return
+	var candidates: Array = []
+	candidates.append_array(tree.get_nodes_in_group("units"))
+	candidates.append_array(tree.get_nodes_in_group("buildings"))
+	candidates.append_array(tree.get_nodes_in_group("resources"))
+	var r2 = explosion_radius * explosion_radius
+	for c in candidates:
+		if not is_instance_valid(c) or not (c is Node2D):
+			continue
+		var d2 = c.global_position.distance_squared_to(pos)
+		if d2 > r2:
+			continue
+		# Friendly-fire guard
+		if c.has_method("get_player_id"):
+			var pid = int(c.get_player_id())
+			if pid == owner_player_id and pid >= 0:
+				continue
+		if not c.has_method("take_damage"):
+			continue
+		var t = sqrt(d2) / explosion_radius     # 0 at centre, 1 at edge
+		var dmg_scale = lerp(1.0, explosion_falloff, t)
+		var aoe_damage = int(round(float(damage) * dmg_scale))
+		if aoe_damage <= 0:
+			continue
+		c.take_damage(aoe_damage)
+		print("[COMBAT_LOG] Explosion at ", pos, " dealt ", aoe_damage, " to entity (dist ",
+			int(sqrt(d2)), "/", int(explosion_radius), ")")
 
 func _expire() -> void:
 	expired.emit()

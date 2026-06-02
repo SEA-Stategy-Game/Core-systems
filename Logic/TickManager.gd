@@ -62,6 +62,9 @@ func _process_simulation() -> void:
 	var tick = {"TICK": tick_count}
 	server.broadcast_state(tick)
 	
-	# 4. Broadcast the state in the server
-	Networking.broadcast_state(tick_count)
-	
+	# 4. Broadcast the state to any connected peers.  Guard against the
+	#    Networking autoload not being present (e.g. solo-play builds).
+	var net = get_node_or_null("/root/Networking")
+	if net != null and net.has_method("broadcast_state"):
+		net.broadcast_state(tick_count)
+
