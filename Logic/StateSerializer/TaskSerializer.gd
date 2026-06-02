@@ -6,21 +6,28 @@
 extends RefCounted
 class_name TaskSerializer
 
-const SAVE_PATH: String = "user://ai_task_state.json"
-
 # -----------------------------------------------------------------
 # Save
 # -----------------------------------------------------------------
+
+static var _strategy: IStateSerializer = null
+
+static func _get_strategy() -> IStateSerializer:
+	if _strategy == null:
+		var redis_flag = OS.get_environment("USE_REDIS")
+		if redis_flag == "true" or redis_flag == "1":
+			_strategy = load("res://Logic/StateSerializer/RedisStatePersistence.gd").new()
+		else:
+			_strategy = load("res://Logic/StateSerializer/LocalStatePersistence.gd").new()
+			
+	return _strategy
 
 ## Serialise the command queues of all units and the global state
 ## into a JSON file.
 static func save_state(scene_tree: SceneTree) -> bool:
 	var state: Dictionary = {
 		"timestamp": Time.get_unix_time_from_system(),
-		"resources": {
-			"wood": Game.Wood,
-			"stone": Game.Stone
-		},
+		"resources": Game.player_resources,
 		"units": []
 	}
 
@@ -33,15 +40,7 @@ static func save_state(scene_tree: SceneTree) -> bool:
 			}
 			state["units"].append(unit_data)
 
-	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
-	if file == null:
-		push_error("TaskSerializer: Cannot open ", SAVE_PATH, " for writing.")
-		return false
-
-	file.store_string(JSON.stringify(state, "\t"))
-	file.close()
-	print("[TaskSerializer] State saved to ", SAVE_PATH)
-	return true
+	return _get_strategy().save_state(state, scene_tree)
 
 # -----------------------------------------------------------------
 # Load
@@ -50,26 +49,7 @@ static func save_state(scene_tree: SceneTree) -> bool:
 ## Load previously saved task state.  Returns the parsed Dictionary
 ## or an empty Dictionary on failure.
 static func load_state() -> Dictionary:
-	if not FileAccess.file_exists(SAVE_PATH):
-		print("[TaskSerializer] No save file found at ", SAVE_PATH)
-		return {}
-
-	var file = FileAccess.open(SAVE_PATH, FileAccess.READ)
-	if file == null:
-		push_error("TaskSerializer: Cannot open ", SAVE_PATH, " for reading.")
-		return {}
-
-	var text: String = file.get_as_text()
-	file.close()
-
-	var json = JSON.new()
-	var err = json.parse(text)
-	if err != OK:
-		push_error("TaskSerializer: JSON parse error: ", json.get_error_message())
-		return {}
-
-	print("[TaskSerializer] State loaded from ", SAVE_PATH)
-	return json.data
+	return _get_strategy().load_state()
 
 # -----------------------------------------------------------------
 # Restore helpers
@@ -82,9 +62,8 @@ static func restore_queues(scene_tree: SceneTree, state: Dictionary) -> void:
 		return
 
 	# Restore global resources
-	if "resources" in state:
-		Game.Wood = int(state["resources"].get("wood", 0))
-		Game.Stone = int(state["resources"].get("stone", 0))
+	if "player_resources" in state:
+		Game.player_resources = state["player_resources"]
 
 	# Restore per-unit queues
 	if "units" not in state:

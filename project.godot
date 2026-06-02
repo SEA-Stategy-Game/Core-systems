@@ -17,15 +17,20 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+; IMPORTANT: Game.gd must be loaded first as it sets up global state
+; like 'game_room_id' which other singletons may depend on at initialization.
 Game="*res://Logic/Game.gd"
+GlobalSignals="*res://Logic/GlobalSignals.gd"
+RedisClient="*res://Logic/Clients/RedisClient.gd"
 ActionGateway="*res://Logic/ActionGateway.gd"
 TickManager="*res://Logic/TickManager.gd"
-Networking="*res://Logic/multiplayer/network.gd"
-PlayerManager="*res://Logic/multiplayer/player_manager.gd"
-GameRoomManager="*res://Logic/multiplayer/game_room_manager.gd"
-PlanReceiver="*res://Logic/PlanReceiver.gd"
+PlanReceiver="*res://Logic/Notifications/PlanReceiver.gd"
+RedisStateMirror="*res://Logic/StateSerializer/RedisStateMirror.gd"
 DebugWindow="*res://UI/DebugWindow.tscn"
 ResourceSpawner="*res://Entities/Map/Resource_spawner.gd"
+Networking="*res://Logic/Multiplayer/network.gd"
+PlayerManager="*res://Logic/Multiplayer/player_manager.gd"
+GameRoomManager="*res://Logic/Multiplayer/game_room_manager.gd"
 WinConditionChecker="*res://Logic/WinConditionChecker.gd"
 FogManager="*res://Entities/Map/FogOfWar.gd"
 BehaviorPlanner="*res://Logic/BehaviorPlanner.gd"

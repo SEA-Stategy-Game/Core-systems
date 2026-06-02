@@ -689,7 +689,7 @@ func _initiate_return_to_base(unit_id: int, pid: int) -> void:
 	cq.enqueue(move_action)
 	print("[IDLE_REPORT] Unit ", unit_id, " returning to barracks at ", barracks.global_position)
 
-func _get_next_entity_id() -> int:
+func get_next_entity_id() -> int:
 	var id = _next_entity_id
 	_next_entity_id += 1
 	return id
@@ -712,7 +712,7 @@ func spawn_initial_unit(player_id: int, scene_path: String = "res://Entities/Uni
 	unit.set_meta("player_id", player_id)
 		
 	# Assign a unique entity_id to prevent dictionary key overwrites in state payloads
-	var new_id = _get_next_entity_id()
+	var new_id = get_next_entity_id()
 	unit.set("entity_id", new_id)
 	unit.set_meta("entity_id", new_id)
 		
@@ -727,7 +727,8 @@ func spawn_initial_unit(player_id: int, scene_path: String = "res://Entities/Uni
 	var units_container = current_scene.get_node_or_null("Units") if current_scene else null
 	if units_container:
 		units_container.add_child(unit)
-		print("[SPAWN] Initial unit created for Player ", player_id, " at ", random_spawn_point)
+		print("[SPAWN] Initial unit ", new_id, " created for Player ", player_id, " at ", random_spawn_point)
+		GlobalSignals.unit_created.emit(unit)
 	else:
 		push_error("ActionGateway.spawn_initial_unit: Could not find 'Units' container in current scene.")
 		

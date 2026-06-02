@@ -14,7 +14,20 @@ var time_passed: float = 0.0
 var tick_count: int = 0
 
 ## Auto-save interval (in ticks).  0 = disabled.
-var auto_save_interval: int = 60  # Every 30 seconds at 2 tps
+var auto_save_interval: int = 60  # 60 = Every 30 seconds at 2 tps
+
+## Get the auto-save interval in actual seconds
+func get_auto_save_interval_seconds() -> float:
+	return tick_interval * auto_save_interval
+
+func _ready() -> void:
+
+	var env_auto_save = OS.get_environment("AUTO_SAVE_INTERVAL") 
+	if env_auto_save != "":
+		var parsed_auto_save = env_auto_save.to_int()
+		if parsed_auto_save >= 0:
+			auto_save_interval = parsed_auto_save
+			print("[TickManager] auto_save_interval set to ", auto_save_interval, " via environment variable.")
 
 func _process(delta: float) -> void:
 	time_passed += delta
@@ -51,4 +64,3 @@ func _process_simulation() -> void:
 	var net = get_node_or_null("/root/Networking")
 	if net != null and net.has_method("broadcast_state"):
 		net.broadcast_state(tick_count)
-
