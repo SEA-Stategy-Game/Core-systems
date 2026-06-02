@@ -13,6 +13,6 @@ func _ready() -> void:
 	resource_name = "ressource_stone"
 
 func on_finished_harvesting():
-	Game.Stone += 1
+	Game.add_resource(last_harvester_pid, "stone", 1)
 	# Parent function to remove it
 	super.on_finished_harvesting()

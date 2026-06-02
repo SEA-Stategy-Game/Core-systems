@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://cwinpopup0001"]
+
+[ext_resource type="Script" path="res://UI/WinPopup.gd" id="1_winp"]
+
+[node name="WinPopup" type="CanvasLayer"]
+layer = 200
+process_mode = 3
+script = ExtResource("1_winp")

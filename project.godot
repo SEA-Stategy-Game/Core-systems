@@ -36,6 +36,7 @@ GameRoomManager="*res://Logic/Multiplayer/game_room_manager.gd"
 
 project/assembly_name="Core"
 PlanReceiver="*res://Logic/PlanReceiver.gd"
+WinConditionChecker="*res://Logic/WinConditionChecker.gd"
 
 [dotnet]
 
