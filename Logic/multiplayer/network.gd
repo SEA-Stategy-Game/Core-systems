@@ -188,6 +188,22 @@ func ai_explode_at(unit_id: int, x: float, y: float,
 	if gw == null: return
 	gw.explode_at(unit_id, Vector2(x, y), radius, damage, pid)
 
+## Register a reactive behavior plan (predicate -> action) on a unit.
+## `rules` is Array[Dictionary]: { "when": String, "do": String,
+##                                 "priority": int, "args": Dictionary }
+## Pass an empty array to clear.
+@rpc("any_peer", "call_remote", "reliable")
+func ai_set_behavior(unit_id: int, rules: Array, pid: int) -> void:
+	var gw = get_node_or_null("/root/ActionGateway")
+	if gw == null: return
+	gw.set_behavior_plan(unit_id, rules, pid)
+
+@rpc("any_peer", "call_remote", "reliable")
+func ai_clear_behavior(unit_id: int, pid: int) -> void:
+	var gw = get_node_or_null("/root/ActionGateway")
+	if gw == null: return
+	gw.clear_behavior_plan(unit_id, pid)
+
 # -----------------------------------------------------------------------
 # Server functions
 # -----------------------------------------------------------------------

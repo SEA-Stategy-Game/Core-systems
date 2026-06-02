@@ -311,6 +311,26 @@ func _on_btn_force_win_check() -> void:
 	var fired = wcc.check_now()
 	_log("[WIN_CHECK] check_now() returned %s" % str(fired))
 
+func _on_btn_smart_behavior() -> void:
+	# Demo: arm the acting unit with the canonical reactive plan
+	#   "chop trees, fight if attacked, balance resources".
+	var gw = get_node("/root/ActionGateway")
+	var uid = int(unit_id_input.value)
+	var pid = int(player_id_input.value)
+	var rules = [
+		{"when": "enemy_within(100)",  "do": "ATTACK_NEAREST",          "priority": 100},
+		{"when": "wood > stone",       "do": "MINE_NEAREST",            "priority":  60},
+		{"when": "stone > wood",       "do": "CHOP_NEAREST_AND_RETURN", "priority":  60},
+		{"when": "idle",               "do": "CHOP_NEAREST_AND_RETURN", "priority":  10},
+	]
+	var ok = gw.set_behavior_plan(uid, rules, pid)
+	_log("[BEHAVIOR] Armed reactive plan on unit %d (player %d): %s" % [uid, pid, str(ok)])
+
+func _on_btn_clear_behavior() -> void:
+	var gw = get_node("/root/ActionGateway")
+	gw.clear_behavior_plan(int(unit_id_input.value), int(player_id_input.value))
+	_log("[BEHAVIOR] Cleared plan on unit %d" % int(unit_id_input.value))
+
 func _on_btn_clear_console() -> void:
 	if console_log:
 		console_log.text = ""
@@ -481,6 +501,8 @@ func _build_ui() -> void:
 	helpers.add_child(_btn("Grant +10W / +5S", _on_btn_grant_resources))
 	helpers.add_child(_btn("Force win-check", _on_btn_force_win_check))
 	helpers.add_child(_btn("Clear console", _on_btn_clear_console))
+	helpers.add_child(_btn("Arm reactive plan", _on_btn_smart_behavior))
+	helpers.add_child(_btn("Clear reactive plan", _on_btn_clear_behavior))
 
 	root_v.add_child(HSeparator.new())
 

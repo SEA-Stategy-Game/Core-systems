@@ -28,6 +28,7 @@ DebugWindow="*res://UI/DebugWindow.tscn"
 ResourceSpawner="*res://Entities/Map/Resource_spawner.gd"
 WinConditionChecker="*res://Logic/WinConditionChecker.gd"
 FogManager="*res://Entities/Map/FogOfWar.gd"
+BehaviorPlanner="*res://Logic/BehaviorPlanner.gd"
 
 [dotnet]
 
