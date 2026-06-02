@@ -64,4 +64,3 @@ func _process_simulation() -> void:
 	var net = get_node_or_null("/root/Networking")
 	if net != null and net.has_method("broadcast_state"):
 		net.broadcast_state(tick_count)
-
