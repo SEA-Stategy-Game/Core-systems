@@ -254,6 +254,27 @@ func attack_nearest_enemy(unit_id: int, requesting_player_id: int = -1) -> bool:
 	cq.enqueue(UnitActionAttack.create_focused(target, PLAYER_INITIATIVE_BONUS))
 	return true
 
+# =================================================================
+#  REACTIVE BEHAVIOR PLANS  (forward to BehaviorPlanner)
+# =================================================================
+
+## Register a list of (when, do, priority) rules on a unit.  Every
+## TickManager tick the planner picks the highest-priority matching
+## rule and dispatches it.  Pass [] to clear.
+func set_behavior_plan(unit_id: int, rules: Array, requesting_player_id: int = -1) -> bool:
+	var bp = get_node_or_null("/root/BehaviorPlanner")
+	if bp == null:
+		push_error("ActionGateway.set_behavior_plan: BehaviorPlanner not loaded.")
+		return false
+	return bp.set_behavior(unit_id, rules, requesting_player_id)
+
+func clear_behavior_plan(unit_id: int, _requesting_player_id: int = -1) -> bool:
+	var bp = get_node_or_null("/root/BehaviorPlanner")
+	if bp == null:
+		return false
+	bp.clear_behavior(unit_id)
+	return true
+
 ## Trigger an AoE explosion at a world position centred at `center`.
 ## Hostiles within `radius` take linearly-falling damage.
 func explode_at(unit_id: int, center: Vector2, radius: float = 64.0,
@@ -311,10 +332,24 @@ func execute_plan(plan: Dictionary) -> bool:
 	var plan_id: String = plan.get("plan_id", "unknown")
 	var plan_player_id: int = int(plan.get("player_id", -1))
 	var commands: Array = plan.get("commands", [])
+	var behaviors: Array = plan.get("behaviors", [])
 
-	if commands.is_empty():
+	# Register any reactive behavior blocks first so they are armed before
+	# the imperative commands kick in.
+	# Format:  "behaviors": [ {"unit_id": 1, "rules": [...]}, ... ]
+	for b in behaviors:
+		var bd: Dictionary = b
+		var uid := int(bd.get("unit_id", -1))
+		var rules: Array = bd.get("rules", [])
+		set_behavior_plan(uid, rules, plan_player_id)
+
+	if commands.is_empty() and behaviors.is_empty():
 		push_warning("ActionGateway.execute_plan: empty command list.")
 		return false
+	if commands.is_empty():
+		# Behavior-only plan; nothing to dispatch immediately.
+		plan_execution_finished.emit(plan_id)
+		return true
 
 	for cmd in commands:
 		var uid: int = int(cmd.get("unit_id", -1))

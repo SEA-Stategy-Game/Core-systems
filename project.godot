@@ -42,6 +42,7 @@ project/assembly_name="Core"
 PlanReceiver="*res://Logic/PlanReceiver.gd"
 WinConditionChecker="*res://Logic/WinConditionChecker.gd"
 FogManager="*res://Entities/Map/FogOfWar.gd"
+BehaviorPlanner="*res://Logic/BehaviorPlanner.gd"
 
 [dotnet]
 
