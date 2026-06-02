@@ -33,6 +33,7 @@ PlayerManager="*res://Logic/Multiplayer/player_manager.gd"
 GameRoomManager="*res://Logic/Multiplayer/game_room_manager.gd"
 WinConditionChecker="*res://Logic/WinConditionChecker.gd"
 FogManager="*res://Entities/Map/FogOfWar.gd"
+BehaviorPlanner="*res://Logic/BehaviorPlanner.gd"
 
 [dotnet]
 

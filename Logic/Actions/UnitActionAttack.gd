@@ -89,10 +89,14 @@ func tick(unit: CharacterBody2D, delta: float) -> int:
 	if not is_instance_valid(_target_node) and unit.has_method("get_closest_hostile"):
 		_target_node = unit.get_closest_hostile()
 
-	# If no specific target and nothing in our Area2D, combat is complete
+	# Fall back to a global scene scan when the Area2D has nothing in range
+	if not is_instance_valid(_target_node):
+		_target_node = _find_nearest_enemy(unit)
+
+	# Still nothing — no enemies anywhere, combat is complete
 	if not is_instance_valid(_target_node):
 		_state = ActionState.COMPLETED
-		print("[COMBAT_LOG] Unit ", _get_uid(unit), " no hostiles. Exiting combat.")
+		print("[COMBAT_LOG] Unit ", _get_uid(unit), " no hostiles anywhere. Exiting combat.")
 		if unit.has_node("AnimationPlayer"):
 			unit.get_node("AnimationPlayer").stop()
 		return _state
@@ -209,6 +213,28 @@ func serialize() -> Dictionary:
 
 func _get_uid(unit: CharacterBody2D) -> int:
 	return unit.entity_id if "entity_id" in unit else unit.get_instance_id()
+
+const SEARCH_RADIUS := 300.0
+
+func _find_nearest_enemy(unit: CharacterBody2D) -> Node2D:
+	var best: Node2D = null
+	var best_dist := SEARCH_RADIUS * SEARCH_RADIUS
+	for other in unit.get_tree().get_nodes_in_group("units"):
+		if other == unit:
+			continue
+		if not other.has_method("get_player_id"):
+			continue
+		if other.get_player_id() == _attacker_player_id:
+			continue
+		if other.get_player_id() == -1:
+			continue
+		if other.has_method("is_alive") and not other.is_alive():
+			continue
+		var d = unit.global_position.distance_squared_to(other.global_position)
+		if d < best_dist:
+			best_dist = d
+			best = other
+	return best
 
 # -----------------------------------------------------------------
 # Factories
