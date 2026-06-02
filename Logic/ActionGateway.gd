@@ -45,6 +45,11 @@ func sense() -> SenseAPI:
 # -----------------------------------------------------------------
 var _chop_return_state: Dictionary = {}
 
+# -----------------------------------------------------------------
+#  Entity ID Generation
+# -----------------------------------------------------------------
+var _next_entity_id: int = 1000 # Start high to avoid collision with scene-placed entities
+
 # =================================================================
 #  HIGH-LEVEL WRAPPERS  ("Task" layer)
 # =================================================================
@@ -359,6 +364,9 @@ func _ai_get_plan() -> Dictionary:
 func get_all_units() -> Array:
 	return sense().get_all_units()
 
+func get_player_units(pid: int) -> Array:
+	return sense().get_player_units(pid)
+
 func get_idle_units(pid: int) -> Array:
 	return sense().get_idle_units(pid)
 
@@ -411,7 +419,7 @@ func _validate_ownership(unit: Node, requesting_player_id: int) -> bool:
 func _find_unit(unit_id: int) -> CharacterBody2D:
 	for unit in get_tree().get_nodes_in_group("units"):
 		if unit is CharacterBody2D:
-			var uid = unit.entity_id if "entity_id" in unit else unit.get_instance_id()
+			var uid = _get_uid(unit)
 			if uid == unit_id:
 				return unit
 	push_warning("ActionGateway: Unit ", unit_id, " not found.")
@@ -429,7 +437,7 @@ func _find_resource(resource_id: int) -> Node2D:
 
 	for root in search_roots:
 		for child in root.get_children():
-			var cid = child.entity_id if "entity_id" in child else child.get_instance_id()
+			var cid = _get_uid(child)
 			if cid == resource_id:
 				return child
 	return null
@@ -443,7 +451,7 @@ func _find_entity(eid: int) -> Node2D:
 
 	# Check buildings
 	for bld in get_tree().get_nodes_in_group("buildings"):
-		var bid = bld.entity_id if "entity_id" in bld else bld.get_instance_id()
+		var bid = _get_uid(bld)
 		if bid == eid:
 			return bld
 
@@ -530,27 +538,32 @@ func _find_nearest_barracks(pos: Vector2, pid: int) -> Node2D:
 	return closest
 
 func _get_uid(node: Node) -> int:
-	return node.entity_id if "entity_id" in node else node.get_instance_id()
-
+	if "entity_id" in node and node.entity_id > 0:
+		return node.entity_id
+	if node.has_meta("entity_id") and node.get_meta("entity_id") > 0:
+		return node.get_meta("entity_id")
+	# Fallback for nodes that might not have a persistent ID yet
+	return node.get_instance_id()
 func _get_or_create_queue(unit: CharacterBody2D) -> CommandQueue:
+	var cq: CommandQueue
 	if "command_queue" in unit and unit.command_queue != null:
-		return unit.command_queue
+		cq = unit.command_queue
+	else:
+		cq = CommandQueue.new()
+		var uid = _get_uid(unit)
+		cq.setup(unit, uid)
+		if "command_queue" in unit:
+			unit.command_queue = cq
+		else:
+			unit.set_meta("command_queue", cq)
 
-	var cq = CommandQueue.new()
-	var uid = unit.entity_id if "entity_id" in unit else unit.get_instance_id()
-	cq.setup(unit, uid)
-
-	# Wire signals
-	cq.action_completed.connect(_on_action_completed)
-	cq.action_failed.connect(_on_action_failed)
+	# Wire signals, guards prevent duplicates from repeated calls
+	if not cq.action_completed.is_connected(_on_action_completed):
+		cq.action_completed.connect(_on_action_completed)
+	if not cq.action_failed.is_connected(_on_action_failed):
+		cq.action_failed.connect(_on_action_failed)
 	if not cq.queue_empty.is_connected(_on_queue_empty):
 		cq.queue_empty.connect(_on_queue_empty)
-
-	# Store on the unit
-	if "command_queue" in unit:
-		unit.command_queue = cq
-	else:
-		unit.set_meta("command_queue", cq)
 
 	return cq
 
@@ -610,3 +623,47 @@ func _initiate_return_to_base(unit_id: int, pid: int) -> void:
 	var cq: CommandQueue = _get_or_create_queue(unit)
 	cq.enqueue(move_action)
 	print("[IDLE_REPORT] Unit ", unit_id, " returning to barracks at ", barracks.global_position)
+
+func _get_next_entity_id() -> int:
+	var id = _next_entity_id
+	_next_entity_id += 1
+	return id
+
+# =================================================================
+#  SPAWNING UTILITIES
+# =================================================================
+
+## Instantiates an initial unit for a new player and adds it to the World.
+func spawn_initial_unit(player_id: int, scene_path: String = "res://Entities/Units/unit.tscn") -> Node2D:
+	var unit_scene = load(scene_path)
+	if not unit_scene:
+		push_error("ActionGateway.spawn_initial_unit: Could not load scene " + scene_path)
+		return null
+		
+	var unit = unit_scene.instantiate()
+	
+	# Assign the correct ownership
+	unit.set("player_id", player_id)
+	unit.set_meta("player_id", player_id)
+		
+	# Assign a unique entity_id to prevent dictionary key overwrites in state payloads
+	var new_id = _get_next_entity_id()
+	unit.set("entity_id", new_id)
+	unit.set_meta("entity_id", new_id)
+		
+	# Ensure the unit is discoverable by SenseAPI queries
+	unit.add_to_group("units")
+	
+	var random_spawn_point = Vector2(randf_range(100.0, 500.0), randf_range(100.0, 500.0))
+	unit.global_position = random_spawn_point
+	
+	# Robustly fetch the Units container from the active scene
+	var current_scene = get_tree().current_scene
+	var units_container = current_scene.get_node_or_null("Units") if current_scene else null
+	if units_container:
+		units_container.add_child(unit)
+		print("[SPAWN] Initial unit created for Player ", player_id, " at ", random_spawn_point)
+	else:
+		push_error("ActionGateway.spawn_initial_unit: Could not find 'Units' container in current scene.")
+		
+	return unit
