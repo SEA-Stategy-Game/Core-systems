@@ -27,10 +27,7 @@ static func _get_strategy() -> IStateSerializer:
 static func save_state(scene_tree: SceneTree) -> bool:
 	var state: Dictionary = {
 		"timestamp": Time.get_unix_time_from_system(),
-		"resources": {
-			"wood": Game.Wood,
-			"stone": Game.Stone
-		},
+		"resources": Game.player_resources,
 		"units": []
 	}
 
@@ -65,9 +62,8 @@ static func restore_queues(scene_tree: SceneTree, state: Dictionary) -> void:
 		return
 
 	# Restore global resources
-	if "resources" in state:
-		Game.Wood = int(state["resources"].get("wood", 0))
-		Game.Stone = int(state["resources"].get("stone", 0))
+	if "player_resources" in state:
+		Game.player_resources = state["player_resources"]
 
 	# Restore per-unit queues
 	if "units" not in state:

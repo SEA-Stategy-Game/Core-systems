@@ -18,6 +18,9 @@ func _ready():
 
 		if has_node("Camera2D"):
 			$Camera2D.area_selected.connect(_on_area_selected)
+	if has_node("Camera2D"):
+		$Camera2D.area_selected.connect(_on_area_selected)
+
 	
 	var stone = StoneResource.new()
 	var new_id = ActionGateway.get_next_entity_id()
