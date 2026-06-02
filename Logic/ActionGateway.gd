@@ -254,6 +254,20 @@ func attack_nearest_enemy(unit_id: int, requesting_player_id: int = -1) -> bool:
 	cq.enqueue(UnitActionAttack.create_focused(target, PLAYER_INITIATIVE_BONUS))
 	return true
 
+## Trigger an AoE explosion at a world position centred at `center`.
+## Hostiles within `radius` take linearly-falling damage.
+func explode_at(unit_id: int, center: Vector2, radius: float = 64.0,
+		damage: int = 25, requesting_player_id: int = -1) -> bool:
+	var unit = _find_unit(unit_id)
+	if unit == null:
+		return false
+	if not _validate_ownership(unit, requesting_player_id):
+		return false
+	var action = UnitActionExplode.create(center, radius, damage)
+	var cq: CommandQueue = _get_or_create_queue(unit)
+	cq.enqueue(action)
+	return true
+
 ## Convenience composite: chop nearest tree, then march back to the unit's
 ## nearest barracks and idle.  Mirrors `go_chop_tree_and_return` but
 ## without requiring a tree_id.
@@ -339,6 +353,11 @@ func execute_plan(plan: Dictionary) -> bool:
 				attack_nearest_enemy(uid, plan_player_id)
 			"CHOP_NEAREST_AND_RETURN":
 				go_chop_nearest_tree_and_return(uid, plan_player_id)
+			"EXPLODE":
+				var t = cmd.get("target", {})
+				var radius = float(cmd.get("radius", 64.0))
+				var dmg = int(cmd.get("damage", 25))
+				explode_at(uid, Vector2(t.get("x", 0), t.get("y", 0)), radius, dmg, plan_player_id)
 			_:
 				push_warning("ActionGateway: Unknown action '", action_str, "' in plan.")
 

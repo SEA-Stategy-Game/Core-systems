@@ -2,15 +2,29 @@ extends Node
 
 ## Authoritative server gateway. Manages the multiplayer peer, serialises world
 ## state, and distributes it to connected clients via RPC.
+##
+## NOTE: registered as an autoload, so this node enters the tree BEFORE the
+## main World scene. We therefore cannot use @onready here; the World nodes
+## have to be resolved lazily on first broadcast.
 
-@onready var units = get_node("/root/World/Units")     
-@onready var objects = get_node("/root/World/NavigationRegion2D/TileMapLayer/Objects")  
-@onready var buildings = get_node("/root/World/NavigationRegion2D/TileMapLayer/Houses") 
-@onready var map_manager = get_node("/root/World/NavigationRegion2D/TileMapLayer") 
+var units: Node = null
+var objects: Node = null
+var buildings: Node = null
+var map_manager: Node = null
 
 var MAX_PLAYERS: int = 32
 var DEFAULT_PORT: int = 12345
 var queued_objects: Array[Dictionary] = []
+
+## Returns true if the World scene is loaded and we have a Units container.
+func _resolve_world_refs() -> bool:
+	if units != null and is_instance_valid(units):
+		return true
+	units = get_node_or_null("/root/World/Units")
+	objects = get_node_or_null("/root/World/NavigationRegion2D/TileMapLayer/Objects")
+	buildings = get_node_or_null("/root/World/NavigationRegion2D/TileMapLayer/Houses")
+	map_manager = get_node_or_null("/root/World/NavigationRegion2D/TileMapLayer")
+	return units != null
 
 func _ready():
 	# Get the port from command line or use default
@@ -173,25 +187,28 @@ func ai_chop_nearest_and_return(unit_id: int, pid: int) -> void:
 ## Broadcasts a dynamic state update to all connected peers.
 ## [param state] A dictionary containing the current dynamic world state.
 func broadcast_state(tick: int) -> void:
+	if multiplayer.multiplayer_peer == null:
+		return  # No server running yet (e.g. solo play).
 	var peers = multiplayer.get_peers()
-	if len(peers) > 0 :
-		print("Broadcasting to peers: ", peers)
-		
-		# TODO:
-		# Expand the state to also include map-data
-		# Create unit paths:
-		var state = {
-			"current_tick" : tick,
-			# Always send all units since the majority are likely to be dynamic 
-			"units" : units.get_children().map(func(x): return build_dynamic_unit(x)),
-			# For objects, we only send objects that are modified since there are a lot of these and they are likely to be mostly static 
-			"modified_objects" : queued_objects
-		}
-		queued_objects = []
-		#print("Dynamic state: ", state)
-		var bytes = JSON.stringify(state).to_utf8_buffer()
-		var compressed = bytes.compress(FileAccess.COMPRESSION_GZIP)
-		rpc("receive_state", compressed)
+	if peers.is_empty():
+		return
+	if not _resolve_world_refs():
+		return  # World not loaded yet.
+
+	# TODO:
+	# Expand the state to also include map-data
+	# Create unit paths:
+	var state = {
+		"current_tick" : tick,
+		# Always send all units since the majority are likely to be dynamic
+		"units" : units.get_children().map(func(x): return build_dynamic_unit(x)),
+		# For objects, we only send objects that are modified since there are a lot of these and they are likely to be mostly static
+		"modified_objects" : queued_objects
+	}
+	queued_objects = []
+	var bytes = JSON.stringify(state).to_utf8_buffer()
+	var compressed = bytes.compress(FileAccess.COMPRESSION_GZIP)
+	rpc("receive_state", compressed)
 
 func build_dynamic_unit(unit):
 	return {
@@ -214,6 +231,8 @@ func _on_ressource_modified(object):
 ## RPC is reliable to ensure the full state arrives intact.
 @rpc("any_peer", "call_remote", "reliable")
 func on_static_state_requested() -> void:
+	if not _resolve_world_refs():
+		return
 	print("Static state requested")
 	var requesting_peer = multiplayer.get_remote_sender_id()
 	var state = build_entire_state()
@@ -224,6 +243,8 @@ func on_static_state_requested() -> void:
 
 ## Builds a dictionary representing the full current world state
 func build_entire_state() -> Dictionary:
+	if not _resolve_world_refs():
+		return {}
 	return {
 		"units"   : units.get_children().map(func(x): return serialize_unit(x)),
 		"objects" : objects.get_children().map(func(x): return serialize_object(x)),
