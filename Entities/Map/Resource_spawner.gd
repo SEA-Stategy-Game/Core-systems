@@ -1,8 +1,7 @@
 extends Node
 
-@onready var stone_scene = preload("res://Entities/Resource/Stone.tscn")
-@onready var tree_scene = preload("res://Entities/Resource/Tree.tscn")
-@onready var objects = get_tree().get_root().get_node("World/NavigationRegion2D/TileMapLayer/Objects")
+var stone_scene = preload("res://Entities/Resource/Stone.tscn")
+var tree_scene  = preload("res://Entities/Resource/Tree.tscn")
 
 var rng = RandomNumberGenerator.new();
 
@@ -54,10 +53,12 @@ func sum(accum, number):
 
 func spawn_resource(type: MapTile.TerrainType) -> MapResource:
 	var table_type = spawn_table[type]
-	# First check if the field is selected for spawning a resource
 	if rng.randf() <= table_type["spawn_chance"]:
-		# Then check which kind of resource is picked
-		var picked_num = rng.randi_range(0, table_type["choice_array"].size()-1) 
+		var objects = get_tree().get_root().get_node_or_null("World/NavigationRegion2D/TileMapLayer/Objects")
+		if objects == null:
+			push_warning("ResourceSpawner: Objects node not found — skipping resource spawn")
+			return null
+		var picked_num = rng.randi_range(0, table_type["choice_array"].size()-1)
 		match table_type["choice_array"][picked_num]:
 			"tree":
 				var tree = tree_scene.instantiate()
