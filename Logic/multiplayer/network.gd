@@ -180,6 +180,14 @@ func ai_chop_nearest_and_return(unit_id: int, pid: int) -> void:
 	if gw == null: return
 	gw.go_chop_nearest_tree_and_return(unit_id, pid)
 
+## AoE explosion at a world position.  Linear-falloff damage.
+@rpc("any_peer", "call_remote", "reliable")
+func ai_explode_at(unit_id: int, x: float, y: float,
+		radius: float, damage: int, pid: int) -> void:
+	var gw = get_node_or_null("/root/ActionGateway")
+	if gw == null: return
+	gw.explode_at(unit_id, Vector2(x, y), radius, damage, pid)
+
 # -----------------------------------------------------------------------
 # Server functions
 # -----------------------------------------------------------------------
