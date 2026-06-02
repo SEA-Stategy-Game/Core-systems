@@ -21,10 +21,18 @@ const ActionState = IUnitAction.ActionState
 ## Area2D hasn't fired body_entered (defensive against layer mismatch).
 const FALLBACK_MELEE_DIST: float = 18.0
 
-## Default chase speed for the in-action melee approach (px/s).
-## Matches the unit's regular pathfind movement so chase doesn't look like
-## a teleport.
-const CHASE_SPEED: float = 50.0
+## How far the target has to move before we re-set the NavigationAgent2D
+## destination.  Avoids recomputing a path every physics frame.
+const PATH_REFRESH_DIST: float = 16.0
+
+## When the navigation finishes more than this far from the actual target,
+## the target is treated as unreachable (e.g. across water) and combat
+## bails out cleanly so the unit doesn't pace at the shore forever.
+const UNREACHABLE_DIST: float = 64.0
+
+## Maximum seconds we'll spend chasing before giving up.  Re-set every time
+## we visibly close on the target.
+const CHASE_TIMEOUT: float = 8.0
 
 var _state: int = ActionState.PENDING
 var _attack_damage: int = 10
@@ -35,6 +43,11 @@ var _initiative_bonus: float = 1.0
 
 ## Optional: specific target to focus on. If null, auto-acquires closest.
 var _target_node: Node2D = null
+
+## Chase state.
+var _last_target_path: Vector2 = Vector2.INF
+var _chase_timer: float = 0.0
+var _last_chase_dist: float = INF
 
 # -----------------------------------------------------------------
 # IUnitAction contract
@@ -54,6 +67,9 @@ func start(unit: CharacterBody2D, target: Node2D) -> void:
 		_attacker_player_id = unit.player_id
 
 	_cooldown_timer = 0.0  # Allow immediate first attack
+	_last_target_path = Vector2.INF
+	_chase_timer = 0.0
+	_last_chase_dist = INF
 	print("[COMBAT_LOG] Unit ", _get_uid(unit), " entering combat (initiative x",
 		_initiative_bonus, ").")
 
@@ -92,22 +108,59 @@ func tick(unit: CharacterBody2D, delta: float) -> int:
 		in_range = true
 
 	if not in_range:
-		# Chase the target.
+		# Chase the target -- but USE the NavigationAgent2D so the path goes
+		# AROUND water/obstacles instead of stepping into them and snapping
+		# back at the shoreline.
+		var nav_agent: NavigationAgent2D = unit.get_node_or_null("NavigationAgent2D")
+		if nav_agent != null and unit.has_method("set_target") and unit.has_method("pathfind_and_move"):
+			# Only re-set the target position when it has moved noticeably,
+			# otherwise we trash the agent's path every physics frame.
+			var target_pos: Vector2 = _target_node.global_position
+			if _last_target_path == Vector2.INF \
+					or target_pos.distance_to(_last_target_path) > PATH_REFRESH_DIST:
+				unit.set_target(target_pos)
+				_last_target_path = target_pos
+
+			# If the navigation thinks we've arrived but we're still far from
+			# the actual target, the target is unreachable from here
+			# (typically: across water with no land bridge).  Bail out so we
+			# don't loop forever.
+			if nav_agent.is_navigation_finished() and dist > UNREACHABLE_DIST:
+				print("[COMBAT_LOG] Unit ", _get_uid(unit),
+					" target unreachable (dist ", int(dist), "). Exiting combat.")
+				_state = ActionState.COMPLETED
+				if unit.has_node("AnimationPlayer"):
+					unit.get_node("AnimationPlayer").stop()
+				return _state
+
+			# Follow the computed path one step.
+			if not nav_agent.is_navigation_finished():
+				unit.pathfind_and_move(delta)
+
+			# Walk animation
+			if unit.has_node("AnimationPlayer"):
+				var anim: AnimationPlayer = unit.get_node("AnimationPlayer")
+				if anim.has_animation("Walk Down") and not anim.is_playing():
+					anim.play("Walk Down")
+
+			# Watchdog: if we haven't closed the gap in CHASE_TIMEOUT seconds,
+			# stop chasing (path keeps failing).
+			_chase_timer += delta
+			if dist + 1.0 < _last_chase_dist:
+				_last_chase_dist = dist
+				_chase_timer = 0.0
+			if _chase_timer >= CHASE_TIMEOUT:
+				print("[COMBAT_LOG] Unit ", _get_uid(unit),
+					" chase timed out. Exiting combat.")
+				_state = ActionState.COMPLETED
+				return _state
+
+			return _state
+
+		# Fallback (no NavigationAgent2D on the unit): old straight-line chase.
 		var direction = unit.global_position.direction_to(_target_node.global_position)
-		unit.velocity = direction * CHASE_SPEED
+		unit.velocity = direction * 50.0
 		unit.move_and_slide()
-
-		# Keep the chaser on the navmesh so it can't walk through water tiles.
-		var nav_agent = unit.get_node_or_null("NavigationAgent2D")
-		if nav_agent != null:
-			unit.global_position = NavigationServer2D.map_get_closest_point(
-				nav_agent.get_navigation_map(), unit.global_position)
-
-		# Play walk animation
-		if unit.has_node("AnimationPlayer"):
-			var anim: AnimationPlayer = unit.get_node("AnimationPlayer")
-			if anim.has_animation("Walk Down") and not anim.is_playing():
-				anim.play("Walk Down")
 		return _state
 
 	# In range -- stop and attack on cooldown
