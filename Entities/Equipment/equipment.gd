@@ -25,6 +25,7 @@ class_name Equipment
 @export var armor: int = 0                           ## flat damage reduction
 @export var speed_bonus: float = 0.0                 ## fractional, applied on top of base
 @export var vision_bonus_tiles: int = 0
+@export var attack_range_scale: float = 1.0          ## multiplies the unit's Range Area2D shape
 
 var equipped_to: Node = null
 
@@ -48,6 +49,10 @@ func apply_to(unit: Node) -> void:
 		unit.speed = int(round(unit.speed * (1.0 + speed_bonus)))
 	if "vision_range_tiles" in unit:
 		unit.vision_range_tiles += vision_bonus_tiles
+	if attack_range_scale != 1.0:
+		var range_shape = unit.get_node_or_null("Range/CollisionShape2D")
+		if range_shape:
+			range_shape.scale *= attack_range_scale
 	print("[EQUIP] '", equipment_name, "' applied to ",
 		unit.entity_id if "entity_id" in unit else unit.get_instance_id(),
 		"  (+", attack_damage_bonus, " dmg, x", attack_cooldown_multiplier,
@@ -66,6 +71,10 @@ func remove_from(unit: Node) -> void:
 		unit.speed = int(round(unit.speed / (1.0 + speed_bonus)))
 	if "vision_range_tiles" in unit:
 		unit.vision_range_tiles -= vision_bonus_tiles
+	if attack_range_scale != 1.0 and attack_range_scale != 0.0:
+		var range_shape = unit.get_node_or_null("Range/CollisionShape2D")
+		if range_shape:
+			range_shape.scale /= attack_range_scale
 	equipped_to = null
 	print("[EQUIP] '", equipment_name, "' removed from ",
 		unit.entity_id if "entity_id" in unit else unit.get_instance_id())
@@ -83,4 +92,5 @@ static func create(name: String, stats: Dictionary = {}) -> Equipment:
 	eq.armor = int(stats.get("armor", 0))
 	eq.speed_bonus = float(stats.get("speed_bonus", 0.0))
 	eq.vision_bonus_tiles = int(stats.get("vision_bonus_tiles", 0))
+	eq.attack_range_scale = float(stats.get("attack_range_scale", 1.0))
 	return eq
