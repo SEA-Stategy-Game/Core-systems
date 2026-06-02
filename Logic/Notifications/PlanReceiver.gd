@@ -5,6 +5,10 @@ extends Node
 const LISTEN_PORT  = 8085
 const PLANNING_URL = "http://127.0.0.1:5000"
 
+const BUILDING_SCENES: Dictionary = {
+	"Barracks": "res://Houses/Barracks.tscn",
+}
+
 ## unit_id (String) -> { "steps": Array, "index": int }
 var _store: Dictionary = {}
 
@@ -32,6 +36,8 @@ func _ready() -> void:
 
 	add_child(_receiver_strategy)
 	_receiver_strategy.plan_notified.connect(_on_plan_notified)
+	if _receiver_strategy.has_signal("game_state_requested"):
+		_receiver_strategy.game_state_requested.connect(_serve_game_state)
 
 	_sense = SenseAPI.new(get_tree())
 
@@ -184,44 +190,37 @@ func _dispatch_step(unit_id: int, step: Dictionary) -> void:
 		"MoveTo":
 			var pos = Vector2(float(params.get("x", 0)), float(params.get("y", 0)))
 			dispatched = gateway.move_unit(unit_id, pos)
+		"Attack":
+			var mode = params.get("mode", "nearest")
+			if mode == "move":
+				var pos = Vector2(float(params.get("x", 0)), float(params.get("y", 0)))
+				dispatched = gateway.attack_move(unit_id, pos)
+			elif mode == "target":
+				var tid = int(params.get("target_id", -1))
+				dispatched = gateway.attack_target(unit_id, tid)
+			else:
+				dispatched = gateway.attack_nearest_enemy(unit_id)
 		"Harvest":
 			var resource_type: String = params.get("resource_type", "")
-			if resource_type != "":
-				var entry = _store.get(str(unit_id), {})
-				var player_id_int = int(entry.get("player_id", "-1"))
-				var unit_node = gateway._find_unit_for_player(unit_id, player_id_int)
-				if unit_node == null:
-					push_warning("PlanReceiver: Harvest — unit %d not found for player %d" % [unit_id, player_id_int])
-				else:
-					var nearest = _find_nearest_resource_by_type(resource_type, unit_node.global_position)
-					if nearest == null:
-						push_warning("PlanReceiver: no %s found near unit %d" % [resource_type, unit_id])
-					else:
-						print("PlanReceiver: found nearest %s, enqueuing move+harvest" % resource_type)
-						var cq: CommandQueue = gateway._get_or_create_queue(unit_node)
-						cq.enqueue(UnitActionMove.create_to_node(nearest))
-						cq.enqueue(UnitActionHarvest.create(nearest))
-						dispatched = true
+			var mode: String          = params.get("mode", "")
+			if resource_type == "tree" and mode == "return":
+				dispatched = gateway.go_chop_nearest_tree_and_return(unit_id)
+			elif resource_type == "tree":
+				dispatched = gateway.go_chop_nearest_tree(unit_id)
+			elif resource_type == "stone":
+				dispatched = gateway.go_mine_nearest_stone(unit_id)
 			else:
 				var tid = int(params.get("target_id", -1))
 				dispatched = gateway.go_chop_tree(unit_id, tid)
-		"Attack":
-			var entry = _store.get(str(unit_id), {})
-			var player_id_int = int(entry.get("player_id", "-1"))
-			var unit_node = gateway._find_unit_for_player(unit_id, player_id_int)
-			if unit_node:
-				var cq: CommandQueue = gateway._get_or_create_queue(unit_node)
-				cq.enqueue(UnitActionAttack.create_auto())
-				dispatched = true
-			else:
-				push_warning("PlanReceiver: Attack — unit %d not found for player %d" % [unit_id, player_id_int])
 		"Construct":
-			dispatched = gateway.go_construct(
-				unit_id,
-				params.get("scene", ""),
-				Vector2(float(params.get("x", 0)), float(params.get("y", 0))),
-				float(params.get("duration", 10.0))
-			)
+			var alias: String      = params.get("scene", "")
+			var scene_path: String = BUILDING_SCENES.get(alias, alias)
+			var pos = Vector2(float(params.get("x", 0)), float(params.get("y", 0)))
+			var duration = float(params.get("duration", 10.0))
+			if scene_path.is_empty():
+				push_warning("PlanReceiver: unknown building '%s'" % alias)
+			else:
+				dispatched = gateway.go_construct(unit_id, scene_path, pos, duration)
 		_:
 			push_warning("PlanReceiver: unknown action_type '%s'" % action_type)
 
@@ -259,43 +258,62 @@ func _execute_if_step(unit_id: int, step: Dictionary) -> void:
 func _eval_condition(condition: String, unit_id: int, player_id_int: int) -> bool:
 	if _sense == null:
 		_sense = SenseAPI.new(get_tree())
-	var cond    = condition.strip_edges()
-	var gateway = get_node_or_null("/root/ActionGateway")
+	var cond       = condition.strip_edges()
+	var cond_lower = cond.to_lower()
+	var gateway    = get_node_or_null("/root/ActionGateway")
 
-	if cond.to_lower() == "enemy_nearby":
+	if cond_lower == "always":
+		return true
+
+	if cond_lower == "idle" or cond_lower == "busy":
+		var snap = _sense.get_unit(unit_id)
+		var is_idle = snap.get("is_idle", true)
+		return is_idle if cond_lower == "idle" else not is_idle
+
+	if cond_lower.begins_with("enemywithin ") or cond_lower.begins_with("noenemywithin "):
 		var unit_node = gateway._find_unit_for_player(unit_id, player_id_int) if gateway else null
 		if unit_node == null:
 			return false
-		for u in _sense.get_units_near(unit_node.global_position, 200.0):
+		var prefix_len = 12 if cond_lower.begins_with("enemywithin ") else 14
+		var dist = float(cond.substr(prefix_len))
+		var found = false
+		for u in _sense.get_units_near(unit_node.global_position, dist):
 			if int(u.get("player_id", -1)) != player_id_int and int(u.get("id", -1)) != unit_id:
-				return true
-		return false
+				found = true
+				break
+		return found if cond_lower.begins_with("enemywithin") else not found
 
-	if cond.to_lower() == "resources_nearby":
-		var unit_node = gateway._find_unit_for_player(unit_id, player_id_int) if gateway else null
-		if unit_node == null:
+	if cond_lower.begins_with("hpbelow ") or cond_lower.begins_with("hpabove "):
+		var snap   = _sense.get_unit(unit_id)
+		var hp     = float(snap.get("health",     100))
+		var max_hp = float(snap.get("max_health", 100))
+		if max_hp <= 0:
 			return false
-		return not _sense.get_resources_near(unit_node.global_position, 200.0).is_empty()
+		var threshold = float(cond.split(" ")[1])
+		return (hp / max_hp) < threshold if cond_lower.begins_with("hpbelow") \
+										 else (hp / max_hp) > threshold
 
-	var parts = cond.split(" ", false)
-	if parts.size() >= 3:
-		var subject = parts[0].to_lower()
-		var op      = parts[1]
-		var rhs     = float(parts[2]) if parts[2].is_valid_float() else 0.0
-		var lhs: float = 0.0
-		if subject == "stockpile.wood":
-			lhs = float(_sense.get_resources_stockpile().get("wood", 0))
-		elif subject == "stockpile.stone":
-			lhs = float(_sense.get_resources_stockpile().get("stone", 0))
-		elif subject == "unit.health":
-			lhs = float(_sense.get_unit(unit_id).get("health", 0))
-		match op:
-			">=": return lhs >= rhs
-			"<=": return lhs <= rhs
-			">":  return lhs > rhs
-			"<":  return lhs < rhs
-			"==": return is_equal_approx(lhs, rhs)
-			"!=": return not is_equal_approx(lhs, rhs)
+	var stockpile = _sense.get_resources_stockpile()
+	var wood  = int(stockpile.get("wood",  0))
+	var stone = int(stockpile.get("stone", 0))
+
+	if cond_lower == "wood > stone":  return wood > stone
+	if cond_lower == "stone > wood":  return stone > wood
+	if cond_lower == "wood >= stone": return wood >= stone
+	if cond_lower == "stone >= wood": return stone >= wood
+
+	var re = RegEx.new()
+	re.compile("^(wood|stone)\\s*(>=|<=|>|<|==)\\s*(\\d+)$")
+	var m = re.search(cond_lower)
+	if m:
+		var cur = float(wood if m.get_string(1) == "wood" else stone)
+		var val = float(m.get_string(3))
+		match m.get_string(2):
+			">":  return cur > val
+			"<":  return cur < val
+			">=": return cur >= val
+			"<=": return cur <= val
+			"==": return cur == val
 
 	push_warning("PlanReceiver: unrecognised condition '%s' — defaulting to false" % condition)
 	return false
@@ -311,3 +329,22 @@ func _find_nearest_resource_by_type(resource_type: String, origin: Vector2) -> N
 				best_dist = d
 				best = node
 	return best
+
+# ----------------------------------------------------------------
+# Game-state endpoint — served to Planning backend for entity validation
+# ----------------------------------------------------------------
+
+func _serve_game_state(peer: StreamPeerTCP) -> void:
+	if _sense == null:
+		_sense = SenseAPI.new(get_tree())
+	var units_arr: Array = []
+	var res_arr:   Array = []
+	for u in _sense.get_all_units():
+		units_arr.append({"id": str(u.get("id", u.get("entity_id", -1)))})
+	for r in _sense.get_world_resources():
+		res_arr.append({"id": str(r.get("id", r.get("entity_id", -1)))})
+	var body = JSON.stringify({"units": units_arr, "resources": res_arr})
+	var resp = ("HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n" +
+				"Content-Length: %d\r\nConnection: close\r\n\r\n%s") % [body.length(), body]
+	peer.put_data(resp.to_utf8_buffer())
+	peer.disconnect_from_host()
