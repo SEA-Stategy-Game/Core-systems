@@ -79,6 +79,10 @@ func on_player_registered(player_uuid: String) -> void:
 		var gateway = get_node_or_null("/root/ActionGateway")
 		if gateway:
 			gateway.spawn_initial_unit(local_id)
+			
+		// After the first player joins, emits a signal that marks the room as running
+		if PlayerManager.player_uuid_to_local_id.size() == 1:
+			GlobalSignals.game_room_running.emit()
 	
 	
 	rpc_id(peer_id, "receive_player_registration", local_id, Game.game_room_id)
