@@ -9,5 +9,6 @@ signal resource_destroyed(resource_id: int)
 # Game room lifecycle signals
 signal game_room_ready()
 signal game_room_running()
-signal game_room_ended(winner_local_id: int)
-signal game_room_crashed()
+signal game_room_ended(winner_local_id: int, reason: String)
+signal game_room_crashed(reason: String)
+signal game_room_shutdown()

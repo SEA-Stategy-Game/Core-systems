@@ -86,7 +86,7 @@ func _player_has_assets(pid: int) -> bool:
 func _declare_winner(pid: int, reason: String) -> bool:
 	Game.game_over = true
 	print("[GAME_OVER] Player ", pid, " wins via ", reason, ".")
-	GlobalSignals.game_room_ended.emit(pid)
+	GlobalSignals.game_room_ended.emit(pid, reason)
 	if Game.is_headless:
 		return true
 	var popup = WIN_POPUP_SCENE.instantiate()

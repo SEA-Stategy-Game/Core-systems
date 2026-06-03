@@ -47,6 +47,7 @@ func _start_server(port: int):
 	if error != OK:
 		var error_msg = error_string(error)
 		printerr("FATAL ERROR: Could not create server. Err: ", error_string(error))
+		GlobalSignals.game_room_crashed.emit("Server creation failed: %s" % error_msg)
 		get_tree().quit() # Closes the game if server can't be created
 		return # Prevents the rest of the function from running
 
@@ -339,6 +340,24 @@ func _get_port_from_args(default_port: int) -> int:
 				return value.to_int()
 	return default_port
 	
+# -----------------------------------------------------------------------
+# Process Lifecycle Hooks
+# -----------------------------------------------------------------------
+
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_CRASH:
+			print("[FATAL] Engine crash detected. Emitting crash signal.")
+			# This is a best-effort attempt as the process is unstable.
+			GlobalSignals.game_room_crashed.emit("Engine crash")
+		NOTIFICATION_WM_CLOSE_REQUEST:
+			print("[INFO] Window close request received. Shutting down.")
+			get_tree().quit() # Triggers a clean shutdown, which will call _exit_tree.
+
+func _exit_tree() -> void:
+	print("[INFO] Server shutting down gracefully.")
+	GlobalSignals.game_room_shutdown.emit()
+
 # -----------------------------------------------------------------------
 # Client RPC stubs
 # These functions are never executed on the server. They exist solely so
