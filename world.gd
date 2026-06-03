@@ -32,6 +32,8 @@ func _ready():
 	#	if mm:
 	#		mm.map_node = game_map
 	#		mm.tile_size = game_map.tile_size
+	
+	GlobalSignals.game_room_ready.emit()
 
 func get_units():
 	units = null
