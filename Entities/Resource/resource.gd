@@ -83,3 +83,10 @@ func on_finished_harvesting():
 	GlobalSignals.resource_destroyed.emit(self.entity_id)
 	queue_free()
 	nav_region.rebuild_nav()
+
+## Combat / explosion death path (Entity.take_damage -> die).
+## Harvesting uses on_finished_harvesting above; this covers a resource
+## being destroyed by damage so the signal still fires exactly once.
+func die() -> void:
+	GlobalSignals.resource_destroyed.emit(self.entity_id)
+	super()
