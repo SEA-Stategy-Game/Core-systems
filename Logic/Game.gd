@@ -11,12 +11,15 @@ extends Node
 
 @onready var spawn = preload("res://Entities/Interfaces/spawn_unit.tscn")
 
+var is_headless: bool = true
 var game_room_id: String = "testgame"
 
 func _init() -> void:
+	OS.set_environment("USE_REDIS", "true")
 	var env_game_id = OS.get_environment("GAME_ROOM_ID")
 	if env_game_id != "":
 		game_room_id = env_game_id
+	#is_headless = DisplayServer.get_name() == "headless" or OS.has_feature("dedicated_server") or "--server" in OS.get_cmdline_args()
 
 # ---------------------------------------------------------------
 #  Per-player stockpiles ( pid -> { "wood": int, "stone": int } )
@@ -190,6 +193,29 @@ func apply_player_upgrades_to_all_units(pid: int) -> void:
 # ---------------------------------------------------------------
 
 func spawnUnit(position, owning_player_id: int = 0):
+	if is_headless:
+		# In headless mode, bypass the UI popup and spawn directly if affordable.
+		if can_afford_spawn(owning_player_id):
+			spend_resources(owning_player_id, SPAWN_COST_WOOD, SPAWN_COST_STONE)
+			var unit_scene = load("res://Entities/Units/unit.tscn")
+			var unit = unit_scene.instantiate()
+			var units_node = get_tree().get_root().get_node_or_null("World/Units")
+			if not units_node:
+				units_node = Node2D.new()
+				units_node.name = "Units"
+				get_tree().get_root().get_node("World").add_child(units_node)
+			var new_id = ActionGateway.get_next_entity_id()
+			unit.set("entity_id", new_id)
+			unit.set("player_id", owning_player_id)
+			unit.position = position + Vector2(randf_range(-10, 10), randf_range(10, 20))
+			units_node.add_child(unit)
+			apply_player_upgrades_to_unit(owning_player_id, unit)
+			print("[BUILD_OK] Spawned unit ", new_id, " for player ", owning_player_id, " at ", unit.position)
+			GlobalSignals.unit_created.emit(unit)
+		else:
+			print("[BUILD_DENIED] Player ", owning_player_id, " cannot afford a unit spawn.")
+		return
+	
 	var path = get_tree().get_root().get_node_or_null("World/UI")
 	if path == null:
 		return

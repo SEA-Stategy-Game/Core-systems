@@ -38,6 +38,9 @@ var console_log: RichTextLabel
 var _last_action_type: String = ""
 
 func _ready() -> void:
+	if Game.is_headless:
+		queue_free()
+		return
 	_build_ui()
 
 	# Connect to ActionGateway for log lines
