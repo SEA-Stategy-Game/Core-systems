@@ -333,11 +333,17 @@ func serialize_buildings(building: Node) -> Dictionary:
 ## Helper function to parse command line arguments
 func _get_port_from_args(default_port: int) -> int:
 	var args = OS.get_cmdline_user_args()
-	for arg in args:
+	for i in range(args.size()):
+		var arg = args[i]
+		# Handle --port=12345
 		if arg.begins_with("--port="):
 			var value = arg.split("=")[1]
 			if value.is_valid_int():
 				return value.to_int()
+		# Handle --port 12345
+		elif arg == "--port":
+			if i + 1 < args.size() and args[i + 1].is_valid_int():
+				return args[i + 1].to_int()
 	return default_port
 	
 # -----------------------------------------------------------------------
