@@ -18,6 +18,7 @@ var server_port: int = 12345
 var queued_objects: Array[Dictionary] = []
 var _crash_signal_sent := false
 var _shutdown_reason := "Graceful shutdown"
+var _quit_is_in_progress := false
 
 ## Returns true if the World scene is loaded and we have a Units container.
 func _resolve_world_refs() -> bool:
@@ -370,8 +371,9 @@ func _notification(what: int) -> void:
 		# We handle it identically to the window close request.
 		1012, NOTIFICATION_WM_CLOSE_REQUEST:
 			# If a quit is already requested, do nothing to prevent loops.
-			if get_tree().is_quit_requested():
+			if _quit_is_in_progress:
 				return
+			_quit_is_in_progress = true
 
 			if what == 1012:
 				_shutdown_reason = "Process interrupted by OS signal"
@@ -379,7 +381,7 @@ func _notification(what: int) -> void:
 			else: # NOTIFICATION_WM_CLOSE_REQUEST
 				_shutdown_reason = "Window close request"
 				print("[INFO] Window close request received. Initiating graceful shutdown.")
-			
+
 			# Calling quit() will trigger _exit_tree(), which is the designated
 			# place for final actions before the application terminates.
 			get_tree().quit()
