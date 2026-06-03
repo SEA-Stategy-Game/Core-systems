@@ -2,41 +2,99 @@ extends Node
 
 const BASE_URL = "http://localhost:8080"
 
+var _http_request: HTTPRequest
+
 func _ready():
+	_http_request = HTTPRequest.new()
+	add_child(_http_request)
+
 	GlobalSignals.game_room_ready.connect(_on_game_room_ready)
 	GlobalSignals.game_room_running.connect(_on_game_room_running)
 	GlobalSignals.game_room_ended.connect(_on_game_room_ended)
 	GlobalSignals.game_room_crashed.connect(_on_game_room_crashed)
 
 func _set_room_status(status: String, winner: String = "", reason: String = ""):
+	# During shutdown (_exit_tree), the scene tree is being dismantled. Node-based
+	# asynchronous operations like HTTPRequest will fail. For the final "crashed" status
+	# on exit, we must use a blocking, low-level HTTPClient.
+	if status == "crashed":
+		_send_blocking_shutdown_status(status, reason)
+		return
+
 	var room_id = Game.game_room_id
-			
+
 	var url = BASE_URL + "/rooms/" + room_id + "/status"
-	
-	var http_status = HTTPRequest.new()
-	add_child(http_status)
-	
-	http_status.request_completed.connect(func(result, response_code, headers, body):
+
+	_http_request.request_completed.connect(func(result, response_code, headers, body):
 		if response_code == 200 or response_code == 201:
 			print("Successfully set room ", room_id, " status to ", status)
 		else:
 			print("Failed to set room status. Code: ", response_code)
-		http_status.queue_free()
-	)
-	
+	, CONNECT_ONE_SHOT)
+
 	var data = {"status": status}
 	if winner != "":
 		data["winner"] = winner
 	if reason != "":
 		data["statusReason"] = reason
-		
+
 	var json_data = JSON.stringify(data)
 	var custom_headers = ["Content-Type: application/json"]
-	
-	var err = http_status.request(url, custom_headers, HTTPClient.METHOD_POST, json_data)
+
+	var err = _http_request.request(url, custom_headers, HTTPClient.METHOD_POST, json_data)
 	if err != OK:
 		printerr("Could not initiate Set Status request.")
-		http_status.queue_free()
+
+func _send_blocking_shutdown_status(status: String, reason: String):
+	# This function uses the low-level HTTPClient to send a final, blocking status update.
+	# It is required because when the game engine is shutting down (in _exit_tree),
+	# the normal scene tree is being dismantled, and Node-based asynchronous operations
+	# like HTTPRequest will fail. This synchronous method ensures the message is sent
+	# before the application process terminates.
+	print("[SHUTDOWN] Sending blocking status update: ", status)
+	var http_client = HTTPClient.new()
+
+	# Manually parse BASE_URL to get host, port, and SSL status
+	var use_ssl = BASE_URL.begins_with("https")
+	var stripped_url = BASE_URL.trim_prefix("http://").trim_prefix("https://")
+	var host = stripped_url
+	var port = 80 if not use_ssl else 443
+	if ":" in stripped_url:
+		host = stripped_url.get_slice(":", 0)
+		port = stripped_url.get_slice(":", 1).to_int()
+
+	var tls_options = TLSOptions.client() if use_ssl else null
+	var err = http_client.connect_to_host(host, port, tls_options)
+	if err != OK:
+		printerr("[SHUTDOWN] HTTPClient connect_to_host failed to start.")
+		return
+
+	# Block and wait for connection to establish, with a timeout
+	var start_time = Time.get_ticks_msec()
+	while http_client.get_status() == HTTPClient.STATUS_CONNECTING or http_client.get_status() == HTTPClient.STATUS_RESOLVING:
+		http_client.poll()
+		OS.delay_msec(10) # Prevent busy-waiting which can starve the connection thread
+		if Time.get_ticks_msec() - start_time > 2000: # 2-second timeout
+			printerr("[SHUTDOWN] HTTPClient connection timed out.")
+			return
+
+	if http_client.get_status() != HTTPClient.STATUS_CONNECTED:
+		printerr("[SHUTDOWN] HTTPClient failed to connect. Status: ", http_client.get_status())
+		return
+
+	var room_id = Game.game_room_id
+	var url_path = "/rooms/" + room_id + "/status"
+	var data = {"status": status, "statusReason": reason}
+	var json_data = JSON.stringify(data)
+	# The Host header is required by many web servers.
+	var headers = ["Content-Type: application/json", "Host: " + host]
+
+	err = http_client.request(HTTPClient.METHOD_POST, url_path, headers, json_data)
+	if err != OK:
+		printerr("[SHUTDOWN] HTTPClient request failed to start.")
+		return
+	# The request is now in flight. We don't need to wait for the response as the app is closing.
+	print("[SHUTDOWN] Blocking status update request sent.")
 
 func _on_game_room_ready():
 	if Game.game_room_id.begins_with("test"):
@@ -46,36 +104,31 @@ func _on_game_room_ready():
 
 func _register_manual_game():
 	var url = BASE_URL + "/rooms"
-	
-	var http_register = HTTPRequest.new()
-	add_child(http_register)
-	
-	http_register.request_completed.connect(func(result, response_code, headers, body):
+
+	_http_request.request_completed.connect(func(result, response_code, headers, body):
 		if response_code == 200 or response_code == 201:
 			print("Successfully registered manual room testgame")
 			# Now set status to ready
 			_set_room_status("ready")
 		else:
 			print("Failed to register manual room. Code: ", response_code)
-		http_register.queue_free()
-	)
-	
+	, CONNECT_ONE_SHOT)
+
 	var port = Networking.server_port
-			
+
 	var data = {
 		"roomId": Game.game_room_id,
 		"address": "127.0.0.1",
 		"port": port,
 		"maxNumberOfPlayer": Networking.MAX_PLAYERS
 	}
-	
+
 	var json_data = JSON.stringify(data)
 	var custom_headers = ["Content-Type: application/json"]
-	
-	var err = http_register.request(url, custom_headers, HTTPClient.METHOD_POST, json_data)
+
+	var err = _http_request.request(url, custom_headers, HTTPClient.METHOD_POST, json_data)
 	if err != OK:
 		printerr("Could not initiate Register Manual Game request.")
-		http_register.queue_free()
 
 func _on_game_room_running():
 	_set_room_status("running")
@@ -91,21 +144,14 @@ func _on_game_room_crashed(reason: String):
 
 func join_player_to_room(room_id: String, player_id: String):
 	var url = BASE_URL + "/rooms/" + room_id + "/players/" + player_id + "/join"
-	
-	# Create a temporary HTTPRequest node for this specific call
-	var http_join = HTTPRequest.new()
-	add_child(http_join)
-	
-	# Connect to a local lambda or function to clean up the node after completion
-	http_join.request_completed.connect(func(result, response_code, headers, body):
+
+	_http_request.request_completed.connect(func(result, response_code, headers, body):
 		if response_code == 200 or response_code == 201:
 			print("Successfully joined player ", player_id, " to ", room_id, " in GameRoomManager.")
 		else:
 			print("Failed to join player to GameRoomManager. Code: ", response_code)
-		http_join.queue_free() # Clean up the node
-	)
-	
-	var err = http_join.request(url, [], HTTPClient.METHOD_POST)
+	, CONNECT_ONE_SHOT)
+
+	var err = _http_request.request(url, [], HTTPClient.METHOD_POST)
 	if err != OK:
 		printerr("Could not initiate Join Room request.")
-		http_join.queue_free()
