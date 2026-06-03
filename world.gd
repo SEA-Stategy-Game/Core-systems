@@ -5,14 +5,21 @@ const PLAYER_SELECT_SCENE: PackedScene = preload("res://UI/PlayerSelectPopup.tsc
 var units = []
 
 func _ready():
-	get_units()
-	# Show the player-count pop-up; it spawns the starting units once the
-	# user picks 1-4.  No automatic Game.spawnUnit() here.
-	var popup = PLAYER_SELECT_SCENE.instantiate()
-	add_child(popup)
+	if Game.is_headless:
+		if has_node("UI"):
+			$UI.queue_free()
+		if has_node("Camera2D"):
+			$Camera2D.queue_free()
 
-	if has_node("Camera2D"):
-		$Camera2D.area_selected.connect(_on_area_selected)
+	get_units()
+	if not Game.is_headless:
+		# Show the player-count pop-up; it spawns the starting units once the
+		# user picks 1-4.  No automatic Game.spawnUnit() here.
+		var popup = PLAYER_SELECT_SCENE.instantiate()
+		add_child(popup)
+
+		if has_node("Camera2D"):
+			$Camera2D.area_selected.connect(_on_area_selected)
 
 	
 	var stone = StoneResource.new()
