@@ -11,15 +11,14 @@ extends Node
 
 @onready var spawn = preload("res://Entities/Interfaces/spawn_unit.tscn")
 
-var is_headless: bool = true
+var is_headless: bool = false
 var game_room_id: String = "testgame"
 
 func _init() -> void:
-	OS.set_environment("USE_REDIS", "true")
 	var env_game_id = OS.get_environment("GAME_ROOM_ID")
 	if env_game_id != "":
 		game_room_id = env_game_id
-	#is_headless = DisplayServer.get_name() == "headless" or OS.has_feature("dedicated_server") or "--server" in OS.get_cmdline_args()
+	is_headless = DisplayServer.get_name() == "headless" or OS.has_feature("dedicated_server") or "--server" in OS.get_cmdline_args()
 
 # ---------------------------------------------------------------
 #  Per-player stockpiles ( pid -> { "wood": int, "stone": int } )
