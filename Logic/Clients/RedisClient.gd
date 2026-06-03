@@ -5,6 +5,8 @@
 ## -----------------------------------------------------------------------
 extends Node
 
+var redis_flag = ""
+
 var host: String = "127.0.0.1"
 var port: int = 6379
 
@@ -20,7 +22,7 @@ var _connecting_timer: float = 0.0
 
 func _ready() -> void:
 	
-	var redis_flag = OS.get_environment("USE_REDIS")
+	redis_flag = OS.get_environment("USE_REDIS")
 	if redis_flag != "true" and redis_flag != "1":
 		return
 	
@@ -37,6 +39,9 @@ func _ready() -> void:
 		print("[REDIS] Connecting to %s:%d..." % [host, port])
 
 func _process(_delta: float) -> void:
+	if redis_flag != "true" and redis_flag != "1":
+		return 
+		
 	_tcp.poll()
 	_tcp_pubsub.poll()
 	
