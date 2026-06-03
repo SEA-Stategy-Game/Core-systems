@@ -74,7 +74,7 @@ func _register_manual_game():
 		"roomId": Game.game_room_id,
 		"address": "127.0.0.1",
 		"port": port,
-		"maxNumberOfPlayer": Networking.MAX_PLAYERS
+		"maxNumberOfPlayers": Networking.MAX_PLAYERS
 	}
 
 	var json_data = JSON.stringify(data)
