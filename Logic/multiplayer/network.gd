@@ -77,7 +77,7 @@ func on_player_registered(player_uuid: String) -> void:
 	
 	
 	rpc_id(peer_id, "receive_player_registration", local_id, Game.game_room_id)
-	GameRoomManager.join_player_to_room("room-1", player_uuid)
+	GameRoomManager.join_player_to_room(Game.game_room_id, player_uuid)
 
 
 ## Called when a client disconnects
