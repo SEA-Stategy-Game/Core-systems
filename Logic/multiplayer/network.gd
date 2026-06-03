@@ -30,6 +30,11 @@ func _resolve_world_refs() -> bool:
 	return units != null
 
 func _ready():
+	# Disable automatic quitting. We will handle it manually in _notification
+	# to ensure we can send a final status update to the backend.
+	get_tree().set_auto_accept_quit(false)
+	print("[INFO] Manual shutdown handler enabled (auto_accept_quit = false).")
+
 	var env_max_players = OS.get_environment("MAX_PLAYERS")
 	if env_max_players != "" and env_max_players.is_valid_int():
 		MAX_PLAYERS = env_max_players.to_int()
@@ -354,24 +359,41 @@ func _get_port_from_args(default_port: int) -> int:
 
 func _notification(what: int) -> void:
 	match what:
+		# 1012 is MainLoop.NOTIFICATION_OS_SIGNAL. This handles Ctrl+C in a terminal.
+		# We handle it identically to the window close request.
+		1012, NOTIFICATION_WM_CLOSE_REQUEST:
+			# If a quit is already requested, do nothing to prevent loops.
+			if get_tree().is_quit_requested():
+				return
+
+			if what == 1012:
+				_shutdown_reason = "Process interrupted by OS signal"
+				print("[INFO] Received OS signal. Initiating graceful shutdown.")
+			else: # NOTIFICATION_WM_CLOSE_REQUEST
+				_shutdown_reason = "Window close request"
+				print("[INFO] Window close request received. Initiating graceful shutdown.")
+			
+			# Calling quit() will trigger _exit_tree(), which is the designated
+			# place for final actions before the application terminates.
+			get_tree().quit()
+
 		NOTIFICATION_CRASH:
+			if _crash_signal_sent: return
 			print("[FATAL] Engine crash detected. Emitting crash signal.")
-			# This is a best-effort attempt as the process is unstable.
+			# This is a best-effort attempt as the process is unstable and _exit_tree
+			# is not guaranteed to be called. We emit directly.
 			GlobalSignals.game_room_crashed.emit("Engine crash")
 			_crash_signal_sent = true
-		NOTIFICATION_WM_CLOSE_REQUEST:
-			print("[INFO] Window close request received. Shutting down.")
-			# The default _shutdown_reason is "Graceful shutdown", which is correct here.
-			get_tree().quit() # Triggers a clean shutdown, which will call _exit_tree.
 
 func _exit_tree() -> void:
 	if _crash_signal_sent:
-		# A hard crash was detected and a signal was already emitted directly
-		# from the notification handler. We do nothing more to avoid conflicts.
+		# A hard crash signal was already sent directly from _notification.
+		# We do nothing more to avoid sending conflicting shutdown reasons.
 		return
 
-	# This is the authoritative point for sending shutdown/crash reasons for
-	# any controlled shutdown (including server creation failure).
+	# This is the authoritative point for all controlled shutdowns (server fail,
+	# Ctrl+C, window close). The blocking HTTP call in the connected signal
+	# handler will complete before the application finally terminates.
 	print("[INFO] Server shutting down. Reason: ", _shutdown_reason)
 	GlobalSignals.game_room_crashed.emit(_shutdown_reason)
 
