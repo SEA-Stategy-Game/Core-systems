@@ -81,7 +81,7 @@ func on_player_registered(player_uuid: String) -> void:
 		if gateway:
 			gateway.spawn_initial_unit(local_id)
 			
-		// After the first player joins, emits a signal that marks the room as running
+		# After the first player joins, emits a signal that marks the room as running
 		if PlayerManager.player_uuid_to_local_id.size() == 1:
 			GlobalSignals.game_room_running.emit()
 	
@@ -356,7 +356,7 @@ func _notification(what: int) -> void:
 
 func _exit_tree() -> void:
 	print("[INFO] Server shutting down gracefully.")
-	GlobalSignals.game_room_shutdown.emit()
+	GlobalSignals.game_room_crashed.emit("Graceful shutdown")
 
 # -----------------------------------------------------------------------
 # Client RPC stubs
