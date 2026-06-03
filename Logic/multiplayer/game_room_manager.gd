@@ -78,8 +78,9 @@ func _register_manual_game():
 func _on_game_room_running():
 	_set_room_status("running")
 
-func _on_game_room_ended(winner_id: String):
-	_set_room_status("ended", winner_id)
+func _on_game_room_ended(winner_local_id: int):
+	var winner_uuid = PlayerManager.get_uuid_for_local_id(winner_local_id)
+	_set_room_status("ended", winner_uuid)
 
 func _on_game_room_crashed():
 	_set_room_status("crashed")
