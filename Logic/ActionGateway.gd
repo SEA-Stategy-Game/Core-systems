@@ -694,6 +694,22 @@ func get_next_entity_id() -> int:
 	_next_entity_id += 1
 	return id
 
+## Returns the closest point ON the world navmesh to `point`.
+## Used so spawned units never land on water / off-navigation tiles --
+## an off-mesh point gets snapped to the nearest walkable edge.
+func snap_to_navmesh(point: Vector2) -> Vector2:
+	var nav_region = get_tree().get_root().get_node_or_null("World/NavigationRegion2D")
+	if nav_region == null:
+		return point
+	var nav_map: RID = nav_region.get_navigation_map()
+	if not nav_map.is_valid() or not NavigationServer2D.map_is_active(nav_map):
+		return point
+	var snapped: Vector2 = NavigationServer2D.map_get_closest_point(nav_map, point)
+	# Guard against an un-synced map returning the origin.
+	if snapped == Vector2.ZERO and point.length() > 1.0:
+		return point
+	return snapped
+
 # =================================================================
 #  SPAWNING UTILITIES
 # =================================================================
@@ -719,9 +735,11 @@ func spawn_initial_unit(player_id: int, scene_path: String = "res://Entities/Uni
 	# Ensure the unit is discoverable by SenseAPI queries
 	unit.add_to_group("units")
 	
+	# Snap the random spawn onto the navmesh so units never land on water.
 	var random_spawn_point = Vector2(randf_range(100.0, 500.0), randf_range(100.0, 500.0))
+	random_spawn_point = snap_to_navmesh(random_spawn_point)
 	unit.global_position = random_spawn_point
-	
+
 	# Robustly fetch the Units container from the active scene
 	var current_scene = get_tree().current_scene
 	var units_container = current_scene.get_node_or_null("Units") if current_scene else null
