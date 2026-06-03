@@ -2,12 +2,7 @@ extends Node
 
 const BASE_URL = "http://localhost:8080"
 
-var _http_request: HTTPRequest
-
 func _ready():
-	_http_request = HTTPRequest.new()
-	add_child(_http_request)
-
 	GlobalSignals.game_room_ready.connect(_on_game_room_ready)
 	GlobalSignals.game_room_running.connect(_on_game_room_running)
 	GlobalSignals.game_room_ended.connect(_on_game_room_ended)
@@ -21,15 +16,19 @@ func _set_room_status(status: String, winner: String = "", reason: String = ""):
 		_send_blocking_shutdown_status(status, reason)
 		return
 
+	var http_request = HTTPRequest.new()
+	add_child(http_request)
+
 	var room_id = Game.game_room_id
 
 	var url = BASE_URL + "/rooms/" + room_id + "/status"
 
-	_http_request.request_completed.connect(func(result, response_code, headers, body):
+	http_request.request_completed.connect(func(result, response_code, headers, body):
 		if response_code == 200 or response_code == 201:
 			print("Successfully set room ", room_id, " status to ", status)
 		else:
 			print("Failed to set room status. Code: ", response_code)
+		http_request.queue_free()
 	, CONNECT_ONE_SHOT)
 
 	var data = {"status": status}
@@ -41,10 +40,82 @@ func _set_room_status(status: String, winner: String = "", reason: String = ""):
 	var json_data = JSON.stringify(data)
 	var custom_headers = ["Content-Type: application/json"]
 
-	var err = _http_request.request(url, custom_headers, HTTPClient.METHOD_POST, json_data)
+	var err = http_request.request(url, custom_headers, HTTPClient.METHOD_POST, json_data)
 	if err != OK:
 		printerr("Could not initiate Set Status request.")
+		http_request.queue_free()
 
+
+func _on_game_room_ready():
+	if Game.game_room_id.begins_with("test"):
+		_register_manual_game()
+	else:
+		_set_room_status("ready")
+
+func _register_manual_game():
+	var http_request = HTTPRequest.new()
+	add_child(http_request)
+
+	var url = BASE_URL + "/rooms"
+
+	http_request.request_completed.connect(func(result, response_code, headers, body):
+		if response_code == 200 or response_code == 201:
+			print("Successfully registered manual room testgame")
+			# Now set status to ready
+			_set_room_status("ready")
+		else:
+			print("Failed to register manual room. Code: ", response_code)
+		http_request.queue_free()
+	, CONNECT_ONE_SHOT)
+
+	var port = Networking.server_port
+
+	var data = {
+		"roomId": Game.game_room_id,
+		"address": "127.0.0.1",
+		"port": port,
+		"maxNumberOfPlayer": Networking.MAX_PLAYERS
+	}
+
+	var json_data = JSON.stringify(data)
+	var custom_headers = ["Content-Type: application/json"]
+
+	var err = http_request.request(url, custom_headers, HTTPClient.METHOD_POST, json_data)
+	if err != OK:
+		printerr("Could not initiate Register Manual Game request.")
+		http_request.queue_free()
+
+func _on_game_room_running():
+	_set_room_status("running")
+
+func _on_game_room_ended(winner_local_id: int, reason: String):
+	var winner_uuid = ""
+	if winner_local_id != -1:
+		winner_uuid = PlayerManager.get_uuid_for_local_id(winner_local_id)
+	_set_room_status("ended", winner_uuid, reason)
+
+func _on_game_room_crashed(reason: String):
+	_set_room_status("crashed", "", reason)
+
+func join_player_to_room(room_id: String, player_id: String):
+	var http_request = HTTPRequest.new()
+	add_child(http_request)
+
+	var url = BASE_URL + "/rooms/" + room_id + "/players/" + player_id + "/join"
+
+	http_request.request_completed.connect(func(result, response_code, headers, body):
+		if response_code == 200 or response_code == 201:
+			print("Successfully joined player ", player_id, " to ", room_id, " in GameRoomManager.")
+		else:
+			print("Failed to join player to GameRoomManager. Code: ", response_code)
+		http_request.queue_free()
+	, CONNECT_ONE_SHOT)
+
+	var err = http_request.request(url, [], HTTPClient.METHOD_POST)
+	if err != OK:
+		printerr("Could not initiate Join Room request.")
+		http_request.queue_free()
+		
 func _send_blocking_shutdown_status(status: String, reason: String):
 	# This function uses the low-level HTTPClient to send a final, blocking status update.
 	# It is required because when the game engine is shutting down (in _exit_tree),
@@ -95,63 +166,3 @@ func _send_blocking_shutdown_status(status: String, reason: String):
 		return
 	# The request is now in flight. We don't need to wait for the response as the app is closing.
 	print("[SHUTDOWN] Blocking status update request sent.")
-
-func _on_game_room_ready():
-	if Game.game_room_id.begins_with("test"):
-		_register_manual_game()
-	else:
-		_set_room_status("ready")
-
-func _register_manual_game():
-	var url = BASE_URL + "/rooms"
-
-	_http_request.request_completed.connect(func(result, response_code, headers, body):
-		if response_code == 200 or response_code == 201:
-			print("Successfully registered manual room testgame")
-			# Now set status to ready
-			_set_room_status("ready")
-		else:
-			print("Failed to register manual room. Code: ", response_code)
-	, CONNECT_ONE_SHOT)
-
-	var port = Networking.server_port
-
-	var data = {
-		"roomId": Game.game_room_id,
-		"address": "127.0.0.1",
-		"port": port,
-		"maxNumberOfPlayer": Networking.MAX_PLAYERS
-	}
-
-	var json_data = JSON.stringify(data)
-	var custom_headers = ["Content-Type: application/json"]
-
-	var err = _http_request.request(url, custom_headers, HTTPClient.METHOD_POST, json_data)
-	if err != OK:
-		printerr("Could not initiate Register Manual Game request.")
-
-func _on_game_room_running():
-	_set_room_status("running")
-
-func _on_game_room_ended(winner_local_id: int, reason: String):
-	var winner_uuid = ""
-	if winner_local_id != -1:
-		winner_uuid = PlayerManager.get_uuid_for_local_id(winner_local_id)
-	_set_room_status("ended", winner_uuid, reason)
-
-func _on_game_room_crashed(reason: String):
-	_set_room_status("crashed", "", reason)
-
-func join_player_to_room(room_id: String, player_id: String):
-	var url = BASE_URL + "/rooms/" + room_id + "/players/" + player_id + "/join"
-
-	_http_request.request_completed.connect(func(result, response_code, headers, body):
-		if response_code == 200 or response_code == 201:
-			print("Successfully joined player ", player_id, " to ", room_id, " in GameRoomManager.")
-		else:
-			print("Failed to join player to GameRoomManager. Code: ", response_code)
-	, CONNECT_ONE_SHOT)
-
-	var err = _http_request.request(url, [], HTTPClient.METHOD_POST)
-	if err != OK:
-		printerr("Could not initiate Join Room request.")
