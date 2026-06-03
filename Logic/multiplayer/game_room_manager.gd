@@ -157,12 +157,31 @@ func _send_blocking_shutdown_status(status: String, reason: String):
 	var url_path = "/rooms/" + room_id + "/status"
 	var data = {"status": status, "statusReason": reason}
 	var json_data = JSON.stringify(data)
+	
 	# The Host header is required by many web servers.
-	var headers = ["Content-Type: application/json", "Host: " + host]
+	var host_header_value = host
+	if (use_ssl and port != 443) or (not use_ssl and port != 80):
+		host_header_value += ":" + str(port)
+	var headers = ["Content-Type: application/json", "Host: " + host_header_value]
 
 	err = http_client.request(HTTPClient.METHOD_POST, url_path, headers, json_data)
 	if err != OK:
 		printerr("[SHUTDOWN] HTTPClient request failed to start.")
 		return
-	# The request is now in flight. We don't need to wait for the response as the app is closing.
+
+	# The request is now in flight. We must poll and wait for the request to complete,
+	# otherwise the application will terminate before the OS has a chance to send the data.
+	start_time = Time.get_ticks_msec()
+	while http_client.get_status() != HTTPClient.STATUS_DISCONNECTED and http_client.get_status() != HTTPClient.STATUS_CONNECTION_ERROR:
+		http_client.poll()
+		# has_response() is true once the headers are received.
+		if http_client.has_response():
+			print("[SHUTDOWN] Server responded with code: ", http_client.get_response_code())
+			# We can break now, the message was received and processed.
+			break
+		if Time.get_ticks_msec() - start_time > 2000: # 2-second timeout for the whole operation
+			printerr("[SHUTDOWN] HTTPClient request timed out while waiting for response.")
+			break
+		OS.delay_msec(10) # Prevent busy-waiting
+
 	print("[SHUTDOWN] Blocking status update request sent.")

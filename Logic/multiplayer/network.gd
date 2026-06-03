@@ -16,6 +16,8 @@ var MAX_PLAYERS: int = 32
 var DEFAULT_PORT: int = 12345
 var server_port: int = 12345
 var queued_objects: Array[Dictionary] = []
+var _crash_signal_sent := false
+var _shutdown_reason := "Graceful shutdown"
 
 ## Returns true if the World scene is loaded and we have a Units container.
 func _resolve_world_refs() -> bool:
@@ -47,8 +49,8 @@ func _start_server(port: int):
 	if error != OK:
 		var error_msg = error_string(error)
 		printerr("FATAL ERROR: Could not create server. Err: ", error_string(error))
-		GlobalSignals.game_room_crashed.emit("Server creation failed: %s" % error_msg)
-		get_tree().quit() # Closes the game if server can't be created
+		_shutdown_reason = "Server creation failed: %s" % error_msg
+		get_tree().quit() # Closes the game, _exit_tree will send the final status
 		return # Prevents the rest of the function from running
 
 	multiplayer.multiplayer_peer = peer
@@ -356,13 +358,22 @@ func _notification(what: int) -> void:
 			print("[FATAL] Engine crash detected. Emitting crash signal.")
 			# This is a best-effort attempt as the process is unstable.
 			GlobalSignals.game_room_crashed.emit("Engine crash")
+			_crash_signal_sent = true
 		NOTIFICATION_WM_CLOSE_REQUEST:
 			print("[INFO] Window close request received. Shutting down.")
+			# The default _shutdown_reason is "Graceful shutdown", which is correct here.
 			get_tree().quit() # Triggers a clean shutdown, which will call _exit_tree.
 
 func _exit_tree() -> void:
-	print("[INFO] Server shutting down gracefully.")
-	GlobalSignals.game_room_crashed.emit("Graceful shutdown")
+	if _crash_signal_sent:
+		# A hard crash was detected and a signal was already emitted directly
+		# from the notification handler. We do nothing more to avoid conflicts.
+		return
+
+	# This is the authoritative point for sending shutdown/crash reasons for
+	# any controlled shutdown (including server creation failure).
+	print("[INFO] Server shutting down. Reason: ", _shutdown_reason)
+	GlobalSignals.game_room_crashed.emit(_shutdown_reason)
 
 # -----------------------------------------------------------------------
 # Client RPC stubs
