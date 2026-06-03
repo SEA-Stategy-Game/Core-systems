@@ -37,7 +37,43 @@ func _set_room_status(status: String, winner: String = ""):
 		http_status.queue_free()
 
 func _on_game_room_ready():
-	_set_room_status("ready")
+	if Game.game_room_id == "testgame":
+		_register_manual_game()
+	else:
+		_set_room_status("ready")
+
+func _register_manual_game():
+	var url = BASE_URL + "/rooms"
+	
+	var http_register = HTTPRequest.new()
+	add_child(http_register)
+	
+	http_register.request_completed.connect(func(result, response_code, headers, body):
+		if response_code == 200 or response_code == 201:
+			print("Successfully registered manual room testgame")
+			# Now set status to ready
+			_set_room_status("ready")
+		else:
+			print("Failed to register manual room. Code: ", response_code)
+		http_register.queue_free()
+	)
+	
+	var port = Networking.server_port
+			
+	var data = {
+		"roomId": Game.game_room_id,
+		"address": "127.0.0.1",
+		"port": port,
+		"maxNumberOfPlayer": Networking.MAX_PLAYERS
+	}
+	
+	var json_data = JSON.stringify(data)
+	var custom_headers = ["Content-Type: application/json"]
+	
+	var err = http_register.request(url, custom_headers, HTTPClient.METHOD_POST, json_data)
+	if err != OK:
+		printerr("Could not initiate Register Manual Game request.")
+		http_register.queue_free()
 
 func _on_game_room_running():
 	_set_room_status("running")

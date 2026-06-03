@@ -14,6 +14,7 @@ var map_manager: Node = null
 
 var MAX_PLAYERS: int = 32
 var DEFAULT_PORT: int = 12345
+var server_port: int = 12345
 var queued_objects: Array[Dictionary] = []
 
 ## Returns true if the World scene is loaded and we have a Units container.
@@ -27,9 +28,13 @@ func _resolve_world_refs() -> bool:
 	return units != null
 
 func _ready():
+	var env_max_players = OS.get_environment("MAX_PLAYERS")
+	if env_max_players != "" and env_max_players.is_valid_int():
+		MAX_PLAYERS = env_max_players.to_int()
+		
 	# Get the port from command line or use default
-	var port = _get_port_from_args(DEFAULT_PORT)
-	_start_server(port)
+	server_port = _get_port_from_args(DEFAULT_PORT)
+	_start_server(server_port)
 	return
 
 ## Initialises the ENet server on the received port with a maximum of 32 clients.
