@@ -31,10 +31,10 @@ func _ready() -> void:
 	var env_port = OS.get_environment("REDIS_PORT")
 	if env_port != "": port = env_port.to_int()
 
-	var err = _tcp.connect_to_host(host, port)
-	_tcp_pubsub.connect_to_host(host, port)
-	if err != OK:
-		push_error("[REDIS] Failed to connect to %s:%d" % [host, port])
+	var main_err = _tcp.connect_to_host(host, port)
+	var pubsub_err = _tcp_pubsub.connect_to_host(host, port)
+	if main_err != OK or pubsub_err != OK:
+		push_error("[REDIS] Failed to initiate connection to %s:%d" % [host, port])
 	else:
 		print("[REDIS] Connecting to %s:%d..." % [host, port])
 
