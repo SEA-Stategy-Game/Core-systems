@@ -39,7 +39,7 @@ func _set_room_status(status: String, winner: String = "", reason: String = ""):
 		http_status.queue_free()
 
 func _on_game_room_ready():
-	if Game.game_room_id == "testgame":
+	if Game.game_room_id.begins_with("test"):
 		_register_manual_game()
 	else:
 		_set_room_status("ready")
