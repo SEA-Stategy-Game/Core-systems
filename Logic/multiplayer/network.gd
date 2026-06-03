@@ -72,6 +72,13 @@ func _on_peer_connected(id: int):
 @rpc("any_peer", "call_remote", "reliable")
 func on_player_registered(player_uuid: String) -> void:
 	var peer_id = multiplayer.get_remote_sender_id()
+
+	# Reject new players if the game room is already full.
+	if PlayerManager.is_new_player(player_uuid) and PlayerManager.player_uuid_to_local_id.size() >= MAX_PLAYERS:
+		print("[INFO] Player connection rejected: room is full. UUID=", player_uuid, " Peer=", peer_id)
+		rpc_id(peer_id, "connection_rejected", "Game room is full.")
+		return
+
 	var new_player = PlayerManager.is_new_player(player_uuid)
 	var local_id = PlayerManager.get_or_create_local_id(player_uuid)
 	
