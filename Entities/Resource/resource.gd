@@ -17,8 +17,6 @@ class_name MapResource
 
 @onready var nav_region = $"/root/World/NavigationRegion2D"
 
-@onready var server = get_node_or_null("/root/World/ClientGateway")
-
 var amount: int = 1
 var maxAmount: int = 1
 var currentTime: float
@@ -33,6 +31,7 @@ signal modified
 
 func _ready() -> void:
 	player_id = -1  # Neutral / environment object
+	max_health = totalTime
 	current_health = max_health
 	currentTime = totalTime
 	if bar:
@@ -46,6 +45,8 @@ func _ready() -> void:
 	
 	if server and server.has_method("_on_ressource_modified"):
 		self.modified.connect(server._on_ressource_modified)
+	if Networking and Networking.has_method("_on_ressource_modified"):
+		self.modified.connect(Networking._on_ressource_modified)
 
 func harvest():
 	if amount > 0:
@@ -75,13 +76,19 @@ func _on_timer_timeout() -> void:
 	if bar:
 		var tween = get_tree().create_tween()
 		tween.tween_property(bar, "value", currentTime, 0.5)
-
-	if currentTime <= 0:
+	
+	# Not a pretty solution, but there are too many variables in play currently
+	# This is just for the server
+	current_health = currentTime
+	
+	if (currentTime <= 0):
 		harvest()
+	
+	if (units_harvesting > 0):
+		self.modified.emit(self)
 
 
 func on_finished_harvesting():
-	modified.emit(self)
 	GlobalSignals.resource_destroyed.emit(self.entity_id)
 	queue_free()
 	nav_region.rebuild_nav()
