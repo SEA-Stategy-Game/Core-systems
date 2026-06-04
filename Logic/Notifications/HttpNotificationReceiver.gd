@@ -1,6 +1,7 @@
 extends Node
 
 signal plan_notified(game_id: String, player_id: String, unit_ids: Array)
+signal game_state_requested(peer: StreamPeerTCP)
 
 const LISTEN_PORT = 8085
 var _server: TCPServer = TCPServer.new()
@@ -31,6 +32,11 @@ func _handle_connection(peer: StreamPeerTCP) -> void:
 	if not "\r\n\r\n" in raw:
 		push_warning("HttpNotificationReceiver: timeout - no headers received")
 		_respond(peer, 400)
+		return
+
+	var first_line: String = raw.split("\r\n")[0]
+	if first_line.begins_with("GET /game-state"):
+		game_state_requested.emit(peer)
 		return
 
 	var content_length = 0
