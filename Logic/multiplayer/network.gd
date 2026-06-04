@@ -14,7 +14,11 @@ var map_manager: Node = null
 
 var MAX_PLAYERS: int = 32
 var DEFAULT_PORT: int = 12345
+var server_port: int = 12345
 var queued_objects: Array[Dictionary] = []
+var _crash_signal_sent := false
+var _shutdown_reason := "Graceful shutdown"
+var _quit_is_in_progress := false
 
 ## Returns true if the World scene is loaded and we have a Units container.
 func _resolve_world_refs() -> bool:
@@ -27,9 +31,19 @@ func _resolve_world_refs() -> bool:
 	return units != null
 
 func _ready():
+	# Disable automatic quitting. We will handle it manually in _notification
+	# to ensure we can send a final status update to the backend.
+	get_tree().set_auto_accept_quit(false)
+	print("[INFO] Manual shutdown handler enabled (auto_accept_quit = false).")
+
+	var env_max_players = OS.get_environment("MAX_PLAYERS")
+	if env_max_players != "" and env_max_players.is_valid_int():
+		MAX_PLAYERS = env_max_players.to_int()
+
+		
 	# Get the port from command line or use default
-	var port = _get_port_from_args(DEFAULT_PORT)
-	_start_server(port)
+	server_port = _get_port_from_args(DEFAULT_PORT)
+	_start_server(server_port)
 	return
 
 ## Initialises the ENet server on the received port with a maximum of 32 clients.
@@ -42,7 +56,8 @@ func _start_server(port: int):
 	if error != OK:
 		var error_msg = error_string(error)
 		printerr("FATAL ERROR: Could not create server. Err: ", error_string(error))
-		get_tree().quit() # Closes the game if server can't be created
+		_shutdown_reason = "Server creation failed: %s" % error_msg
+		get_tree().quit() # Closes the game, _exit_tree will send the final status
 		return # Prevents the rest of the function from running
 
 	multiplayer.multiplayer_peer = peer
@@ -59,6 +74,14 @@ func _on_peer_connected(id: int):
 @rpc("any_peer", "call_remote", "reliable")
 func on_player_registered(player_uuid: String) -> void:
 	var peer_id = multiplayer.get_remote_sender_id()
+
+	# Reject new players if the game room is already full.
+	if PlayerManager.is_new_player(player_uuid) and PlayerManager.player_uuid_to_local_id.size() >= MAX_PLAYERS:
+		print("[INFO] Player connection rejected: room is full. UUID=", player_uuid, " Peer=", peer_id)
+		rpc_id(peer_id, "connection_rejected", "Game room is full.")
+		multiplayer.disconnect_peer(peer_id)
+		return
+
 	var new_player = PlayerManager.is_new_player(player_uuid)
 	var local_id = PlayerManager.get_or_create_local_id(player_uuid)
 	
@@ -74,6 +97,10 @@ func on_player_registered(player_uuid: String) -> void:
 		var gateway = get_node_or_null("/root/ActionGateway")
 		if gateway:
 			gateway.spawn_initial_unit(local_id)
+			
+		# After the first player joins, emits a signal that marks the room as running
+		if PlayerManager.player_uuid_to_local_id.size() == 1:
+			GlobalSignals.game_room_running.emit()
 	
 	
 	rpc_id(peer_id, "receive_player_registration", local_id, Game.game_room_id)
@@ -323,13 +350,64 @@ func serialize_buildings(building: Node) -> Dictionary:
 ## Helper function to parse command line arguments
 func _get_port_from_args(default_port: int) -> int:
 	var args = OS.get_cmdline_user_args()
-	for arg in args:
+	for i in range(args.size()):
+		var arg = args[i]
+		# Handle --port=12345
 		if arg.begins_with("--port="):
 			var value = arg.split("=")[1]
 			if value.is_valid_int():
 				return value.to_int()
+		# Handle --port 12345
+		elif arg == "--port":
+			if i + 1 < args.size() and args[i + 1].is_valid_int():
+				return args[i + 1].to_int()
 	return default_port
 	
+# -----------------------------------------------------------------------
+# Process Lifecycle Hooks
+# -----------------------------------------------------------------------
+
+func _notification(what: int) -> void:
+	match what:
+		# 1012 is MainLoop.NOTIFICATION_OS_SIGNAL. This handles Ctrl+C in a terminal.
+		# We handle it identically to the window close request.
+		1012, NOTIFICATION_WM_CLOSE_REQUEST:
+			# If a quit is already requested, do nothing to prevent loops.
+			if _quit_is_in_progress:
+				return
+			_quit_is_in_progress = true
+
+			if what == 1012:
+				_shutdown_reason = "Process interrupted by OS signal"
+				print("[INFO] Received OS signal. Initiating graceful shutdown.")
+			else: # NOTIFICATION_WM_CLOSE_REQUEST
+				_shutdown_reason = "Window close request"
+				print("[INFO] Window close request received. Initiating graceful shutdown.")
+
+			# Calling quit() will trigger _exit_tree(), which is the designated
+			# place for final actions before the application terminates.
+			get_tree().quit()
+
+		NOTIFICATION_CRASH:
+			if _crash_signal_sent: return
+			print("[FATAL] Engine crash detected. Emitting crash signal.")
+			# This is a best-effort attempt as the process is unstable and _exit_tree
+			# is not guaranteed to be called. We emit directly.
+			GlobalSignals.game_room_crashed.emit("Engine crash")
+			_crash_signal_sent = true
+
+func _exit_tree() -> void:
+	if _crash_signal_sent:
+		# A hard crash signal was already sent directly from _notification.
+		# We do nothing more to avoid sending conflicting shutdown reasons.
+		return
+
+	# This is the authoritative point for all controlled shutdowns (server fail,
+	# Ctrl+C, window close). The blocking HTTP call in the connected signal
+	# handler will complete before the application finally terminates.
+	print("[INFO] Server shutting down. Reason: ", _shutdown_reason)
+	GlobalSignals.game_room_crashed.emit(_shutdown_reason)
+
 # -----------------------------------------------------------------------
 # Client RPC stubs
 # These functions are never executed on the server. They exist solely so
@@ -356,4 +434,9 @@ func receive_player_registration(player_local_id: int, game_room_id: String) -> 
 	
 @rpc("authority", "call_remote", "reliable")
 func register_player(player_uuid: String) -> void:
+	pass
+
+
+@rpc("authority", "call_remote", "reliable")
+func connection_rejected(reason: String) -> void:
 	pass

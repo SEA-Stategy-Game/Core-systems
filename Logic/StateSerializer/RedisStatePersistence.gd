@@ -11,13 +11,6 @@ func save_state(state: Dictionary, tree: SceneTree) -> bool:
 	
 	var state_key = _get_state_key()
 	redis.set_value(state_key, json_string)
-	
-	if redis.has_method("expire"):
-		var save_time_seconds = TickManager.get_auto_save_interval_seconds();
-		var calculated_ttl = int(save_time_seconds * 5.0)
-		var ttl = calculated_ttl if calculated_ttl > 10 else 10
-		
-		redis.expire(state_key, ttl) 
 		
 	RedisStateMirror.mirror_state()
 		
