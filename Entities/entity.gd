@@ -9,9 +9,9 @@ class_name Entity
 # Core state variables
 @export var entity_id: int = -1
 @export var max_health: int = 100
+@export var current_health: int
 @export var player_id: int = 0        ## Owner player (-1 = neutral / environment)
 
-var current_health: int
 var is_selected: bool = false
 
 # -----------------------------------------------------------------

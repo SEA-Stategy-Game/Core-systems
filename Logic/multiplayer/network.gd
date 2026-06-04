@@ -249,6 +249,7 @@ func broadcast_state(tick: int) -> void:
 	# TODO:
 	# Expand the state to also include map-data
 	# Create unit paths:
+	print(queued_objects)
 	var state = {
 		"current_tick" : tick,
 		# Always send all units since the majority are likely to be dynamic
@@ -307,6 +308,7 @@ func serialize_core_state_variables(entity: Node) -> Dictionary:
 	return {
 		"entity_id"  : entity.entity_id,
 		"max_health" : entity.max_health,
+		"current_health" : entity.current_health,
 		"player_id"  : entity.player_id,
 		"position"   : entity.global_position
 	}
