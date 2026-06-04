@@ -41,14 +41,12 @@ func _on_resource_created(resource: Node) -> void:
 		resource_id = -1
 	var key = "game:%s:resources" % game_id
 	_redis.sadd(key, str(resource_id))
-	print("[STATE_MIRROR] Added resource ", resource_id, " to Redis set via signal.")
+	# print("[STATE_MIRROR] Added resource ", resource_id, " to Redis set via signal.")
 
 func _on_resource_destroyed(resource_id: int) -> void:
 	var key = "game:%s:resources" % game_id
 	_redis.srem(key, str(resource_id))
-	print("[STATE_MIRROR] Removed resource ", resource_id, " from Redis set via signal.")
-
-
+	# print("[STATE_MIRROR] Removed resource ", resource_id, " from Redis set via signal.")
 
 func mirror_state() -> void:
 	var sense_api = ActionGateway.sense()

@@ -78,6 +78,7 @@ func on_player_registered(player_uuid: String) -> void:
 	# Reject new players if the game room is already full.
 	if PlayerManager.is_new_player(player_uuid) and PlayerManager.player_uuid_to_local_id.size() >= MAX_PLAYERS:
 		print("[INFO] Player connection rejected: room is full. UUID=", player_uuid, " Peer=", peer_id)
+		rpc_id(peer_id, "connection_rejected", "Game room is full.")
 		multiplayer.disconnect_peer(peer_id)
 		return
 
@@ -433,4 +434,9 @@ func receive_player_registration(player_local_id: int, game_room_id: String) -> 
 	
 @rpc("authority", "call_remote", "reliable")
 func register_player(player_uuid: String) -> void:
+	pass
+
+
+@rpc("authority", "call_remote", "reliable")
+func connection_rejected(reason: String) -> void:
 	pass
