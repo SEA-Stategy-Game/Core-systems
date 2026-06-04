@@ -39,6 +39,11 @@ func try_spawn_resource(tile_size: int = 32) -> void:
 	if map_object != null:
 		# Have to use a specific calculation for the objects since they are offset into the world
 		map_object.global_position = get_world_position() + Vector2(tile_size/2, tile_size/2)
+		# Give the map-generated resource a unique id and announce it so the
+		# Redis state mirror / other listeners can track it.
+		if "entity_id" in map_object and map_object.entity_id < 0:
+			map_object.entity_id = ActionGateway.get_next_entity_id()
+		GlobalSignals.resource_created.emit(map_object)
 
 func set_map_object(new_object: Variant) -> void:
 	map_object = new_object

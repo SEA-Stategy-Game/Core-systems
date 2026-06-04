@@ -105,6 +105,8 @@ func _spawn_starting_units(count: int) -> void:
 
 		var angle = TAU * float(pid) / float(count)
 		var pos = centre + Vector2(cos(angle), sin(angle)) * SPAWN_RING_RADIUS
+		# Keep starters off the water.
+		pos = ActionGateway.snap_to_navmesh(pos)
 
 		var u = unit_scene.instantiate()
 		u.entity_id = next_starting_id
@@ -112,6 +114,8 @@ func _spawn_starting_units(count: int) -> void:
 		u.player_id = pid
 		u.position = pos
 		units_node.add_child(u)
+		# Notify state mirror / listeners that a unit was created.
+		GlobalSignals.unit_created.emit(u)
 		print("[GAME_START] Spawned starter unit ", u.entity_id, " for player ", pid, " at ", pos)
 
 	Game._sync_legacy()

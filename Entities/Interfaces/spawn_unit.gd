@@ -106,11 +106,17 @@ func _on_yes_pressed() -> void:
 	unit1.player_id = owner_player_id
 	next_unit_id += 1
 
-	unit1.position = housePos + Vector2(randomPosX, randomPosY)
+	# Snap the jittered spawn onto the navmesh so the unit never lands on water.
+	var spawn_pos = housePos + Vector2(randomPosX, randomPosY)
+	spawn_pos = ActionGateway.snap_to_navmesh(spawn_pos)
+	unit1.position = spawn_pos
 	unitPath.add_child(unit1)
 
 	# New units auto-inherit whatever upgrades the owner has purchased.
 	Game.apply_player_upgrades_to_unit(owner_player_id, unit1)
+
+	# Notify state mirror / listeners that a unit was created.
+	GlobalSignals.unit_created.emit(unit1)
 
 	if worldPath.has_method("get_units"):
 		worldPath.get_units()
