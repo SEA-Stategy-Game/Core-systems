@@ -12,7 +12,6 @@ func _ready() -> void:
 	var topic = "planning.%s.plan-updated" % game_id
 	_redis.subscribe(topic, Callable(self, "_on_redis_message"))
 	print("[REDIS_RECEIVER] Subscribed to %s" % topic)
-	push_error("[REDIS_RECEIVER] RedisClient not found!")
 
 func _on_redis_message(channel: String, message: String) -> void:
 	var plan = JSON.parse_string(message)

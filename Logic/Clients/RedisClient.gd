@@ -31,10 +31,10 @@ func _ready() -> void:
 	var env_port = OS.get_environment("REDIS_PORT")
 	if env_port != "": port = env_port.to_int()
 
-	var err = _tcp.connect_to_host(host, port)
-	_tcp_pubsub.connect_to_host(host, port)
-	if err != OK:
-		push_error("[REDIS] Failed to connect to %s:%d" % [host, port])
+	var main_err = _tcp.connect_to_host(host, port)
+	var pubsub_err = _tcp_pubsub.connect_to_host(host, port)
+	if main_err != OK or pubsub_err != OK:
+		push_error("[REDIS] Failed to initiate connection to %s:%d" % [host, port])
 	else:
 		print("[REDIS] Connecting to %s:%d..." % [host, port])
 
@@ -89,12 +89,15 @@ func _process(_delta: float) -> void:
 		_was_pubsub_connected = false
 		
 	# --- Auto-Reconnect Logic ---
-	if tcp_status == StreamPeerTCP.STATUS_ERROR or pubsub_status == StreamPeerTCP.STATUS_ERROR or tcp_status == StreamPeerTCP.STATUS_NONE or pubsub_status == StreamPeerTCP.STATUS_NONE:
+	if tcp_status != StreamPeerTCP.STATUS_CONNECTED or pubsub_status != StreamPeerTCP.STATUS_CONNECTED:
 		_reconnect_timer -= _delta
 		if _reconnect_timer <= 0.0:
-			print("[REDIS] Connection failed. Retrying %s:%d..." % [host, port])
-			_tcp.connect_to_host(host, port)
-			_tcp_pubsub.connect_to_host(host, port)
+			if tcp_status == StreamPeerTCP.STATUS_NONE or tcp_status == StreamPeerTCP.STATUS_ERROR:
+				print("[REDIS] Main socket is down. Retrying %s:%d..." % [host, port])
+				_tcp.connect_to_host(host, port)
+			if pubsub_status == StreamPeerTCP.STATUS_NONE or pubsub_status == StreamPeerTCP.STATUS_ERROR:
+				print("[REDIS] PubSub socket is down. Retrying %s:%d..." % [host, port])
+				_tcp_pubsub.connect_to_host(host, port)
 			_reconnect_timer = 3.0
 
 ## Core internal method to encode and send RESP arrays

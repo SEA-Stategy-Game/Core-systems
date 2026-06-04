@@ -28,7 +28,8 @@ static func save_state(scene_tree: SceneTree) -> bool:
 	var state: Dictionary = {
 		"timestamp": Time.get_unix_time_from_system(),
 		"resources": Game.player_resources,
-		"units": []
+		"units": [],
+		"player_assignment" : PlayerManager.player_uuid_to_local_id
 	}
 
 	for unit in scene_tree.get_nodes_in_group("units"):
@@ -62,8 +63,12 @@ static func restore_queues(scene_tree: SceneTree, state: Dictionary) -> void:
 		return
 
 	# Restore global resources
-	if "player_resources" in state:
-		Game.player_resources = state["player_resources"]
+	if "resources" in state:
+		Game.player_resources = state["resources"]
+	
+	# Restore player assignment
+	if "player_assignment" not in state:
+		PlayerManager.player_uuid_to_local_id = state["playerAssignment"]
 
 	# Restore per-unit queues
 	if "units" not in state:

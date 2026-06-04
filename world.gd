@@ -42,6 +42,13 @@ func _ready():
 	stone.set("entity_id", new_id)
 	add_child(stone)
 	GlobalSignals.resource_created.emit(stone)
+	#if Engine.has_singleton("MapManager"):
+	#	var mm = Engine.get_singleton("MapManager")
+	#	if mm:
+	#		mm.map_node = game_map
+	#		mm.tile_size = game_map.tile_size
+	
+	GlobalSignals.game_room_ready.emit()
 
 func get_units():
 	units = null

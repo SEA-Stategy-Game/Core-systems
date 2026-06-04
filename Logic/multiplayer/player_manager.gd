@@ -22,6 +22,12 @@ func get_or_create_local_id(uuid: String) -> int:
 func is_new_player(uuid: String) -> bool:
 	return (not player_uuid_to_local_id.has(uuid))
 
+func get_uuid_for_local_id(local_id: int) -> String:
+	for uuid in player_uuid_to_local_id:
+		if player_uuid_to_local_id[uuid] == local_id:
+			return uuid
+	return ""
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass # Replace with function body.
