@@ -15,6 +15,7 @@ var is_headless: bool = false
 var game_room_id: String = "testgame"
 
 func _init() -> void:
+	OS.set_environment("USE_REDIS", "true")
 	var env_game_id = OS.get_environment("GAME_ROOM_ID")
 	if env_game_id != "":
 		game_room_id = env_game_id
