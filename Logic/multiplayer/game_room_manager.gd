@@ -1,6 +1,6 @@
 extends Node
 
-const BASE_URL = "http://localhost:8080"
+@onready var BASE_URL: String = OS.get_environment("GAME_ROOM_MANAGER_URL") if OS.has_environment("GAME_ROOM_MANAGER_URL") else "http://localhost:8080"
 
 func _ready():
 	GlobalSignals.game_room_ready.connect(_on_game_room_ready)

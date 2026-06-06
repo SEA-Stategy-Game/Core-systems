@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  gameroom:
+    platform: linux/amd64
+    build: .
+    ports:
+      - "12345:12345/udp"
+    # This allows the container to resolve host.docker.internal to your Mac's localhost
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - GAME_ROOM_ID=testgame
+      - USE_REDIS=true
+      # host.docker.internal points to your Mac's localhost from inside the container
+      - REDIS_HOST=host.docker.internal
+      - REDIS_PORT=6379
+      - MAX_PLAYERS=4
+      - GAME_ROOM_MANAGER_URL=http://host.docker.internal:8080
+      - PLANNING_URL=http://host.docker.internal:5000
+    command: ["--headless"]
