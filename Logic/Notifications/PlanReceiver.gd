@@ -3,7 +3,7 @@
 extends Node
 
 const LISTEN_PORT  = 8085
-const PLANNING_URL = "http://127.0.0.1:5000"
+@onready var PLANNING_URL: String = OS.get_environment("PLANNING_URL") if OS.has_environment("PLANNING_URL") else "http://127.0.0.1:5000"
 
 const BUILDING_SCENES: Dictionary = {
 	"Barracks": "res://Houses/Barracks.tscn",

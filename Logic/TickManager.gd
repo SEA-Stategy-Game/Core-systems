@@ -16,12 +16,14 @@ var tick_count: int = 0
 ## Auto-save interval (in ticks).  0 = disabled.
 var auto_save_interval: int = 60  # 60 = Every 30 seconds at 2 tps
 
+## Heartbeat stuff
+@export var heartbeat_interval: int = 10
+
 ## Get the auto-save interval in actual seconds
 func get_auto_save_interval_seconds() -> float:
 	return tick_interval * auto_save_interval
 
 func _ready() -> void:
-
 	var env_auto_save = OS.get_environment("AUTO_SAVE_INTERVAL") 
 	if env_auto_save != "":
 		var parsed_auto_save = env_auto_save.to_int()
@@ -53,6 +55,10 @@ func _process_simulation() -> void:
 	#    which runs every physics frame (not just on tick boundaries).
 	#    The tick boundary is used here only for plan polling and
 	#    bookkeeping.
+	
+	# 2.5. Heartbeat stuff
+	if tick_count % heartbeat_interval == 0:
+		GameRoomManager.send_heartbeat()
 
 	# 3. Periodic auto-save of AI task state.
 	if auto_save_interval > 0 and tick_count % auto_save_interval == 0:
@@ -67,3 +73,4 @@ func _process_simulation() -> void:
 	var net = get_node_or_null("/root/Networking")
 	if net != null and net.has_method("broadcast_state"):
 		net.broadcast_state(tick_count)
+
