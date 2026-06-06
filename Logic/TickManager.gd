@@ -18,27 +18,12 @@ var auto_save_interval: int = 60  # 60 = Every 30 seconds at 2 tps
 
 ## Heartbeat stuff
 @export var heartbeat_interval: int = 10
-var room_id: String = ""
-var room_manager_url: String = "http://localhost:8080"
-var http_client: HTTPRequest
 
 ## Get the auto-save interval in actual seconds
 func get_auto_save_interval_seconds() -> float:
 	return tick_interval * auto_save_interval
 
 func _ready() -> void:
-	http_client = HTTPRequest.new()
-	add_child(http_client)
-	room_id = OS.get_environment("ROOM_ID")
-	var env_url = OS.get_environment("ROOM_MANAGER_URL")
-	if env_url != "":
-		room_manager_url = env_url
-	
-	## This bit is needed for the heartbeat funct
-	if room_id == "":
-		room_id = "testgame"
-		print("ROOM_ID not found, defaulting to: ", room_id)
-	
 	var env_auto_save = OS.get_environment("AUTO_SAVE_INTERVAL") 
 	if env_auto_save != "":
 		var parsed_auto_save = env_auto_save.to_int()
@@ -73,7 +58,7 @@ func _process_simulation() -> void:
 	
 	# 2.5. Heartbeat stuff
 	if tick_count % heartbeat_interval == 0:
-		_send_heartbeat()
+		GameRoomManager.send_heartbeat()
 
 	# 3. Periodic auto-save of AI task state.
 	if auto_save_interval > 0 and tick_count % auto_save_interval == 0:
@@ -86,21 +71,3 @@ func _process_simulation() -> void:
 	if net != null and net.has_method("broadcast_state"):
 		net.broadcast_state(tick_count)
 
-# Heartbeat funct, as seen above this only sends at a certain interval
-# Most of the code is in the GRM repo.
-func _send_heartbeat() -> void:
-	## this really isn't needed if I'm being honest, but it's here!
-	if room_id == "":
-		print("--- Skipping heartbeat: No ROOM_ID set ---")
-		return
-	
-	if http_client.get_http_client_status() != HTTPClient.STATUS_DISCONNECTED:
-		return 
-		
-	var url = "%s/rooms/%s/heartbeat" % [room_manager_url, room_id]
-	var headers = ["Content-Type: application/json"]
-	
-	var error = http_client.request(url, headers, HTTPClient.METHOD_POST)
-	if error != OK:
-		print("--- Failed to initiate heartbeat request. ---")
-	else: print("--- Sent heartbeat ---")
