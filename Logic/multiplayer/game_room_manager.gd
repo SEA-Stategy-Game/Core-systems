@@ -1,6 +1,6 @@
 extends Node
 
-const BASE_URL = "http://localhost:8080"
+@onready var BASE_URL: String = OS.get_environment("GAME_ROOM_MANAGER_URL") if OS.has_environment("GAME_ROOM_MANAGER_URL") else "http://localhost:8080"
 
 func _ready():
 	GlobalSignals.game_room_ready.connect(_on_game_room_ready)
@@ -185,3 +185,24 @@ func _send_blocking_shutdown_status(status: String, reason: String):
 		OS.delay_msec(10) # Prevent busy-waiting
 
 	print("[SHUTDOWN] Blocking status update request sent.")
+
+
+func send_heartbeat() -> void:
+	var http_request = HTTPRequest.new()
+	add_child(http_request)
+
+	var room_id = Game.game_room_id
+	var url = BASE_URL + "/rooms/" + room_id + "/heartbeat"
+
+	http_request.request_completed.connect(func(result, response_code, headers, body):
+		if response_code == 200 or response_code == 201:
+			print("Successfully sent heartbeat for room ", room_id)
+		else:
+			print("Failed to send heartbeat. Code: ", response_code)
+		http_request.queue_free()
+	, CONNECT_ONE_SHOT)
+
+	var err = http_request.request(url, [], HTTPClient.METHOD_POST)
+	if err != OK:
+		printerr("Could not initiate Heartbeat request.")
+		http_request.queue_free()
