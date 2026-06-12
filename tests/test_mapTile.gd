@@ -1,28 +1,3 @@
-extends Node
-class_name MapManager
-
-@export var tile_size: int = 32
-@export var map_node_path: NodePath = NodePath("")
-
-var map_node: Node = null
-
-func _ready() -> void:
-    if map_node_path != NodePath(""):
-        if has_node(map_node_path):
-            map_node = get_node(map_node_path)
-        else:
-            map_node = null
-
-func world_to_grid(world_pos: Vector2) -> Vector2i:
-    return Vector2i(int(floor(world_pos.x / tile_size)), int(floor(world_pos.y / tile_size)))
-
-func get_tile_at_world_pos(world_pos: Vector2) -> Variant:
-    var gpos = world_to_grid(world_pos)
-    if map_node:
-        if map_node.has_method("get_tile"):
-            return map_node.get_tile(gpos.x, gpos.y)
-    return null
-
 extends GutTest
 
 const DEFAULT_TILE_SIZE := 32
@@ -119,15 +94,28 @@ func test_is_walkable_false_for_water() -> void:
 	tile.clear_map_object()
 	assert_false(tile.is_walkable())
 
-func test_is_walkable_false_for_mountain() -> void:
-	tile.terrain = MapTile.TerrainType.MOUNTAIN
+func test_is_walkable_true_for_unoccupied_hills() -> void:
+	tile.terrain = MapTile.TerrainType.HILLS
 	tile.clear_map_object()
-	assert_false(tile.is_walkable())
+	assert_true(tile.is_walkable())
 
 func test_is_walkable_true_for_unoccupied_plains() -> void:
 	tile.terrain = MapTile.TerrainType.PLAINS
 	tile.clear_map_object()
 	assert_true(tile.is_walkable())
+
+# ---------------------
+# movement multipliers
+# ---------------------
+func test_movement_multiplier_per_terrain() -> void:
+	tile.terrain = MapTile.TerrainType.PLAINS
+	assert_almost_eq(tile.get_movement_multiplier(), 1.10, 0.0001)
+	tile.terrain = MapTile.TerrainType.FOREST
+	assert_almost_eq(tile.get_movement_multiplier(), 0.75, 0.0001)
+	tile.terrain = MapTile.TerrainType.HILLS
+	assert_almost_eq(tile.get_movement_multiplier(), 0.6, 0.0001)
+	tile.terrain = MapTile.TerrainType.WATER
+	assert_almost_eq(tile.get_movement_multiplier(), 0.0, 0.0001)
 
 func test_can_place_object_true_when_unoccupied_and_walkable() -> void:
 	tile.terrain = MapTile.TerrainType.PLAINS

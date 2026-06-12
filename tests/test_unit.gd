@@ -1,6 +1,6 @@
 extends GutTest
 
-const UNIT_SCENE = preload("res://Entities/Units/character_body_2d.tscn")
+const UNIT_SCENE = preload("res://Entities/Units/character_body_2dtets.tscn")
 
 class RunningAction extends RefCounted:
 	var started: bool = false
@@ -70,28 +70,35 @@ func test_set_selected_false_sets_property_and_hitbox_hidden() -> void:
 # ------------------------
 # physics / command tests
 # ------------------------
-func test_physics_process_manual_branch_sets_velocity_towards_target() -> void:
-	unit.command_queue.clear()
-	unit.global_position = Vector2.ZERO
-	unit.target = Vector2(100, 0)
+func test_set_target_updates_navigation_agent_destination() -> void:
+	unit.set_target(Vector2(100, 0))
 
-	unit._physics_process(0.016)
+	assert_eq(unit.get_node("NavigationAgent2D").target_position, Vector2(100, 0))
 
-	assert_eq(unit.velocity, Vector2(unit.Speed, 0))
+func test_set_target_resets_path_index() -> void:
+	unit.current_path_index = 5
 
-func test_physics_process_stops_animation_when_at_target() -> void:
-	unit.command_queue.clear()
-	unit.target = unit.global_position
-	unit.anim.play("Walk Down")
+	unit.set_target(Vector2(100, 0))
 
-	unit._physics_process(0.016)
+	assert_eq(unit.current_path_index, 0)
+
+func test_set_anim_true_starts_walk_animation() -> void:
+	unit.set_anim(true)
+
+	assert_true(unit.anim.is_playing())
+	assert_true(unit.is_animated)
+
+func test_set_anim_false_stops_walk_animation() -> void:
+	unit.set_anim(true)
+
+	unit.set_anim(false)
 
 	assert_false(unit.anim.is_playing())
+	assert_false(unit.is_animated)
 
 func test_physics_process_prioritizes_ai_queue_over_manual_movement() -> void:
 	var action := RunningAction.new()
 	unit.global_position = Vector2.ZERO
-	unit.target = Vector2(100, 0)
 	unit.velocity = Vector2.ZERO
 
 	var enqueue_ok := unit.command_queue.enqueue(action)
